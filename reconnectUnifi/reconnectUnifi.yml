@@ -1,0 +1,24 @@
+---
+- hosts: unifi_devices
+  remote_user: admin
+  gather_facts: no
+
+  #vars:
+    #- ssh_key: '~/.ssh/id_ecdsa.pub'
+
+  tasks:
+    - name: "run the command"
+      #file:
+        #path: /.ssh/authorized_keys
+        #state: touch
+      #action: raw
+      #args:
+        #free_form: set-inform http://192.168.3.7:8282/inform
+      raw: "set-inform http://192.168.3.7:8282/inform"
+      args:
+          executable: /usr/bin/mca-cli-op
+    #- name: "Copy SSH key to server"
+      #lineinfile:
+        #path: "/.ssh/authorized_keys"
+        #line: "{{ ssh_key }}"
+      #raw: echo ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOax0ZYUe5CpSHS+h4dPYEOpZs/aUbUol5b4ypwPV9jEdNsBUateQhzwtSXZJbosW4VpGIBtfQVhFgaJri2Fftc= root@Borg >> /.ssh/authorized_keys

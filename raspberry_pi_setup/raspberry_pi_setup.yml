@@ -1,0 +1,75 @@
+---
+- hosts: all
+  remote_user: pi
+  gather_facts: yes
+  vars:
+      unnecessary_services:
+        - telnet
+      unnecessary_software:
+        - wpa-supplicant
+
+- name: Perform full patching
+  package:
+    name: '*'
+    state: latest
+
+- name: Add admin group
+  group:
+      name: admin
+      state: present
+
+- name: Add local user
+  user:
+    name: dax
+    group: admin
+    shell: /bin/zsh
+    home: /home/dax
+    create_home: yes
+    state: present
+
+- name: Add SSH public key for local user
+    authorized_key:
+        user: dax
+        key: "{{ lookup('file', '~/home/dax/.ssh/id_ecdsa.pub') }}"
+        state: present
+
+- name: Create sudoers.d file for local user
+  file:
+    path: /etc/sudoers.d/dax
+    state: touch
+    mode: '0440'
+
+- name: Edit sudoers.d file for local user to add in passwordless sudo
+  blockinfile:
+      path: /etc/sudoers.d/dax
+      block: |
+        dax     ALL=(ALL:ALL) ALL
+        %dax ALL=(ALL:ALL) NOPASSWD:ALL
+      backup: yes
+
+- name: Add sshd config file
+  copy:
+      dest: /etc/ssh/sshd_config
+      src: etc/ssh/sshd_config
+      owner: root
+      group: root
+      mode: 0600
+    notify: Reload SSH
+
+- name: Remove undesirable packages
+  package:
+    name: "{{ unnecessary_software }}"
+
+- name: Stop and disable unnecessary services
+  service:
+      name: "{{ item }}"
+      state: stopped
+      enabled: no
+    with_items: "{{ unnecessary_services }}"
+    ignore_errors: yes
+
+  handlers:
+    - name: Reload SSH
+      service:
+        name: sshd
+        state: reloaded
