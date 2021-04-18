@@ -3,10 +3,20 @@
   remote_user: pi
   gather_facts: yes
   vars:
+      necessary_packages:
+        - exa
+        - unzip
+        - tmux
+        - wget
+        - git
+        
       unnecessary_services:
         - telnet
-      unnecessary_software:
+      unnecessary_packages:
         - wpa-supplicant
+
+#git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+
 
 - name: Perform full patching
   package:
@@ -56,9 +66,14 @@
       mode: 0600
     notify: Reload SSH
 
+- name: Add packages I want
+  package:
+    name: "{{ necessary_packages }}"
+    state: latest
+
 - name: Remove undesirable packages
   package:
-    name: "{{ unnecessary_software }}"
+    name: "{{ unnecessary_packages }}"
 
 - name: Stop and disable unnecessary services
   service:
