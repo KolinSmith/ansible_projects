@@ -1,5 +1,6 @@
 ---
-- hosts: all
+  - name: piHoleUpdate
+  - hosts: all
   #remote_user: pi
   become: yes
   gather_facts: yes
@@ -25,107 +26,105 @@
         - telnet
       unnecessary_packages:
         - wpa-supplicant
+    tasks:
+      - name: perform full patching
+        package:
+          name: '*'
+          state: latest
+
+      - name: add admin group
+        group:
+            name: admin
+            state: present
+
+      - name: add local user
+        user:
+          name: {{ user }}
+          group: admin
+          shell: /bin/zsh
+          home: /home/{{ user }}
+          create_home: yes
+          state: present
+
+      - name: add SSH public key for local user
+          authorized_key:
+              user: {{ user }}
+              key: "{{ lookup('file', '~/home/{{ user }}/.ssh/id_ecdsa.pub') }}"
+              state: present
+
+      - name: create sudoers.d file for local user
+        file:
+          path: /etc/sudoers.d/{{ user }}
+          state: touch
+          mode: '0440'
+
+      - name: edit sudoers.d file for local user to add in passwordless sudo
+        blockinfile:
+            path: /etc/sudoers.d/{{ user }}
+            block: |
+              {{ user }}     ALL=(ALL:ALL) ALL
+              %{{ user }} ALL=(ALL:ALL) NOPASSWD:ALL
+            backup: yes
+
+      - name: add sshd config file
+        copy:
+            dest: /etc/ssh/sshd_config
+            src: etc/ssh/sshd_config
+            owner: root
+            group: root
+            mode: 0600
+          notify: Reload SSH
+
+      - name: add packages I want
+        package:
+          name: "{{ necessary_packages }}"
+          state: latest
+
+      - name: remove undesirable packages
+        package:
+          name: "{{ unnecessary_packages }}"
+
+      - name: stop and disable unnecessary services
+        service:
+            name: "{{ item }}"
+            state: stopped
+            enabled: no
+          with_items: "{{ unnecessary_services }}"
+          ignore_errors: yes
+
+      - name: git clone powerlevel10k color theme
+        command: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+
+      - name: change default shell to zsh
+        command: chsh -s $(which zsh)
+
+      - name: install oh-my-zshrc
+        command:  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+      - name: fix zsh-autosuggestions
+        command:  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions.
+
+      - name: clone dotfiles repository
+        git:
+          repo: "{{ dotfiles_repo }}"
+          dest: ./tmp-dotfiles
+          accept_hostkey: yes
+          force: yes
+          recursive: no
+          key_file: "/home/{{ user }}/.ssh/id_ecdsa.pub"
+        run_once: true
+
+      - name: copy .zshrc
+        copy:
+          src: ./tmp-dotfiles/.zshrc
+          dest: "/home/{{ user }}/.zshrc"
+          owner: "{{ user }}"
+          group: "admin"
+          mode: '0644'
 
 
-
-- name: perform full patching
-  package:
-    name: '*'
-    state: latest
-
-- name: add admin group
-  group:
-      name: admin
-      state: present
-
-- name: add local user
-  user:
-    name: {{ user }}
-    group: admin
-    shell: /bin/zsh
-    home: /home/{{ user }}
-    create_home: yes
-    state: present
-
-- name: add SSH public key for local user
-    authorized_key:
-        user: {{ user }}
-        key: "{{ lookup('file', '~/home/{{ user }}/.ssh/id_ecdsa.pub') }}"
-        state: present
-
-- name: create sudoers.d file for local user
-  file:
-    path: /etc/sudoers.d/{{ user }}
-    state: touch
-    mode: '0440'
-
-- name: edit sudoers.d file for local user to add in passwordless sudo
-  blockinfile:
-      path: /etc/sudoers.d/{{ user }}
-      block: |
-        {{ user }}     ALL=(ALL:ALL) ALL
-        %{{ user }} ALL=(ALL:ALL) NOPASSWD:ALL
-      backup: yes
-
-- name: add sshd config file
-  copy:
-      dest: /etc/ssh/sshd_config
-      src: etc/ssh/sshd_config
-      owner: root
-      group: root
-      mode: 0600
-    notify: Reload SSH
-
-- name: add packages I want
-  package:
-    name: "{{ necessary_packages }}"
-    state: latest
-
-- name: remove undesirable packages
-  package:
-    name: "{{ unnecessary_packages }}"
-
-- name: stop and disable unnecessary services
-  service:
-      name: "{{ item }}"
-      state: stopped
-      enabled: no
-    with_items: "{{ unnecessary_services }}"
-    ignore_errors: yes
-
-- name: git clone powerlevel10k color theme
-  command: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-
-- name: change default shell to zsh
-  command: chsh -s $(which zsh)
-
-- name: install oh-my-zshrc
-  command:  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-- name: fix zsh-autosuggestions
-  command:  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions.
-
-- name: clone dotfiles repository
-  git:
-    repo: "{{ dotfiles_repo }}"
-    dest: ./tmp-dotfiles
-    accept_hostkey: yes
-    force: yes
-    recursive: no
-    key_file: "/home/{{ user }}/.ssh/id_ecdsa.pub"
-  run_once: true
-
-- name: copy .zshrc
-  copy:
-    src: ./tmp-dotfiles/.zshrc
-    dest: "/home/{{ user }}/.zshrc"
-    owner: "{{ user }}"
-    group: "admin"
-    mode: '0644'
-
-
-  handlers:
-    - name: Reload SSH
-      service:
-        name: sshd
-        state: reloaded
+        handlers:
+          - name: Reload SSH
+            service:
+              name: sshd
+              state: reloaded

@@ -1,5 +1,5 @@
 ---
-  - name: Playbook
+  - name: piHoleUpdate
     hosts: dns_servers
     gather_facts: yes
     #become_user: dax
