@@ -1,0 +1,1 @@
+run the command by typing `sudo ansible-playbook /home/dax/code_base/ansible_projects/serverProvisionScript/serverProvisionScript.yml -i /home/dax/code_base/ansible_projects/hosts.yml -l <ip of the new raspberry pi> --ask-pass`
