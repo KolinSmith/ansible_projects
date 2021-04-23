@@ -1,0 +1,11 @@
+- hosts: dns_servers
+  become: yes
+  gather_facts: yes
+
+- name: perform full update
+  package:
+    name: '*'
+    state: latest
+
+- name: git clone powerlevel10k color theme
+  command: pihole -up
