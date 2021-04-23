@@ -26,6 +26,8 @@
       unnecessary_packages:
         - wpa-supplicant
 
+
+
 - name: perform full patching
   package:
     name: '*'
