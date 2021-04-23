@@ -1,5 +1,5 @@
 ---
-  - name: piHoleUpdate
+  - name: serverProvisionScript
   - hosts: all
   #remote_user: pi
   become: yes
