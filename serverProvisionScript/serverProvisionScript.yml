@@ -4,6 +4,10 @@
   #remote_user: pi
   become: yes
   gather_facts: yes
+  vars_prompt:
+    - name: hostname
+      prompt: What do you want to set as the hostname?
+      private: no
   vars:
     - user: 'dax'
     - dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
@@ -122,6 +126,16 @@
           group: "admin"
           mode: '0644'
 
+      - name: set hostname
+        hostname:
+            name: {{ hostname }}
+
+      - name: update /etc/hosts files with hostname
+        lineinfile:
+          path: /etc/hosts
+          regexp: '^127\.0\.0\.1[ \t]+localhost'
+          line: '127.0.0.1 localhost {{ hostname }}'
+          state: present
 
         handlers:
           - name: Reload SSH
