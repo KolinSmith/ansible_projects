@@ -24,7 +24,7 @@
         - powerline
         - fonts-powerline
         - tmux
-        - bat # doesn't seem to be available in debian stable yet (https://github.com/sharkdp/bat#installation) need to manually install
+      # - bat # doesn't seem to be available in debian stable yet (https://github.com/sharkdp/bat#installation) need to manually install
         - curl
       unnecessary_services:
         - telnet
