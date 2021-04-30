@@ -14,9 +14,10 @@
       #action: raw
       #args:
         #free_form: set-inform http://192.168.3.7:8282/inform
-      raw: "set-inform http://192.168.3.7:8282/inform"
+      raw: "mca-cli-op set-inform http://192.168.3.7:8282/inform"
       args:
-          executable: /usr/bin/mca-cli-op
+           executable: /bin/ash
+      #    executable: /usr/bin/mca-cli-op
     #- name: "Copy SSH key to server"
       #lineinfile:
         #path: "/.ssh/authorized_keys"
