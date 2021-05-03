@@ -24,6 +24,7 @@
         - powerline
         - fonts-powerline
         - tmux
+        - logrotate
       # - bat # doesn't seem to be available in debian stable yet (https://github.com/sharkdp/bat#installation) need to manually install
         - curl
       unnecessary_services:
@@ -96,14 +97,14 @@
           with_items: "{{ unnecessary_services }}"
           ignore_errors: yes
 
-      - name: git clone powerlevel10k color theme
-        command: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-
-      - name: change default shell to zsh
+        - name: change default shell to zsh
         command: chsh -s $(which zsh)
 
       - name: install oh-my-zshrc
         command:  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+      - name: git clone powerlevel10k color theme
+        command: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 
       - name: fix zsh-autosuggestions
         command:  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions.
