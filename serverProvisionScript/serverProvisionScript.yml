@@ -1,145 +1,146 @@
 ---
   - name: serverProvisionScript
-  - hosts: all
+    hosts: ansible_target_servers
   #remote_user: pi
-  become: yes
-  gather_facts: yes
-  vars_prompt:
+    become: yes
+    gather_facts: yes
+    vars_prompt:
     - name: hostname
       prompt: What do you want to set as the hostname?
       private: no
-  vars:
-    - user: 'dax'
-    - dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
-      necessary_packages:
-        - exa
-        - unzip
-        - tmux
-        - wget
-        - git
-        - htop
-        - net-tools
-        - ncdu
-        - zsh
-        - powerline
-        - fonts-powerline
-        - tmux
-        - logrotate
-      # - bat # doesn't seem to be available in debian stable yet (https://github.com/sharkdp/bat#installation) need to manually install
-        - curl
-      unnecessary_services:
-        - telnet
-      unnecessary_packages:
-        - wpa-supplicant
+    vars:
+      - user: 'dax'
+      - dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
+        necessary_packages:
+          - exa
+          - unzip
+          - tmux
+          - wget
+          - git
+          - htop
+          - net-tools
+          - ncdu
+          - zsh
+          - powerline
+          - fonts-powerline
+          - tmux
+          - logrotate
+        # - bat # doesn't seem to be available in debian stable yet (https://github.com/sharkdp/bat#installation) need to manually install
+          - curl
+        unnecessary_services:
+          - telnet
+        unnecessary_packages:
+          - wpa-supplicant
     tasks:
-      - name: perform full patching
-        package:
-          name: '*'
-          state: latest
+        - name: perform full patching
+          package:
+            name: '*'
+            state: latest
 
-      - name: add admin group
-        group:
-            name: admin
+        - name: add admin group
+          group:
+              name: admin
+              state: present
+
+        - name: add local user
+          user:
+            name: "{{ user }}"
+            group: admin
+            shell: /bin/zsh
+            home: /home/{{ user }}
+            create_home: yes
             state: present
 
-      - name: add local user
-        user:
-          name: {{ user }}
-          group: admin
-          shell: /bin/zsh
-          home: /home/{{ user }}
-          create_home: yes
-          state: present
-
-      - name: add SSH public key for local user
+        - name: add SSH public key for local user
           authorized_key:
-              user: {{ user }}
+              user: "{{ user }}"
               key: "{{ lookup('file', '~/home/{{ user }}/.ssh/id_ecdsa.pub') }}"
               state: present
 
-      - name: create sudoers.d file for local user
-        file:
-          path: /etc/sudoers.d/{{ user }}
-          state: touch
-          mode: '0440'
-
-      - name: edit sudoers.d file for local user to add in passwordless sudo
-        blockinfile:
+        - name: create sudoers.d file for local user
+          file:
             path: /etc/sudoers.d/{{ user }}
-            block: |
-              {{ user }}     ALL=(ALL:ALL) ALL
-              %{{ user }} ALL=(ALL:ALL) NOPASSWD:ALL
-            backup: yes
+            state: touch
+            mode: '0440'
 
-      - name: add sshd config file
-        copy:
-            dest: /etc/ssh/sshd_config
-            src: etc/ssh/sshd_config
-            owner: root
-            group: root
-            mode: 0600
+        - name: edit sudoers.d file for local user to add in passwordless sudo
+          blockinfile:
+              path: /etc/sudoers.d/{{ user }}
+              block: |
+                {{ user }}     ALL=(ALL:ALL) ALL
+                %{{ user }} ALL=(ALL:ALL) NOPASSWD:ALL
+              backup: yes
+
+        - name: add sshd config file
+          copy:
+              dest: /etc/ssh/sshd_config
+              src: etc/ssh/sshd_config
+              owner: root
+              group: root
+              mode: 0600
           notify: Reload SSH
 
-      - name: add packages I want
-        package:
-          name: "{{ necessary_packages }}"
-          state: latest
+        - name: add packages I want
+          package:
+            name: "{{ necessary_packages }}"
+            state: latest
 
-      - name: remove undesirable packages
-        package:
-          name: "{{ unnecessary_packages }}"
+        - name: remove undesirable packages
+          package:
+            name: "{{ unnecessary_packages }}"
+            state: absent
 
-      - name: stop and disable unnecessary services
-        service:
-            name: "{{ item }}"
-            state: stopped
-            enabled: no
+        - name: stop and disable unnecessary services
+          service:
+              name: "{{ item }}"
+              state: stopped
+              enabled: no
           with_items: "{{ unnecessary_services }}"
           ignore_errors: yes
 
         - name: change default shell to zsh
-        command: chsh -s $(which zsh)
+          command: chsh -s $(which zsh)
 
-      - name: install oh-my-zshrc
-        command:  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        - name: install oh-my-zshrc
+          command:  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-      - name: git clone powerlevel10k color theme
-        command: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+        - name: git clone powerlevel10k color theme
+          command: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 
-      - name: fix zsh-autosuggestions
-        command:  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions.
+        - name: fix zsh-autosuggestions
+          command:  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions.
 
-      - name: clone dotfiles repository
-        git:
-          repo: "{{ dotfiles_repo }}"
-          dest: ./tmp-dotfiles
-          accept_hostkey: yes
-          force: yes
-          recursive: no
-          key_file: "/home/{{ user }}/.ssh/id_ecdsa.pub"
-        run_once: true
+        - name: clone dotfiles repository
+          git:
+            repo: "{{ dotfiles_repo }}"
+            dest: ./tmp-dotfiles
+            accept_hostkey: yes
+            force: yes
+            recursive: no
+            key_file: "/home/{{ user }}/.ssh/id_ecdsa.pub"
+          run_once: true
 
-      - name: copy .zshrc
-        copy:
-          src: ./tmp-dotfiles/.zshrc
-          dest: "/home/{{ user }}/.zshrc"
-          owner: "{{ user }}"
-          group: "admin"
-          mode: '0644'
+        - name: copy .zshrc
+          copy:
+            src: ./tmp-dotfiles/.zshrc
+            dest: "/home/{{ user }}/.zshrc"
+            owner: "{{ user }}"
+            group: "admin"
+            mode: '0644'
 
-      - name: set hostname
-        hostname:
-            name: {{ hostname }}
+        - name: set hostname
+          hostname:
+              name: "{{ hostname }}"
 
-      - name: update /etc/hosts files with hostname
-        lineinfile:
-          path: /etc/hosts
-          regexp: '^127\.0\.0\.1[ \t]+localhost'
-          line: '127.0.0.1 localhost {{ hostname }}'
-          state: present
+        - name: update /etc/hosts files with hostname
+          lineinfile:
+            path: /etc/hosts
+            regexp: '^127\.0\.0\.1[ \t]+localhost'
+            line: '127.0.0.1 localhost {{ hostname }}'
+            state: present
 
-        handlers:
-          - name: Reload SSH
-            service:
-              name: sshd
-              state: reloaded
+    handlers:
+      - name: Reload SSH
+        service:
+          name: sshd
+          state: reloaded
