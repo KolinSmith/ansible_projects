@@ -61,22 +61,22 @@
               %{{ user }} ALL=(ALL:ALL) NOPASSWD:ALL
             backup: yes
 
-      - name: update /etc/hosts files with hostname
-        lineinfile:
-          path: /etc/hosts
-          regexp: '^127\.0\.1\.1[ \t]+template'
-          line: '127.0.1.1 "{{ hostname }}"'
-          state: present
-
-
-
-
-
+#      - name: update /etc/hosts files with hostname
+#        lineinfile:
+#          path: /etc/hosts
+#          regexp: '^127\.0\.1\.1[ \t]+template'
+#          line: '127.0.1.1 "{{ hostname }}"'
+#          state: present
 
       - name: perform full patching
         package:
           name: '*'
           state: latest
+
+
+
+
+
 
       - name: add SSH public key for local user
         authorized_key:
@@ -92,24 +92,6 @@
             group: root
             mode: 0600
         notify: Reload SSH
-
-      - name: add packages I want
-        package:
-          name: "{{ necessary_packages }}"
-          state: latest
-
-      - name: remove undesirable packages
-        package:
-          name: "{{ unnecessary_packages }}"
-          state: absent
-
-      - name: stop and disable unnecessary services
-        service:
-            name: "{{ item }}"
-            state: stopped
-            enabled: no
-        with_items: "{{ unnecessary_services }}"
-        ignore_errors: yes
 
       - name: change default shell to zsh
         command: chsh -s $(which zsh)

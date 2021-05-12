@@ -23,7 +23,6 @@
           - zsh
           - powerline
           - fonts-powerline
-          - tmux
           - logrotate
         # - bat # doesn't seem to be available in debian stable yet (https://github.com/sharkdp/bat#installation) need to manually install
           - curl
