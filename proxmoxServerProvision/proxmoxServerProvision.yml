@@ -1,8 +1,9 @@
 ---
   - name: proxmoxServerProvision
     hosts: all
-    remote_user: serveradmin
+    #remote_user: serveradmin
     become: yes
+    become_user: root
     gather_facts: yes
     vars_prompt:
     - name: hostname
@@ -10,6 +11,13 @@
       private: no
     vars:
       - user: 'dax'
+        necessary_packages:
+          - wget
+          - net-tools
+          - zsh
+          - powerline
+          - fonts-powerline
+          - curl
     tasks:
       - name: set hostname
         hostname:
@@ -73,11 +81,6 @@
           name: '*'
           state: latest
 
-
-
-
-
-
       - name: add SSH public key for local user
         authorized_key:
             user: "{{ user }}"
@@ -93,6 +96,11 @@
             mode: 0600
         notify: Reload SSH
 
+      - name: add packages I want
+        package:
+          name: "{{ necessary_packages }}"
+          state: latest
+
       - name: change default shell to zsh
         command: chsh -s $(which zsh)
 
@@ -105,26 +113,8 @@
       - name: fix zsh-autosuggestions
         command:  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions.
 
-      - name: clone dotfiles repository
-        git:
-          repo: "{{ dotfiles_repo }}"
-          dest: ./tmp-dotfiles
-          accept_hostkey: yes
-          force: yes
-          recursive: no
-          key_file: "/home/{{ user }}/.ssh/id_ecdsa.pub"
-        run_once: true
-
-      - name: copy .zshrc
-        copy:
-          src: ./tmp-dotfiles/.zshrc
-          dest: "/home/{{ user }}/.zshrc"
-          owner: "{{ user }}"
-          group: "admin"
-          mode: '0644'
-
-      handlers:
+    handlers:
       - name: Reload SSH
-      service:
-        name: sshd
-        state: reloaded
+        service:
+          name: sshd
+          state: reloaded
