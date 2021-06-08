@@ -2,9 +2,10 @@
   - name: proxmoxServerProvision
     hosts: all
     #remote_user: serveradmin
-    become: yes
-    become_user: root
-    gather_facts: yes
+    #become: yes
+    #become_user: root
+    become: true
+    gather_facts: false
     vars_prompt:
     - name: hostname
       prompt: What do you want to set as the hostname?
