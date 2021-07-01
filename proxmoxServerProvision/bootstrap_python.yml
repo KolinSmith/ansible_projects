@@ -1,0 +1,12 @@
+- hosts: all
+  gather_facts: false
+  #become_user: root
+  become: yes
+  pre_tasks:
+#    - name: Generate locals
+#      raw: export LC_ALL="en_GB.UTF-8"; locale-gen en_GB.UTF-8
+#      changed_when: false
+    - name: install python 2
+      raw: sudo test -e /usr/bin/python || (apt -y update && apt -y install python2-minimal)
+      changed_when: false
+    - setup: # gather facts

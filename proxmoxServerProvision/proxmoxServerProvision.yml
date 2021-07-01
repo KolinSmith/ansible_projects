@@ -1,11 +1,13 @@
 ---
+  - import_playbook: bootstrap_python.yml
+
   - name: proxmoxServerProvision
     hosts: all
     #remote_user: serveradmin
-    #become: yes
+    become: yes
     #become_user: root
-    become: true
-    gather_facts: false
+    #become: true
+    gather_facts: yes
     vars_prompt:
     - name: hostname
       prompt: What do you want to set as the hostname?
@@ -19,10 +21,19 @@
           - powerline
           - fonts-powerline
           - curl
+    #roles:
+      #- { role: viasite-ansible.zsh, zsh_user: dax }
     tasks:
+      - name: perform full update
+        apt:
+          upgrade: yes
+          update_cache: yes
+          cache_valid_time: 86400
+
       - name: set hostname
-        hostname:
-          name: "{{ hostname }}"
+#        hostname:
+#          name: "{{ hostname }}"
+        command: sudo hostnamectl set-hostname {{ hostname }}
 
       - name: change /etc/hosts file to correct hostname
         replace:
@@ -30,31 +41,52 @@
           regexp: 'template'
           replace: '{{ hostname }}'
 
+          #use file module for this!!!!
       - name: reset the machine ID
-        command: |
-          rm -f /etc/machine-id /var/lib/dbus/machine-id
-          dbus-uuidgen --ensure=/etc/machine-id
-          dbus-uuidgen --ensure
+        command: "{{ item }}"
+        with_items:
+          - rm -f /etc/machine-id /var/lib/dbus/machine-id
+          - dbus-uuidgen --ensure=/etc/machine-id
+          - dbus-uuidgen --ensure
 
       - name: regenerate ssh keys
-        command: |
-          regen ssh keys
-          sudo rm /etc/ssh/ssh_host_*
-          sudo dpkg-reconfigure openssh-server
+        command: "{{ item }}"
+        ignore_errors: yes
+        with_items:
+          - regen ssh keys
+          - sudo rm /etc/ssh/ssh_host_*
+          - sudo dpkg-reconfigure openssh-server
 
       - name: add admin group
         group:
           name: admin
           state: present
 
+      - name: add {{ user }} group
+        group:
+            name: "{{ user }}"
+            state: present
+
+      - name: import the viasite-ansible role
+        import_role:
+          name: viasite-ansible.zsh
+        vars:
+          zsh_user: "{{ user }}"
+
       - name: add local user
         user:
           name: "{{ user }}"
-          group: admin
+          groups: admin
           shell: /bin/zsh
           home: /home/{{ user }}
           create_home: yes
           state: present
+
+      - name: Change local user shell
+        user:
+          name: "{{ user }}"
+          shell: /bin/zsh
+        become: yes
 
       - name: create sudoers.d file for local user
         file:
@@ -77,36 +109,67 @@
 #          line: '127.0.1.1 "{{ hostname }}"'
 #          state: present
 
-      - name: perform full patching
-        package:
-          name: '*'
-          state: latest
+#      - name: perform full patching
+#        package:
+#          name: '*'
+#          state: latest
 
       - name: add SSH public key for local user
         authorized_key:
             user: "{{ user }}"
-            key: "{{ lookup('file', '~/home/{{ user }}/.ssh/id_ecdsa.pub') }}"
+            key: "{{ lookup('file', '/home/dax/.ssh/id_ecdsa.pub') }}"
             state: present
 
+#      - name: add sshd config file
+#        copy:
+#            dest: /etc/ssh/sshd_config
+#            src: /etc/ssh/sshd_config
+#            owner: root
+#            group: root
+#            mode: 0600
+#        notify: Reload SSH
+
+    #might end up using the one from the dotfiles
       - name: add sshd config file
-        copy:
-            dest: /etc/ssh/sshd_config
-            src: etc/ssh/sshd_config
-            owner: root
-            group: root
-            mode: 0600
-        notify: Reload SSH
+        template:
+          src: /home/dax/code_base/ansible_projects/templates/sshd_config.j2
+          dest: /etc/ssh/sshd_config
+          owner: root
+          group: root
+          mode: 0600
+          validate: /usr/sbin/sshd -t -f %s
+          backup: yes
+
+
 
       - name: add packages I want
         package:
           name: "{{ necessary_packages }}"
           state: latest
 
-      - name: change default shell to zsh
-        command: chsh -s $(which zsh)
+      - name: create ~/.zshrc file for local user
+        file:
+          path: /home/{{ user }}
+          state: touch
+          mode: '0600'
 
-      - name: install oh-my-zshrc
-        command:  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      #- name: change default shell to zsh
+        #command: chsh -s /usr/bin/zsh
+        #command: chsh -s $(which zsh)
+        #become_user: "{{ user }}"
+
+      #- name: install oh-my-zshrc
+      #  command:  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      #  become_user: "{{ user }}"
+
+      - name: Fetch oh-my-zsh
+        get-url:
+          https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+          dest: /tmp/install-oh-my-zsh.sh
+          mode: 0755
+
+      - name: install oh-my-zsh
+        command: zsh /tmp/install-oh-my-zsh.sh
 
       - name: git clone powerlevel10k color theme
         command: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
