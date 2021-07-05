@@ -22,10 +22,13 @@
           - fonts-powerline
           - curl
           - git
-        machine_id_files:
+          - iputils-ping
+          - dnsutils
+        files_to_be_reset:
           - /etc/machine-id
           - /var/lib/dbus/machine-id
-        allow_world_readable_tmpfiles: true
+          - /etc/ssh/ssh_host_*
+        # allow_world_readable_tmpfiles: true
     #roles:
       #- { role: viasite-ansible.zsh, zsh_user: dax }
 
@@ -59,7 +62,6 @@
         debug:
           msg: "Playbook is being run as: {{ ansible_user_id }}"
 
-
       - name: set hostname
 #        hostname:
 #          name: "{{ hostname }}"
@@ -72,10 +74,11 @@
           regexp: 'template'
           replace: '{{ hostname }}'
 
-      - name: remove machine-id file
+      - name: remove files that came with the template and need to be reset
         file:
-          path: "{{ machine_id_files }}"
+          path: "{{ files_to_be_reset }}"
           state: absent
+        ignore_errors: yes
 
       - name: reset the machine ID
         command: "{{ item }}"
@@ -84,13 +87,14 @@
           - dbus-uuidgen --ensure=/etc/machine-id
           - dbus-uuidgen --ensure
 
-      # - name: regenerate ssh keys
-      #   command: "{{ item }}"
-      #   ignore_errors: yes
-      #   with_items:
-      #     - regen ssh keys
-      #     - sudo rm /etc/ssh/ssh_host_*
-      #     - sudo dpkg-reconfigure openssh-server
+      - name: regenerate ssh keys
+        command: "{{ item }}"
+        ignore_errors: yes
+        with_items:
+          # - rm /etc/ssh/ssh_host_*
+          - dpkg-reconfigure openssh-server
+        become: yes
+        notify: Reload SSH
 
       - name: add admin group
         group:
@@ -111,18 +115,19 @@
       - name: add local user
         user:
           name: "{{ user }}"
-          groups: admin
+          groups: admin, "{{ user }}"
           shell: /bin/zsh
           home: /home/{{ user }}
           create_home: yes
           state: present
           # password: "nilok3"
 
-      - name: Change local user shell
-        user:
-          name: "{{ user }}"
-          shell: /bin/zsh
-        become: yes
+      # This should be set in the above task
+      # - name: Change local user shell
+      #   user:
+      #     name: "{{ user }}"
+      #     shell: /bin/zsh
+      #   become: yes
 
       - name: Add local user to sudo
         lineinfile:
@@ -184,6 +189,7 @@
           mode: 0600
           validate: /usr/sbin/sshd -t -f %s
           backup: yes
+        notify: Reload SSH
 
       - name: create ~/.zshrc file for local user
         file:
@@ -210,9 +216,9 @@
           dest: /tmp/install-oh-my-zsh.sh
           mode: 0755
 
-      # - name: install oh-my-zsh
-      #   command: sh /tmp/install-oh-my-zsh.sh
-      #   become_user: "{{ user }}"
+      - name: install oh-my-zsh
+        command: sh /tmp/install-oh-my-zsh.sh
+        become_user: "{{ user }}"
 
       - name: Checkout powerlevel10k repo and use refspec to fetch all pull requests
         git:
