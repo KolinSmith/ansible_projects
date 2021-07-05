@@ -21,19 +21,50 @@
           - powerline
           - fonts-powerline
           - curl
+          - git
+        machine_id_files:
+          - /etc/machine-id
+          - /var/lib/dbus/machine-id
+        allow_world_readable_tmpfiles: true
     #roles:
       #- { role: viasite-ansible.zsh, zsh_user: dax }
+
+    # pre_tasks:
+    #   - name: update repo cache (CentOS)
+    #     tags: always
+    #     dnf:
+    #       update_cache: yes
+    #     changed_when: false
+    #     when: ansible_distribution == "CentOS"
+    #
+    #   - name: update repo cache (Ubuntu)
+    #     tags: always
+    #     apt:
+    #       upgrade: yes
+    #       update_cache: yes
+    #       cache_valid_time: 86400
+
     tasks:
-      - name: perform full update
-        apt:
-          upgrade: yes
-          update_cache: yes
-          cache_valid_time: 86400
+      # - name: perform full update
+      #   apt:
+      #     upgrade: yes
+      #     update_cache: yes
+      #     cache_valid_time: 86400
+      - name: add packages I want
+        package:
+          name: "{{ necessary_packages }}"
+          state: latest
+
+      - name: print out user this playbook is running as
+        debug:
+          msg: "Playbook is being run as: {{ ansible_user_id }}"
+
 
       - name: set hostname
 #        hostname:
 #          name: "{{ hostname }}"
-        command: sudo hostnamectl set-hostname {{ hostname }}
+        command: hostnamectl set-hostname {{ hostname }}
+        become: true
 
       - name: change /etc/hosts file to correct hostname
         replace:
@@ -41,21 +72,25 @@
           regexp: 'template'
           replace: '{{ hostname }}'
 
-          #use file module for this!!!!
+      - name: remove machine-id file
+        file:
+          path: "{{ machine_id_files }}"
+          state: absent
+
       - name: reset the machine ID
         command: "{{ item }}"
         with_items:
-          - rm -f /etc/machine-id /var/lib/dbus/machine-id
+          # - rm -f /etc/machine-id /var/lib/dbus/machine-id
           - dbus-uuidgen --ensure=/etc/machine-id
           - dbus-uuidgen --ensure
 
-      - name: regenerate ssh keys
-        command: "{{ item }}"
-        ignore_errors: yes
-        with_items:
-          - regen ssh keys
-          - sudo rm /etc/ssh/ssh_host_*
-          - sudo dpkg-reconfigure openssh-server
+      # - name: regenerate ssh keys
+      #   command: "{{ item }}"
+      #   ignore_errors: yes
+      #   with_items:
+      #     - regen ssh keys
+      #     - sudo rm /etc/ssh/ssh_host_*
+      #     - sudo dpkg-reconfigure openssh-server
 
       - name: add admin group
         group:
@@ -67,11 +102,11 @@
             name: "{{ user }}"
             state: present
 
-      - name: import the viasite-ansible role
-        import_role:
-          name: viasite-ansible.zsh
-        vars:
-          zsh_user: "{{ user }}"
+      # - name: import the viasite-ansible role
+      #   import_role:
+      #     name: viasite-ansible.zsh
+      #   vars:
+      #     zsh_user: "{{ user }}"
 
       - name: add local user
         user:
@@ -81,6 +116,7 @@
           home: /home/{{ user }}
           create_home: yes
           state: present
+          # password: "nilok3"
 
       - name: Change local user shell
         user:
@@ -88,19 +124,28 @@
           shell: /bin/zsh
         become: yes
 
-      - name: create sudoers.d file for local user
-        file:
+      - name: Add local user to sudo
+        lineinfile:
           path: /etc/sudoers.d/{{ user }}
-          state: touch
-          mode: '0440'
+          line: '{{ user }} ALL=(ALL) NOPASSWD: ALL'
+          state: present
+          mode: 0440
+          create: yes
+          validate: 'visudo -cf %s'
 
-      - name: edit sudoers.d file for local user to add in passwordless sudo
-        blockinfile:
-            path: /etc/sudoers.d/{{ user }}
-            block: |
-              {{ user }}     ALL=(ALL:ALL) ALL
-              %{{ user }} ALL=(ALL:ALL) NOPASSWD:ALL
-            backup: yes
+      # - name: create sudoers.d file for local user
+      #   file:
+      #     path: /etc/sudoers.d/{{ user }}
+      #     state: touch
+      #     mode: '0440'
+      #
+      # - name: edit sudoers.d file for local user to add in passwordless sudo
+      #   blockinfile:
+      #       path: /etc/sudoers.d/{{ user }}
+      #       block: |
+      #         {{ user }} ALL=(ALL:ALL) ALL
+      #         %{{ user }} ALL=(ALL:ALL) NOPASSWD:ALL
+      #       backup: yes
 
 #      - name: update /etc/hosts files with hostname
 #        lineinfile:
@@ -140,18 +185,11 @@
           validate: /usr/sbin/sshd -t -f %s
           backup: yes
 
-
-
-      - name: add packages I want
-        package:
-          name: "{{ necessary_packages }}"
-          state: latest
-
       - name: create ~/.zshrc file for local user
         file:
-          path: /home/{{ user }}
+          path: /home/{{ user }}/.zshrc
           state: touch
-          mode: '0600'
+          mode: 0600
 
       #- name: change default shell to zsh
         #command: chsh -s /usr/bin/zsh
@@ -162,20 +200,40 @@
       #  command:  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
       #  become_user: "{{ user }}"
 
-      - name: Fetch oh-my-zsh
-        get-url:
-          https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+      - name: print out user this playbook is running as
+        debug:
+          msg: "Playbook is being run as: {{ ansible_user_id }} and ansible user is: {{ user }}"
+
+      - name: fetch oh-my-zsh
+        get_url:
+          url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
           dest: /tmp/install-oh-my-zsh.sh
           mode: 0755
 
-      - name: install oh-my-zsh
-        command: zsh /tmp/install-oh-my-zsh.sh
+      # - name: install oh-my-zsh
+      #   command: sh /tmp/install-oh-my-zsh.sh
+      #   become_user: "{{ user }}"
 
-      - name: git clone powerlevel10k color theme
-        command: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+      - name: Checkout powerlevel10k repo and use refspec to fetch all pull requests
+        git:
+          repo: https://github.com/romkatv/powerlevel10k.git
+          dest: /home/{{ user }}${ZSH_CUSTOM:-/home/{{ user }}/.oh-my-zsh/custom}/themes/powerlevel10k
+          refspec: '+refs/pull/*:refs/heads/*'
+          depth: 1
 
-      - name: fix zsh-autosuggestions
-        command:  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions.
+      # - name: git clone powerlevel10k color theme
+      #   command: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+      #   become_user: "{{ user }}"
+
+      - name: Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests
+        git:
+          repo: https://github.com/zsh-users/zsh-autosuggestions
+          dest: /home/{{ user }}${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+          refspec: '+refs/pull/*:refs/heads/*'
+
+      # - name: fix zsh-autosuggestions
+      #   command:  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+      #   become_user: "{{ user }}"
 
     handlers:
       - name: Reload SSH

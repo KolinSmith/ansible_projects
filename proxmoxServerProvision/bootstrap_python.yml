@@ -1,6 +1,6 @@
 - hosts: all
   gather_facts: false
-  #become_user: root
+  #become_user: serveradmin
   become: yes
   pre_tasks:
 #    - name: Generate locals
