@@ -14,6 +14,7 @@
       private: no
     vars:
       - user: 'dax'
+      - dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
         necessary_packages:
           - wget
           - net-tools
@@ -24,6 +25,8 @@
           - git
           - iputils-ping
           - dnsutils
+          - acl
+          - sudo
         files_to_be_reset:
           - /etc/machine-id
           - /var/lib/dbus/machine-id
@@ -46,6 +49,8 @@
     #       upgrade: yes
     #       update_cache: yes
     #       cache_valid_time: 86400
+    #       autoremove: yes
+    #       autoclean: yes
 
     tasks:
       # - name: perform full update
@@ -87,13 +92,18 @@
           - dbus-uuidgen --ensure=/etc/machine-id
           - dbus-uuidgen --ensure
 
+      # - name: regenerate ssh keys
+      #   shell: "{{ item }}"
+      #   ignore_errors: yes
+      #   with_items:
+      #     - rm /etc/ssh/ssh_host_*
+      #     - dpkg-reconfigure openssh-server > /dev/null
+      #   become: yes
+      #   notify: Reload SSH
+
       - name: regenerate ssh keys
-        command: "{{ item }}"
-        ignore_errors: yes
-        with_items:
-          # - rm /etc/ssh/ssh_host_*
-          - dpkg-reconfigure openssh-server
         become: yes
+        shell: "dpkg-reconfigure openssh-server"
         notify: Reload SSH
 
       - name: add admin group
@@ -115,7 +125,7 @@
       - name: add local user
         user:
           name: "{{ user }}"
-          groups: admin, "{{ user }}"
+          groups: admin
           shell: /bin/zsh
           home: /home/{{ user }}
           create_home: yes
@@ -169,6 +179,23 @@
             user: "{{ user }}"
             key: "{{ lookup('file', '/home/dax/.ssh/id_ecdsa.pub') }}"
             state: present
+            manage_dir: yes
+
+      - name: put ssh public keyfile onto host
+        copy:
+            src: /home/dax/.ssh/id_ecdsa.pub
+            dest: /home/{{ user }}/.ssh/
+            owner: "{{ user }}"
+            group: admin
+            mode: 0700
+
+      - name: put ssh private keyfile onto host
+        copy:
+            src: /home/dax/.ssh/id_ecdsa
+            dest: /home/{{ user }}/.ssh/
+            owner: "{{ user }}"
+            group: admin
+            mode: 0700
 
 #      - name: add sshd config file
 #        copy:
@@ -180,16 +207,16 @@
 #        notify: Reload SSH
 
     #might end up using the one from the dotfiles
-      - name: add sshd config file
-        template:
-          src: /home/dax/code_base/ansible_projects/templates/sshd_config.j2
-          dest: /etc/ssh/sshd_config
-          owner: root
-          group: root
-          mode: 0600
-          validate: /usr/sbin/sshd -t -f %s
-          backup: yes
-        notify: Reload SSH
+      # - name: add sshd config file
+      #   template:
+      #     src: /home/dax/code_base/ansible_projects/templates/sshd_config.j2
+      #     dest: /etc/ssh/sshd_config
+      #     owner: root
+      #     group: root
+      #     mode: 0600
+      #     validate: /usr/sbin/sshd -t -f %s
+      #     backup: yes
+      #   notify: Reload SSH
 
       - name: create ~/.zshrc file for local user
         file:
@@ -210,15 +237,28 @@
         debug:
           msg: "Playbook is being run as: {{ ansible_user_id }} and ansible user is: {{ user }}"
 
-      - name: fetch oh-my-zsh
-        get_url:
-          url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
-          dest: /tmp/install-oh-my-zsh.sh
-          mode: 0755
+      # - name: fetch oh-my-zsh
+      #   get_url:
+      #     url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+      #     dest: /tmp/install-oh-my-zsh.sh
+      #     mode: 0755
 
-      - name: install oh-my-zsh
-        command: sh /tmp/install-oh-my-zsh.sh
+      # - name: install oh-my-zsh
+      #   command: zsh /tmp/install-oh-my-zsh.sh
+      #   become_user: "{{ user }}"
+
+      - name: Check for Oh My ZSH Installation
+        stat:
+          path: ~/.oh-my-zsh
         become_user: "{{ user }}"
+        register: omz_installed
+
+      - name: Install Oh My ZSH
+        git:
+          repo: 'https://github.com/ohmyzsh/ohmyzsh.git'
+          dest: ~/.oh-my-zsh
+        become_user: "{{ user }}"
+        when: omz_installed.stat.exists == False
 
       - name: Checkout powerlevel10k repo and use refspec to fetch all pull requests
         git:
@@ -240,6 +280,28 @@
       # - name: fix zsh-autosuggestions
       #   command:  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
       #   become_user: "{{ user }}"
+
+      - name: clone dotfiles repository to localhost
+        git:
+          repo: "{{ dotfiles_repo }}"
+          dest: ./tmp-dotfiles
+          accept_hostkey: yes
+          force: yes
+          recursive: no
+          key_file: /home/dax/.ssh/id_ecdsa
+        delegate_to: localhost
+        run_once: true
+      #
+      # - name: copy .zshrc
+      #   copy:
+      #     src: ./tmp-dotfiles/.zshrc
+      #     dest: "/home/{{ user }}/.zshrc"
+      #     owner: "{{ user }}"
+      #     group: "admin"
+      #     mode: '0644'
+      #
+      # - name: source new .zshrc file
+      #   shell: "source /home/{{ user }}/.zshrc"
 
     handlers:
       - name: Reload SSH
