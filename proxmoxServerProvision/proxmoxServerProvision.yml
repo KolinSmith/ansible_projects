@@ -301,7 +301,7 @@
       #     group: "admin"
       #     mode: '0644'
 
-      - name: copy .zshrc & p10.zsh
+      - name: copy .zshrc & p10k.zsh
         copy:
           src: ./tmp-dotfiles/{{ item }}
           dest: "/home/{{ user }}/{{ item }}"
@@ -310,7 +310,7 @@
           mode: '0644'
         with_items:
           - .zshrc
-          - .p10.zsh
+          - .p10k.zsh
 
       - name: source new .zshrc file
         shell: "/bin/zsh /home/{{ user }}/.zshrc"
