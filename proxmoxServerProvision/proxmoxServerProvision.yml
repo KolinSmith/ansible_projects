@@ -208,16 +208,16 @@
 #        notify: Reload SSH
 
     #might end up using the one from the dotfiles
-      # - name: add sshd config file
-      #   template:
-      #     src: /home/dax/code_base/ansible_projects/templates/sshd_config.j2
-      #     dest: /etc/ssh/sshd_config
-      #     owner: root
-      #     group: root
-      #     mode: 0600
-      #     validate: /usr/sbin/sshd -t -f %s
-      #     backup: yes
-      #   notify: Reload SSH
+      - name: add sshd config file
+        template:
+          src: /home/dax/code_base/ansible_projects/templates/sshd_config.j2
+          dest: /etc/ssh/sshd_config
+          owner: root
+          group: root
+          mode: 0600
+          validate: /usr/sbin/sshd -t -f %s
+          backup: yes
+        notify: Reload SSH
 
       - name: create ~/.zshrc file for local user
         file:
@@ -291,15 +291,26 @@
           recursive: no
           key_file: /home/dax/.ssh/id_ecdsa
         delegate_to: localhost
-        run_once: true
+        # run_once: true
 
-      - name: copy .zshrc
+      # - name: copy .zshrc
+      #   copy:
+      #     src: ./tmp-dotfiles/.zshrc
+      #     dest: "/home/{{ user }}/.zshrc"
+      #     owner: "{{ user }}"
+      #     group: "admin"
+      #     mode: '0644'
+
+      - name: copy .zshrc & p10.zsh
         copy:
-          src: ./tmp-dotfiles/.zshrc
-          dest: "/home/{{ user }}/.zshrc"
+          src: ./tmp-dotfiles/{{ item }}
+          dest: "/home/{{ user }}/{{ item }}"
           owner: "{{ user }}"
           group: "admin"
           mode: '0644'
+        with_items:
+          - .zshrc
+          - .p10.zsh
 
       - name: source new .zshrc file
         shell: "/bin/zsh /home/{{ user }}/.zshrc"
