@@ -27,6 +27,7 @@
           - dnsutils
           - acl
           - sudo
+          - fzf
         files_to_be_reset:
           - /etc/machine-id
           - /var/lib/dbus/machine-id
@@ -181,21 +182,21 @@
             state: present
             manage_dir: yes
 
-      - name: put ssh public keyfile onto host
-        copy:
-            src: /home/dax/.ssh/id_ecdsa.pub
-            dest: /home/{{ user }}/.ssh/
-            owner: "{{ user }}"
-            group: admin
-            mode: 0700
-
-      - name: put ssh private keyfile onto host
-        copy:
-            src: /home/dax/.ssh/id_ecdsa
-            dest: /home/{{ user }}/.ssh/
-            owner: "{{ user }}"
-            group: admin
-            mode: 0700
+      # - name: put ssh public keyfile onto host
+      #   copy:
+      #       src: /home/dax/.ssh/id_ecdsa.pub
+      #       dest: /home/{{ user }}/.ssh/
+      #       owner: "{{ user }}"
+      #       group: admin
+      #       mode: 0700
+      #
+      # - name: put ssh private keyfile onto host
+      #   copy:
+      #       src: /home/dax/.ssh/id_ecdsa
+      #       dest: /home/{{ user }}/.ssh/
+      #       owner: "{{ user }}"
+      #       group: admin
+      #       mode: 0700
 
 #      - name: add sshd config file
 #        copy:
@@ -263,7 +264,7 @@
       - name: Checkout powerlevel10k repo and use refspec to fetch all pull requests
         git:
           repo: https://github.com/romkatv/powerlevel10k.git
-          dest: /home/{{ user }}${ZSH_CUSTOM:-/home/{{ user }}/.oh-my-zsh/custom}/themes/powerlevel10k
+          dest: /home/{{ user }}/.oh-my-zsh/custom/themes/powerlevel10k
           refspec: '+refs/pull/*:refs/heads/*'
           depth: 1
 
@@ -274,7 +275,7 @@
       - name: Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests
         git:
           repo: https://github.com/zsh-users/zsh-autosuggestions
-          dest: /home/{{ user }}${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+          dest: /home/{{ user }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
           refspec: '+refs/pull/*:refs/heads/*'
 
       # - name: fix zsh-autosuggestions
@@ -291,20 +292,20 @@
           key_file: /home/dax/.ssh/id_ecdsa
         delegate_to: localhost
         run_once: true
-      #
-      # - name: copy .zshrc
-      #   copy:
-      #     src: ./tmp-dotfiles/.zshrc
-      #     dest: "/home/{{ user }}/.zshrc"
-      #     owner: "{{ user }}"
-      #     group: "admin"
-      #     mode: '0644'
-      #
-      # - name: source new .zshrc file
-      #   shell: "source /home/{{ user }}/.zshrc"
+
+      - name: copy .zshrc
+        copy:
+          src: ./tmp-dotfiles/.zshrc
+          dest: "/home/{{ user }}/.zshrc"
+          owner: "{{ user }}"
+          group: "admin"
+          mode: '0644'
+
+      - name: source new .zshrc file
+        shell: "/bin/zsh /home/{{ user }}/.zshrc"
 
     handlers:
       - name: Reload SSH
         service:
           name: sshd
-          state: reloaded
+          state: restarted
