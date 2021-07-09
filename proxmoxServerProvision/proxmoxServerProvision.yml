@@ -102,10 +102,10 @@
       #   become: yes
       #   notify: Reload SSH
 
-      - name: regenerate ssh keys
-        become: yes
-        shell: "dpkg-reconfigure openssh-server"
-        notify: Reload SSH
+      # - name: regenerate ssh keys
+      #   become: yes
+      #   shell: "dpkg-reconfigure openssh-server"
+      #   notify: Reload SSH
 
       - name: add admin group
         group:
