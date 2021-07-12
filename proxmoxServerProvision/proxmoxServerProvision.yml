@@ -31,7 +31,7 @@
         files_to_be_reset:
           - /etc/machine-id
           - /var/lib/dbus/machine-id
-          - /etc/ssh/ssh_host_*
+          # - /etc/ssh/ssh_host_*
         # allow_world_readable_tmpfiles: true
     #roles:
       #- { role: viasite-ansible.zsh, zsh_user: dax }
@@ -93,19 +93,16 @@
           - dbus-uuidgen --ensure=/etc/machine-id
           - dbus-uuidgen --ensure
 
-      # - name: regenerate ssh keys
-      #   shell: "{{ item }}"
-      #   ignore_errors: yes
-      #   with_items:
-      #     - rm /etc/ssh/ssh_host_*
-      #     - dpkg-reconfigure openssh-server > /dev/null
-      #   become: yes
-      #   notify: Reload SSH
-
-      # - name: regenerate ssh keys
-      #   become: yes
-      #   shell: "dpkg-reconfigure openssh-server"
-      #   notify: Reload SSH
+      #regenerating the keys requires first deleting the ssh_host_* files then running the reconfigure option.
+      #they must run in the same task one after the other for it to work.
+      - name: regenerate ssh keys
+        shell: "{{ item }}"
+        ignore_errors: yes
+        with_items:
+          - rm /etc/ssh/ssh_host_*
+          - dpkg-reconfigure openssh-server
+        become: yes
+        notify: Reload SSH
 
       - name: add admin group
         group:
@@ -131,14 +128,6 @@
           home: /home/{{ user }}
           create_home: yes
           state: present
-          # password: "nilok3"
-
-      # This should be set in the above task
-      # - name: Change local user shell
-      #   user:
-      #     name: "{{ user }}"
-      #     shell: /bin/zsh
-      #   become: yes
 
       - name: Add local user to sudo
         lineinfile:
@@ -182,31 +171,6 @@
             state: present
             manage_dir: yes
 
-      # - name: put ssh public keyfile onto host
-      #   copy:
-      #       src: /home/dax/.ssh/id_ecdsa.pub
-      #       dest: /home/{{ user }}/.ssh/
-      #       owner: "{{ user }}"
-      #       group: admin
-      #       mode: 0700
-      #
-      # - name: put ssh private keyfile onto host
-      #   copy:
-      #       src: /home/dax/.ssh/id_ecdsa
-      #       dest: /home/{{ user }}/.ssh/
-      #       owner: "{{ user }}"
-      #       group: admin
-      #       mode: 0700
-
-#      - name: add sshd config file
-#        copy:
-#            dest: /etc/ssh/sshd_config
-#            src: /etc/ssh/sshd_config
-#            owner: root
-#            group: root
-#            mode: 0600
-#        notify: Reload SSH
-
     #might end up using the one from the dotfiles
       - name: add sshd config file
         template:
@@ -225,28 +189,9 @@
           state: touch
           mode: 0600
 
-      #- name: change default shell to zsh
-        #command: chsh -s /usr/bin/zsh
-        #command: chsh -s $(which zsh)
-        #become_user: "{{ user }}"
-
-      #- name: install oh-my-zshrc
-      #  command:  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-      #  become_user: "{{ user }}"
-
       - name: print out user this playbook is running as
         debug:
           msg: "Playbook is being run as: {{ ansible_user_id }} and ansible user is: {{ user }}"
-
-      # - name: fetch oh-my-zsh
-      #   get_url:
-      #     url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
-      #     dest: /tmp/install-oh-my-zsh.sh
-      #     mode: 0755
-
-      # - name: install oh-my-zsh
-      #   command: zsh /tmp/install-oh-my-zsh.sh
-      #   become_user: "{{ user }}"
 
       - name: Check for Oh My ZSH Installation
         stat:
@@ -268,42 +213,26 @@
           refspec: '+refs/pull/*:refs/heads/*'
           depth: 1
 
-      # - name: git clone powerlevel10k color theme
-      #   command: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-      #   become_user: "{{ user }}"
-
       - name: Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests
         git:
           repo: https://github.com/zsh-users/zsh-autosuggestions
           dest: /home/{{ user }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
           refspec: '+refs/pull/*:refs/heads/*'
 
-      # - name: fix zsh-autosuggestions
-      #   command:  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-      #   become_user: "{{ user }}"
-
       - name: clone dotfiles repository to localhost
         git:
           repo: "{{ dotfiles_repo }}"
-          dest: ./tmp-dotfiles
+          dest: /tmp/tmp-dotfiles
           accept_hostkey: yes
           force: yes
           recursive: no
           key_file: /home/dax/.ssh/id_ecdsa
         delegate_to: localhost
-        # run_once: true
-
-      # - name: copy .zshrc
-      #   copy:
-      #     src: ./tmp-dotfiles/.zshrc
-      #     dest: "/home/{{ user }}/.zshrc"
-      #     owner: "{{ user }}"
-      #     group: "admin"
-      #     mode: '0644'
+        run_once: true
 
       - name: copy .zshrc & p10k.zsh
         copy:
-          src: ./tmp-dotfiles/{{ item }}
+          src: /tmp/tmp-dotfiles/{{ item }}
           dest: "/home/{{ user }}/{{ item }}"
           owner: "{{ user }}"
           group: "admin"
