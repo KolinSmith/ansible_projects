@@ -5,6 +5,9 @@
     hosts: provision_servers
     gather_facts: yes
     become: yes
+    vars_files:
+      # - /home/dax/code_base/ansible_projects/secrets.yml
+      - /home/dax/code_base/ansible_projects/vars.yml
     vars_prompt:
     - name: hostname
       prompt: What do you want to set as the hostname?
@@ -33,6 +36,7 @@
           - cmatrix
           - neofetch
           - pigz
+          - locate
         # allow_world_readable_tmpfiles: true
     #roles:
       #- { role: viasite-ansible.zsh, zsh_user: dax }
@@ -239,7 +243,7 @@
         delegate_to: localhost
         run_once: true
 
-      - name: copy .zshrc & p10k.zsh
+      - name: copy dotfiles into ~/
         copy:
           src: /tmp/tmp-dotfiles/{{ item }}
           dest: "/home/{{ user }}/{{ item }}"
@@ -250,6 +254,13 @@
           - .zshrc
           - .p10k.zsh
           - .tmux.conf
+          - .wgetrc
+          - .vimrc
+
+      - name: delete dotfiles from /tmp
+        file:
+          state: absent
+          path: /tmp/tmp-dotfiles
 
       - name: source new .zshrc file
         shell: "/bin/zsh /home/{{ user }}/.zshrc"
@@ -279,7 +290,6 @@
       - meta: end_play
         when: reboot_required.stat.exists
 
-      #need to add something to kill the connection once it restarts
       - name: Reboot for any important updates
         reboot:
         when: reboot_required.stat.exists
