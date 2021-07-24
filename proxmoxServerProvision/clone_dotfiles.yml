@@ -1,0 +1,29 @@
+- hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: clone dotfiles repository to localhost
+      git:
+        repo: "{{ dotfiles_repo }}"
+        dest: /tmp/tmp-dotfiles
+        accept_hostkey: yes
+        force: yes
+        recursive: no
+        key_file: /home/dax/.ssh/id_ecdsa
+      delegate_to: localhost
+      run_once: true
+
+    - name: copy .zshrc & p10k.zsh
+      copy:
+        src: /tmp/tmp-dotfiles/{{ item }}
+        dest: "/home/{{ user }}/{{ item }}"
+        owner: "{{ user }}"
+        group: "admin"
+        mode: '0644'
+      with_items:
+        - .zshrc
+        - .p10k.zsh
+        - .tmux.conf
+
+    - name: source new .zshrc file
+      shell: "/bin/zsh /home/{{ user }}/.zshrc"

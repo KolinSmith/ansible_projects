@@ -2,12 +2,9 @@
   - import_playbook: bootstrap_python.yml
 
   - name: proxmoxServerProvision
-    hosts: all
-    #remote_user: serveradmin
-    become: yes
-    #become_user: root
-    #become: true
+    hosts: provision_servers
     gather_facts: yes
+    become: yes
     vars_prompt:
     - name: hostname
       prompt: What do you want to set as the hostname?
@@ -28,45 +25,169 @@
           - acl
           - sudo
           - fzf
-        files_to_be_reset:
-          - /etc/machine-id
-          - /var/lib/dbus/machine-id
-          # - /etc/ssh/ssh_host_*
+          - apt-transport-https
+          - unattended-upgrades
+          - tmux
+          - build-essential
+          - unzip
+          - cmatrix
+          - neofetch
+          - pigz
         # allow_world_readable_tmpfiles: true
     #roles:
       #- { role: viasite-ansible.zsh, zsh_user: dax }
 
-    # pre_tasks:
-    #   - name: update repo cache (CentOS)
-    #     tags: always
-    #     dnf:
-    #       update_cache: yes
-    #     changed_when: false
-    #     when: ansible_distribution == "CentOS"
-    #
-    #   - name: update repo cache (Ubuntu)
-    #     tags: always
-    #     apt:
-    #       upgrade: yes
-    #       update_cache: yes
-    #       cache_valid_time: 86400
-    #       autoremove: yes
-    #       autoclean: yes
+    pre_tasks:
+      - name: update repo cache (CentOS)
+        tags: always
+        dnf:
+          update_cache: yes
+        changed_when: false
+        when: ansible_distribution == "CentOS"
+
+      - name: update repo cache (Ubuntu)
+        tags: always
+        apt:
+          upgrade: yes
+          update_cache: yes
+          cache_valid_time: "86400"
+          autoremove: yes
+          autoclean: yes
+        ignore_errors: yes
+        when: ansible_distribution == "Ubuntu"
+
 
     tasks:
-      # - name: perform full update
-      #   apt:
-      #     upgrade: yes
-      #     update_cache: yes
-      #     cache_valid_time: 86400
       - name: add packages I want
         package:
           name: "{{ necessary_packages }}"
           state: latest
 
-      - name: print out user this playbook is running as
+#############################################################################################################################################################################################
+#download and install exa
+#############################################################################################################################################################################################
+
+      #got from: https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
+      - name: download latest exa binary into /tmp
+        shell: curl -s https://api.github.com/repos/ogham/exa/releases/latest | grep -E 'browser_download_url' | grep linux-x86_64-v | cut -d '"' -f 4 | wget -qi - -O /tmp/exa_binary.zip
+
+      - name: make folder to put unzipped exa binary in
+        file:
+          state: directory
+          path: /tmp/exa_binary
+
+      - name: unzip exa binary
+        unarchive:
+          src: /tmp/exa_binary.zip
+          dest: /tmp/exa_binary
+          remote_src: yes
+
+      - name: move exa binary into /usr/local/bin
+        file:
+          src: /tmp/exa_binary/bin/exa
+          dest: /usr/local/bin/exa
+          state: hard
+        ignore_errors: yes
+
+      - name: move exa man page into /usr/share/man/man1
+        file:
+          src: /tmp/exa_binary/man/{{ item }}
+          dest: /usr/share/man/man1/{{ item }}
+          state: hard
+        with_fileglob:
+          - exa*
+        ignore_errors: yes
+
+#need to check if path it is copying into (/usr/local/share/zsh/site-functions) exists before moving
+
+      - name: move exa shell completetion files into /usr/local/share/zsh/site-functions
+        file:
+          src: /tmp/exa_binary/completions/exa.zsh
+          dest: /usr/local/share/zsh/site-functions
+          state: hard
+        ignore_errors: yes
+
+      - name: delete files from /tmp
+        file:
+          state: absent
+          path: /tmp/{{ item }}
+        with_items:
+          - exa_binary
+          - exa_binary.zip
+
+#############################################################################################################################################################################################
+#############################################################################################################################################################################################
+#############################################################################################################################################################################################
+
+
+
+
+#############################################################################################################################################################################################
+#download and install bat
+#############################################################################################################################################################################################
+
+      - name: download latest bat binary into /tmp
+        shell: curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep -E 'browser_download_url' | grep 'x86_64-unknown-linux-gnu' | cut -d '"' -f 4 | wget -qi - -O /tmp/bat_binary.tar.gz
+        become: yes
+
+      - name: make folder to put unzipped bat binary in
+        file:
+          state: directory
+          path: /tmp/bat_binary
+
+      - name: unzip bat binary
+        unarchive:
+          src: /tmp/bat_binary.tar.gz
+          dest: /tmp/bat_binary
+          remote_src: yes
+
+      - name: move bat binary into /usr/local/bin
+        file:
+          src: /tmp/bat_binary/{{ item }}/bat
+          dest: /usr/local/bin/bat
+          state: hard
+        with_fileglob:
+          - bat-*
+
+      # - name: move bat man page into /usr/share/man/man1
+      #   file:
+      #     src: /tmp/bat_binary/bat-v0.18.2-aarch64-unknown-linux-gnu/bat.1
+      #     dest: /usr/share/man/man1/bat.1
+      #     state: hard
+
+      - name: move bat man page into /usr/share/man/man1
+        file:
+          src: /tmp/bat_binary/"{{ item }}"/bat.1
+          dest: /usr/share/man/man1/bat.1
+          state: hard
+        with_fileglob:
+          - "bat-"
+
+      - name: debug
         debug:
-          msg: "Playbook is being run as: {{ ansible_user_id }}"
+          msg: "HEY THERE!!!"
+
+#need to check if path it is copying into (/usr/local/share/zsh/site-functions) exists before moving
+
+      - name: move bat shell completetion files into /usr/local/share/zsh/site-functions
+        file:
+          src: /tmp/bat_binary/{{ item }}/autocomplete/bat.zsh
+          dest: /usr/local/share/zsh/site-functions
+          state: hard
+        with_fileglob:
+          - bat-*
+
+      # - name: delete files from /tmp
+      #   file:
+      #     state: absent
+      #     path: /tmp/{{ item }}
+      #   with_items:
+      #     - bat_binary
+      #     - bat_binary.tar.gz
+
+#############################################################################################################################################################################################
+#############################################################################################################################################################################################
+#############################################################################################################################################################################################
 
       - name: set hostname
 #        hostname:
@@ -82,14 +203,15 @@
 
       - name: remove files that came with the template and need to be reset
         file:
-          path: "{{ files_to_be_reset }}"
+          path: "{{ item }}"
           state: absent
-        ignore_errors: yes
+        with_items:
+          - /etc/machine-id
+          - /var/lib/dbus/machine-id
 
       - name: reset the machine ID
         command: "{{ item }}"
         with_items:
-          # - rm -f /etc/machine-id /var/lib/dbus/machine-id
           - dbus-uuidgen --ensure=/etc/machine-id
           - dbus-uuidgen --ensure
 
@@ -103,6 +225,22 @@
           - dpkg-reconfigure openssh-server
         become: yes
         notify: Reload SSH
+
+      # possible problems with this part
+      # - name: Configure Unattended Updates
+      #   lineinfile:
+      #     path: /etc/apt/apt.conf.d/50unattended-upgrades
+      #     regexp: "{{ item.line }}"
+      #     line: "{{ item.new }}"
+      #   # untested at the moment - should work
+      #   loop:
+      #     - { line: '^(//)?      "o=Debian(,a=stable)?"', new: '      "o=Debian"'}
+      #     - { line: '^(//)?Unattended-Upgrade::MinimalSteps ".*";', new: 'Unattended-Upgrade::MinimalSteps "true";'}
+      #     - { line: '^(//)?Unattended-Upgrade::Remove-Unused-Dependencies ".*";', new: 'Unattended-Upgrade::Remove-Unused-Dependencies "true";'}
+      #     - { line: '^(//)?Unattended-Upgrade::Automatic-Reboot ".*";', new: 'Unattended-Upgrade::Automatic-Reboot "false";'}
+      #     - { line: '^(//)?Unattended-Upgrade::Automatic-Reboot-WithUsers ".*";', new: 'Unattended-Upgrade::Automatic-Reboot-WithUsers "true";'}
+      #   notify:
+      #    - Restart Unattended Upgrades
 
       - name: add admin group
         group:
@@ -120,7 +258,7 @@
       #   vars:
       #     zsh_user: "{{ user }}"
 
-      - name: add local user
+      - name: add local user {{ user }}
         user:
           name: "{{ user }}"
           groups: admin
@@ -129,7 +267,7 @@
           create_home: yes
           state: present
 
-      - name: Add local user to sudo
+      - name: Add local user {{ user }} to sudo
         lineinfile:
           path: /etc/sudoers.d/{{ user }}
           line: '{{ user }} ALL=(ALL) NOPASSWD: ALL'
@@ -189,10 +327,6 @@
           state: touch
           mode: 0600
 
-      - name: print out user this playbook is running as
-        debug:
-          msg: "Playbook is being run as: {{ ansible_user_id }} and ansible user is: {{ user }}"
-
       - name: Check for Oh My ZSH Installation
         stat:
           path: ~/.oh-my-zsh
@@ -240,12 +374,47 @@
         with_items:
           - .zshrc
           - .p10k.zsh
+          - .tmux.conf
 
       - name: source new .zshrc file
         shell: "/bin/zsh /home/{{ user }}/.zshrc"
+
+      - name: Check if tmuxinator plugin manager is installed.
+        stat:
+          path: /home/{{ user }}/.tmux/plugins/tpm
+        register: tpm_installed
+
+      - name: Create tmux plugin directory
+        file:
+          state: directory
+          path: /home/{{ user }}/.tmux/plugins
+
+      - name: Install tmux plugin manager
+        git:
+          repo: 'https://github.com/tmux-plugins/tpm'
+          dest: /home/{{ user }}/.tmux/plugins/tpm
+        when: tpm_installed.stat.exists == False
+
+      - name: Check if reboot is required
+        stat:
+          path: /var/run/reboot-required
+        register: reboot_required
+
+      #need to add something to kill the connection once it restarts
+      - name: Reboot for any important updates
+        reboot:
+        when: reboot_required.stat.exists
+
+     #should end the play if the remote server needs to reboot
+      - meta: end_play
+        when: reboot_required.stat.exists
 
     handlers:
       - name: Reload SSH
         service:
           name: sshd
+          state: restarted
+      - name: Restart Unattended Upgrades
+        systemd:
+          name: unattended-upgrades
           state: restarted

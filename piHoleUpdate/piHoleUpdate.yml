@@ -12,4 +12,4 @@
           cache_valid_time: 86400 #One day
       - name: update pihole
         become: true
-        command: pihole -up
+        shell: pihole -up

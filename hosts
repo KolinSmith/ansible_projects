@@ -43,10 +43,9 @@ k3s-masters
 k3s-workers
 
 [provision_servers]
-test ansible_host=192.168.9.132
+k3s-mysql-1 ansible_host=192.168.9.129
 
 [mysql-servers]
-k3s-mysql-1 ansible_host=192.168.9.129
 k3s-mysql-2 ansible_host=192.168.9.133
 
 
