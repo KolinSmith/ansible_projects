@@ -5,6 +5,9 @@
     hosts: provision_servers
     gather_facts: yes
     become: yes
+    vars_files:
+      # - /home/dax/code_base/ansible_projects/secrets.yml
+      - /home/dax/code_base/ansible_projects/vars.yml
     vars_prompt:
     - name: hostname
       prompt: What do you want to set as the hostname?
@@ -33,6 +36,7 @@
           - cmatrix
           - neofetch
           - pigz
+          - locate
         # allow_world_readable_tmpfiles: true
     #roles:
       #- { role: viasite-ansible.zsh, zsh_user: dax }
@@ -63,131 +67,11 @@
           name: "{{ necessary_packages }}"
           state: latest
 
-#############################################################################################################################################################################################
-#download and install exa
-#############################################################################################################################################################################################
+      - name: install bat
+        include: install_bat.yml
 
-      #got from: https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
-      - name: download latest exa binary into /tmp
-        shell: curl -s https://api.github.com/repos/ogham/exa/releases/latest | grep -E 'browser_download_url' | grep linux-x86_64-v | cut -d '"' -f 4 | wget -qi - -O /tmp/exa_binary.zip
-
-      - name: make folder to put unzipped exa binary in
-        file:
-          state: directory
-          path: /tmp/exa_binary
-
-      - name: unzip exa binary
-        unarchive:
-          src: /tmp/exa_binary.zip
-          dest: /tmp/exa_binary
-          remote_src: yes
-
-      - name: move exa binary into /usr/local/bin
-        file:
-          src: /tmp/exa_binary/bin/exa
-          dest: /usr/local/bin/exa
-          state: hard
-        ignore_errors: yes
-
-      - name: move exa man page into /usr/share/man/man1
-        file:
-          src: /tmp/exa_binary/man/{{ item }}
-          dest: /usr/share/man/man1/{{ item }}
-          state: hard
-        with_fileglob:
-          - exa*
-        ignore_errors: yes
-
-#need to check if path it is copying into (/usr/local/share/zsh/site-functions) exists before moving
-
-      - name: move exa shell completetion files into /usr/local/share/zsh/site-functions
-        file:
-          src: /tmp/exa_binary/completions/exa.zsh
-          dest: /usr/local/share/zsh/site-functions
-          state: hard
-        ignore_errors: yes
-
-      - name: delete files from /tmp
-        file:
-          state: absent
-          path: /tmp/{{ item }}
-        with_items:
-          - exa_binary
-          - exa_binary.zip
-
-#############################################################################################################################################################################################
-#############################################################################################################################################################################################
-#############################################################################################################################################################################################
-
-
-
-
-#############################################################################################################################################################################################
-#download and install bat
-#############################################################################################################################################################################################
-
-      - name: download latest bat binary into /tmp
-        shell: curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep -E 'browser_download_url' | grep 'x86_64-unknown-linux-gnu' | cut -d '"' -f 4 | wget -qi - -O /tmp/bat_binary.tar.gz
-        become: yes
-
-      - name: make folder to put unzipped bat binary in
-        file:
-          state: directory
-          path: /tmp/bat_binary
-
-      - name: unzip bat binary
-        unarchive:
-          src: /tmp/bat_binary.tar.gz
-          dest: /tmp/bat_binary
-          remote_src: yes
-
-      - name: move bat binary into /usr/local/bin
-        file:
-          src: /tmp/bat_binary/{{ item }}/bat
-          dest: /usr/local/bin/bat
-          state: hard
-        with_fileglob:
-          - bat-*
-
-      # - name: move bat man page into /usr/share/man/man1
-      #   file:
-      #     src: /tmp/bat_binary/bat-v0.18.2-aarch64-unknown-linux-gnu/bat.1
-      #     dest: /usr/share/man/man1/bat.1
-      #     state: hard
-
-      - name: move bat man page into /usr/share/man/man1
-        file:
-          src: /tmp/bat_binary/"{{ item }}"/bat.1
-          dest: /usr/share/man/man1/bat.1
-          state: hard
-        with_fileglob:
-          - "bat-"
-
-      - name: debug
-        debug:
-          msg: "HEY THERE!!!"
-
-#need to check if path it is copying into (/usr/local/share/zsh/site-functions) exists before moving
-
-      - name: move bat shell completetion files into /usr/local/share/zsh/site-functions
-        file:
-          src: /tmp/bat_binary/{{ item }}/autocomplete/bat.zsh
-          dest: /usr/local/share/zsh/site-functions
-          state: hard
-        with_fileglob:
-          - bat-*
-
-      # - name: delete files from /tmp
-      #   file:
-      #     state: absent
-      #     path: /tmp/{{ item }}
-      #   with_items:
-      #     - bat_binary
-      #     - bat_binary.tar.gz
-
-#############################################################################################################################################################################################
-#############################################################################################################################################################################################
-#############################################################################################################################################################################################
+      - name: install exa
+        include: install_exa.yml
 
       - name: set hostname
 #        hostname:
@@ -297,11 +181,6 @@
 #          line: '127.0.1.1 "{{ hostname }}"'
 #          state: present
 
-#      - name: perform full patching
-#        package:
-#          name: '*'
-#          state: latest
-
       - name: add SSH public key for local user
         authorized_key:
             user: "{{ user }}"
@@ -364,7 +243,7 @@
         delegate_to: localhost
         run_once: true
 
-      - name: copy .zshrc & p10k.zsh
+      - name: copy dotfiles into ~/
         copy:
           src: /tmp/tmp-dotfiles/{{ item }}
           dest: "/home/{{ user }}/{{ item }}"
@@ -375,6 +254,13 @@
           - .zshrc
           - .p10k.zsh
           - .tmux.conf
+          - .wgetrc
+          - .vimrc
+
+      - name: delete dotfiles from /tmp
+        file:
+          state: absent
+          path: /tmp/tmp-dotfiles
 
       - name: source new .zshrc file
         shell: "/bin/zsh /home/{{ user }}/.zshrc"
@@ -400,14 +286,14 @@
           path: /var/run/reboot-required
         register: reboot_required
 
-      #need to add something to kill the connection once it restarts
+        #should end the play if the remote server needs to reboot
+      - meta: end_play
+        when: reboot_required.stat.exists
+
       - name: Reboot for any important updates
         reboot:
         when: reboot_required.stat.exists
 
-     #should end the play if the remote server needs to reboot
-      - meta: end_play
-        when: reboot_required.stat.exists
 
     handlers:
       - name: Reload SSH
