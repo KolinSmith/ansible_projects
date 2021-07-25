@@ -46,10 +46,15 @@ k3s-workers
 test ansible_host=192.168.9.132
 
 [provision_servers:vars]
-ansible_user=serveradmin
-ansible_password={{ proxmox_template_password }}
-ansible_become=yes
-ansible_become_password={{ proxmox_template_password }}
+# ansible_user=serveradmin
+# ansible_password={{ proxmox_template_password }}
+# ansible_become=yes
+# ansible_become_password={{ proxmox_template_password }}
+
+ansible_connection=ssh
+ansible_user=dax
+ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa
+ansible_python_interpreter=/usr/bin/python3
 
 
 [mysql-servers]
