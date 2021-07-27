@@ -12574,3 +12574,229 @@ message.
 2021-07-24 18:18:56,694 p=15428 u=root n=ansible | changed: [test]
 2021-07-24 18:18:56,698 p=15428 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
 2021-07-24 18:18:56,700 p=15428 u=root n=ansible | test                       : ok=44   changed=36   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+2021-07-26 15:19:45,651 p=2140 u=root n=ansible | [WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+
+2021-07-26 15:19:48,262 p=2140 u=root n=ansible | PLAY [provision_servers] ********************************************************************************************************
+2021-07-26 15:19:48,416 p=2140 u=root n=ansible | TASK [Gathering Facts] **********************************************************************************************************
+2021-07-26 15:19:52,898 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:19:52,994 p=2140 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:19:53,195 p=2140 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/variables.yml for test
+2021-07-26 15:19:53,302 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Include OS-specific variables.] **********************************************************************
+2021-07-26 15:19:53,546 p=2140 u=root n=ansible | ok: [test] => (item=/home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/vars/Debian.yml)
+2021-07-26 15:19:53,645 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_packages.] ******************************************************************************
+2021-07-26 15:19:53,795 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:19:53,881 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_daemon.] ********************************************************************************
+2021-07-26 15:19:54,015 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:19:54,102 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_slow_query_log_file.] *******************************************************************
+2021-07-26 15:19:54,254 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:19:54,338 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_log_error.] *****************************************************************************
+2021-07-26 15:19:54,494 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:19:54,579 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_syslog_tag.] ****************************************************************************
+2021-07-26 15:19:54,718 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:19:54,805 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_pid_file.] ******************************************************************************
+2021-07-26 15:19:54,950 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:19:55,038 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_config_file.] ***************************************************************************
+2021-07-26 15:19:55,207 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:19:55,290 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_config_include_dir.] ********************************************************************
+2021-07-26 15:19:55,437 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:19:55,541 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_socket.] ********************************************************************************
+2021-07-26 15:19:55,678 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:19:55,767 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_supports_innodb_large_prefix.] **********************************************************
+2021-07-26 15:19:55,904 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:19:55,990 p=2140 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:19:56,099 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:19:56,182 p=2140 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:19:56,921 p=2140 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/setup-Debian.yml for test
+2021-07-26 15:19:57,048 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Check if MySQL is already installed.] ****************************************************************
+2021-07-26 15:19:59,487 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:19:59,574 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Update apt cache if MySQL is not yet installed.] *****************************************************
+2021-07-26 15:19:59,695 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:19:59,779 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Ensure MySQL Python libraries are installed.] ********************************************************
+2021-07-26 15:20:04,515 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:20:04,643 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Ensure MySQL packages are installed.] ****************************************************************
+2021-07-26 15:20:05,786 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:20:05,881 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Ensure MySQL is stopped after initial install.] ******************************************************
+2021-07-26 15:20:06,004 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:20:06,089 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Delete innodb log files created by apt package after initial install.] *******************************
+2021-07-26 15:20:06,218 p=2140 u=root n=ansible | skipping: [test] => (item=ib_logfile0) 
+2021-07-26 15:20:06,246 p=2140 u=root n=ansible | skipping: [test] => (item=ib_logfile1) 
+2021-07-26 15:20:06,331 p=2140 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:20:06,436 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:20:06,520 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Check if MySQL packages were installed.] *************************************************************
+2021-07-26 15:20:06,662 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:20:06,750 p=2140 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:20:06,970 p=2140 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/configure.yml for test
+2021-07-26 15:20:07,140 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Get MySQL version.] **********************************************************************************
+2021-07-26 15:20:08,233 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:20:08,322 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Copy my.cnf global MySQL configuration.] *************************************************************
+2021-07-26 15:20:10,131 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:20:10,230 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Verify mysql include directory exists.] **************************************************************
+2021-07-26 15:20:10,336 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:20:10,419 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Copy my.cnf override files into include directory.] **************************************************
+2021-07-26 15:20:10,610 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Create slow query log file (if configured).] *********************************************************
+2021-07-26 15:20:10,662 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:20:10,751 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Create datadir if it does not exist] *****************************************************************
+2021-07-26 15:20:11,133 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:20:11,240 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Set ownership on slow query log file (if configured).] ***********************************************
+2021-07-26 15:20:11,290 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:20:11,384 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Create error log file (if configured).] **************************************************************
+2021-07-26 15:20:11,507 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:20:11,609 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Set ownership on error log file (if configured).] ****************************************************
+2021-07-26 15:20:11,725 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:20:11,815 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Ensure MySQL is started and enabled on boot.] ********************************************************
+2021-07-26 15:20:14,023 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:20:14,117 p=2140 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:20:14,324 p=2140 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/secure-installation.yml for test
+2021-07-26 15:20:14,515 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Ensure default user is present.] *********************************************************************
+2021-07-26 15:20:14,644 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:20:14,728 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Copy user-my.cnf file with password credentials.] ****************************************************
+2021-07-26 15:20:14,855 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:20:14,941 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Disallow root login remotely] ************************************************************************
+2021-07-26 15:20:15,375 p=2140 u=root n=ansible | ok: [test] => (item=DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1'))
+2021-07-26 15:20:15,461 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Get list of hosts for the root user.] ****************************************************************
+2021-07-26 15:20:15,571 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:20:15,660 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Update MySQL root password for localhost root account (5.7.x).] **************************************
+2021-07-26 15:20:15,886 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Update MySQL root password for localhost root account (< 5.7.x).] ************************************
+2021-07-26 15:20:16,100 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Copy .my.cnf file with root password credentials.] ***************************************************
+2021-07-26 15:20:16,219 p=2140 u=root n=ansible | skipping: [test]
+2021-07-26 15:20:16,304 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Get list of hosts for the anonymous user.] ***********************************************************
+2021-07-26 15:20:16,637 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:20:16,731 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Remove anonymous MySQL users.] ***********************************************************************
+2021-07-26 15:20:16,942 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Remove MySQL test database.] *************************************************************************
+2021-07-26 15:20:18,128 p=2140 u=root n=ansible | ok: [test]
+2021-07-26 15:20:18,213 p=2140 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:20:19,788 p=2140 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/databases.yml for test
+2021-07-26 15:20:19,995 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Ensure MySQL databases are present.] *****************************************************************
+2021-07-26 15:20:20,451 p=2140 u=root n=ansible | ok: [test] => (item={u'collation': u'latin1_swedish_ci', u'name': u'k3s', u'encoding': u'latin1'})
+2021-07-26 15:20:20,563 p=2140 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:20:20,710 p=2140 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/users.yml for test
+2021-07-26 15:20:20,938 p=2140 u=root n=ansible | TASK [ansible-role-mysql : Ensure MySQL users are present.] *********************************************************************
+2021-07-26 15:20:21,042 p=2140 u=root n=ansible | fatal: [test]: FAILED! => {"censored": "the output has been hidden due to the fact that 'no_log: true' was specified for this result"}
+2021-07-26 15:20:21,047 p=2140 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
+2021-07-26 15:20:21,049 p=2140 u=root n=ansible | test                       : ok=30   changed=0    unreachable=0    failed=1    skipped=18   rescued=0    ignored=0   
+2021-07-26 15:27:51,774 p=2841 u=root n=ansible | [WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+
+2021-07-26 15:27:53,550 p=2841 u=root n=ansible | PLAY [provision_servers] ********************************************************************************************************
+2021-07-26 15:27:53,745 p=2841 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:27:53,984 p=2841 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/variables.yml for test
+2021-07-26 15:27:54,129 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Include OS-specific variables.] **********************************************************************
+2021-07-26 15:27:54,311 p=2841 u=root n=ansible | ok: [test] => (item=/home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/vars/Debian.yml)
+2021-07-26 15:27:54,440 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_packages.] ******************************************************************************
+2021-07-26 15:27:54,581 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:27:54,739 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_daemon.] ********************************************************************************
+2021-07-26 15:27:54,877 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:27:54,997 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_slow_query_log_file.] *******************************************************************
+2021-07-26 15:27:55,130 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:27:55,259 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_log_error.] *****************************************************************************
+2021-07-26 15:27:55,409 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:27:55,551 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_syslog_tag.] ****************************************************************************
+2021-07-26 15:27:55,690 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:27:55,837 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_pid_file.] ******************************************************************************
+2021-07-26 15:27:55,978 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:27:56,121 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_config_file.] ***************************************************************************
+2021-07-26 15:27:56,425 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:27:56,542 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_config_include_dir.] ********************************************************************
+2021-07-26 15:27:56,698 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:27:56,819 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_socket.] ********************************************************************************
+2021-07-26 15:27:56,952 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:27:57,076 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Define mysql_supports_innodb_large_prefix.] **********************************************************
+2021-07-26 15:27:57,200 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:27:57,328 p=2841 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:27:57,436 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:27:57,560 p=2841 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:27:58,272 p=2841 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/setup-Debian.yml for test
+2021-07-26 15:27:58,445 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Check if MySQL is already installed.] ****************************************************************
+2021-07-26 15:27:59,290 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:27:59,418 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Update apt cache if MySQL is not yet installed.] *****************************************************
+2021-07-26 15:27:59,537 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:27:59,658 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Ensure MySQL Python libraries are installed.] ********************************************************
+2021-07-26 15:28:01,641 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:28:01,807 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Ensure MySQL packages are installed.] ****************************************************************
+2021-07-26 15:28:02,891 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:28:03,045 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Ensure MySQL is stopped after initial install.] ******************************************************
+2021-07-26 15:28:03,168 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:03,288 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Delete innodb log files created by apt package after initial install.] *******************************
+2021-07-26 15:28:03,425 p=2841 u=root n=ansible | skipping: [test] => (item=ib_logfile0) 
+2021-07-26 15:28:03,448 p=2841 u=root n=ansible | skipping: [test] => (item=ib_logfile1) 
+2021-07-26 15:28:03,575 p=2841 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:28:03,679 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:03,800 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Check if MySQL packages were installed.] *************************************************************
+2021-07-26 15:28:03,951 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:28:04,080 p=2841 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:28:04,455 p=2841 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/configure.yml for test
+2021-07-26 15:28:04,650 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Get MySQL version.] **********************************************************************************
+2021-07-26 15:28:05,588 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:28:05,717 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Copy my.cnf global MySQL configuration.] *************************************************************
+2021-07-26 15:28:07,242 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:28:07,385 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Verify mysql include directory exists.] **************************************************************
+2021-07-26 15:28:07,505 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:07,649 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Copy my.cnf override files into include directory.] **************************************************
+2021-07-26 15:28:07,878 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Create slow query log file (if configured).] *********************************************************
+2021-07-26 15:28:07,929 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:08,058 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Create datadir if it does not exist] *****************************************************************
+2021-07-26 15:28:08,446 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:28:08,563 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Set ownership on slow query log file (if configured).] ***********************************************
+2021-07-26 15:28:08,621 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:08,766 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Create error log file (if configured).] **************************************************************
+2021-07-26 15:28:08,891 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:09,018 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Set ownership on error log file (if configured).] ****************************************************
+2021-07-26 15:28:09,132 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:09,251 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Ensure MySQL is started and enabled on boot.] ********************************************************
+2021-07-26 15:28:11,476 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:28:11,607 p=2841 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:28:11,843 p=2841 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/secure-installation.yml for test
+2021-07-26 15:28:12,078 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Ensure default user is present.] *********************************************************************
+2021-07-26 15:28:12,187 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:12,436 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Copy user-my.cnf file with password credentials.] ****************************************************
+2021-07-26 15:28:12,547 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:12,664 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Disallow root login remotely] ************************************************************************
+2021-07-26 15:28:13,093 p=2841 u=root n=ansible | ok: [test] => (item=DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1'))
+2021-07-26 15:28:13,224 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Get list of hosts for the root user.] ****************************************************************
+2021-07-26 15:28:13,330 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:13,471 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Update MySQL root password for localhost root account (5.7.x).] **************************************
+2021-07-26 15:28:13,694 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Update MySQL root password for localhost root account (< 5.7.x).] ************************************
+2021-07-26 15:28:13,955 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Copy .my.cnf file with root password credentials.] ***************************************************
+2021-07-26 15:28:14,066 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:14,210 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Get list of hosts for the anonymous user.] ***********************************************************
+2021-07-26 15:28:14,614 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:28:14,767 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Remove anonymous MySQL users.] ***********************************************************************
+2021-07-26 15:28:15,008 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Remove MySQL test database.] *************************************************************************
+2021-07-26 15:28:15,924 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:28:16,053 p=2841 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:28:16,266 p=2841 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/databases.yml for test
+2021-07-26 15:28:16,551 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Ensure MySQL databases are present.] *****************************************************************
+2021-07-26 15:28:17,003 p=2841 u=root n=ansible | ok: [test] => (item={u'collation': u'latin1_swedish_ci', u'name': u'k3s', u'encoding': u'latin1'})
+2021-07-26 15:28:17,131 p=2841 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:28:17,324 p=2841 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/users.yml for test
+2021-07-26 15:28:17,567 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Ensure MySQL users are present.] *********************************************************************
+2021-07-26 15:28:19,224 p=2841 u=root n=ansible | changed: [test] => (item=None)
+2021-07-26 15:28:19,228 p=2841 u=root n=ansible | changed: [test]
+2021-07-26 15:28:19,378 p=2841 u=root n=ansible | TASK [ansible-role-mysql : include_tasks] ***************************************************************************************
+2021-07-26 15:28:19,588 p=2841 u=root n=ansible | included: /home/dax/code_base/ansible_projects/k3s_mysql_provision/roles/ansible-role-mysql/tasks/replication.yml for test
+2021-07-26 15:28:19,829 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Ensure replication user exists on master.] ***********************************************************
+2021-07-26 15:28:19,959 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:20,205 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Check slave replication status.] *********************************************************************
+2021-07-26 15:28:20,325 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:20,497 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Check master replication status.] ********************************************************************
+2021-07-26 15:28:20,594 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:20,737 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Configure replication on the slave.] *****************************************************************
+2021-07-26 15:28:20,823 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:20,954 p=2841 u=root n=ansible | TASK [ansible-role-mysql : Start replication.] **********************************************************************************
+2021-07-26 15:28:21,034 p=2841 u=root n=ansible | skipping: [test]
+2021-07-26 15:28:21,160 p=2841 u=root n=ansible | TASK [ufw] **********************************************************************************************************************
+2021-07-26 15:28:23,119 p=2841 u=root n=ansible | ok: [test]
+2021-07-26 15:28:23,127 p=2841 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
+2021-07-26 15:28:23,129 p=2841 u=root n=ansible | test                       : ok=32   changed=1    unreachable=0    failed=0    skipped=23   rescued=0    ignored=0   
+2021-07-26 23:08:36,683 p=5806 u=root n=ansible | [WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+
+2021-07-26 23:08:38,945 p=5806 u=root n=ansible | PLAY [provision_servers] ********************************************************************************************************
+2021-07-26 23:08:40,291 p=5806 u=root n=ansible | TASK [Generate locals] **********************************************************************************************************
+2021-07-26 23:08:43,800 p=5806 u=root n=ansible | ok: [test]
+2021-07-26 23:08:43,822 p=5806 u=root n=ansible | TASK [check if python2 is installed & install if neccessary] ********************************************************************
+2021-07-26 23:08:44,304 p=5806 u=root n=ansible | changed: [test]
+2021-07-26 23:08:46,755 p=5806 u=root n=ansible | PLAY [proxmoxServerProvision] ***************************************************************************************************
+2021-07-26 23:08:46,796 p=5806 u=root n=ansible | TASK [Gathering Facts] **********************************************************************************************************
+2021-07-26 23:08:46,907 p=5806 u=root n=ansible | fatal: [test]: FAILED! => {"msg": "The field 'become_pass' has an invalid value, which includes an undefined variable. The error was: {{ vault_proxmox_template_password }}: 'vault_proxmox_template_password' is undefined"}
+2021-07-26 23:08:46,916 p=5806 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
+2021-07-26 23:08:46,918 p=5806 u=root n=ansible | test                       : ok=2    changed=1    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2021-07-26 23:17:59,305 p=6543 u=root n=ansible | ERROR! The vault password file /root/.ansible_password was not found

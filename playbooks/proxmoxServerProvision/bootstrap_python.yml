@@ -1,0 +1,32 @@
+- hosts: provision_servers
+  gather_facts: false
+  become: true
+  vars_files:
+    # - /home/dax/code_base/ansible_projects/secrets.yml
+    - /home/dax/code_base/ansible_projects/vars.yml
+  # vars:
+  #   isPythonInstalled: "1"
+  pre_tasks:
+    - name: Generate locals
+      raw: export LC_ALL="en_GB.UTF-8"; locale-gen en_GB.UTF-8
+      changed_when: false
+
+    # test if python binary exists on remote. if it doesn't echo 0 and registerisPythonInstalled
+    - name: check if python2 is installed & install if neccessary
+      #raw: test -e /usr/bin/python || (apt -y update && apt install -y python2-minimal)
+      raw: test -e /usr/bin/python || (apt -y install python2-minimal && ln -s /usr/bin/python2 /usr/bin/python)
+      # register: isPythonInstalled
+      # changed_when: false
+    #
+    # - name: display isPythonInstalled
+    #   debug:
+    #     msg: "the variable is set as {{ isPythonInstalled }} and nothing ELSE."
+    #
+    # # try to install python2 and also make a symbolic link between python2 and the python binary
+    # # so it will use python2 by default
+    # - name: symbolic link /usr/bin/python2 to /usr/bin/python if python2 already installed
+    #   raw: apt -y install python2-minimal && ln -s /usr/bin/python2 /usr/bin/python
+    #   when: isPythonInstalled.stdout_lines != "1"
+    #   # when: isPythonInstalled.stdout_lines is defined
+    #   # changed_when: false
+    # - setup: # gather facts

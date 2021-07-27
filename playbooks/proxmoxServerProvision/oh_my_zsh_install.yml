@@ -1,0 +1,29 @@
+- hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Check for Oh My ZSH Installation
+      stat:
+        path: ~/.oh-my-zsh
+      become_user: "{{ user }}"
+      register: omz_installed
+
+    - name: Install Oh My ZSH
+      git:
+        repo: 'https://github.com/ohmyzsh/ohmyzsh.git'
+        dest: ~/.oh-my-zsh
+      become_user: "{{ user }}"
+      when: omz_installed.stat.exists == False
+
+    - name: Checkout powerlevel10k repo and use refspec to fetch all pull requests
+      git:
+        repo: https://github.com/romkatv/powerlevel10k.git
+        dest: /home/{{ user }}/.oh-my-zsh/custom/themes/powerlevel10k
+        refspec: '+refs/pull/*:refs/heads/*'
+        depth: 1
+
+    - name: Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests
+      git:
+        repo: https://github.com/zsh-users/zsh-autosuggestions
+        dest: /home/{{ user }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+        refspec: '+refs/pull/*:refs/heads/*'

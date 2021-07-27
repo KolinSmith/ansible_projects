@@ -1,0 +1,11 @@
+mysql_databases:
+  - name: k3s
+    collation: latin1_swedish_ci
+    encoding: latin1
+
+mysql_users:
+  - name: k3s
+    host: "%"
+    password: "{{ vault_k3s_mysql_password }}"
+    encrypted: no
+    priv: "*.*:ALL"
