@@ -12800,3 +12800,152 @@ message.
 2021-07-26 23:08:46,916 p=5806 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
 2021-07-26 23:08:46,918 p=5806 u=root n=ansible | test                       : ok=2    changed=1    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
 2021-07-26 23:17:59,305 p=6543 u=root n=ansible | ERROR! The vault password file /root/.ansible_password was not found
+2021-07-27 00:08:45,512 p=11902 u=root n=ansible | [WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+
+2021-07-27 00:08:47,796 p=11902 u=root n=ansible | PLAY [provision_servers] ********************************************************************************************************
+2021-07-27 00:08:48,014 p=11902 u=root n=ansible | TASK [Generate locals] **********************************************************************************************************
+2021-07-27 00:09:00,874 p=11902 u=root n=ansible | fatal: [test]: FAILED! => {"msg": "Timeout (12s) waiting for privilege escalation prompt: "}
+2021-07-27 00:09:00,879 p=11902 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
+2021-07-27 00:09:00,880 p=11902 u=root n=ansible | test                       : ok=0    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2021-07-27 00:09:09,504 p=11996 u=root n=ansible | [WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+
+2021-07-27 00:09:11,780 p=11996 u=root n=ansible | PLAY [provision_servers] ********************************************************************************************************
+2021-07-27 00:09:11,995 p=11996 u=root n=ansible | TASK [Generate locals] **********************************************************************************************************
+2021-07-27 00:09:25,451 p=11996 u=root n=ansible | ok: [test]
+2021-07-27 00:09:25,479 p=11996 u=root n=ansible | TASK [check if python2 is installed & install if neccessary] ********************************************************************
+2021-07-27 00:14:40,016 p=11996 u=root n=ansible | changed: [test]
+2021-07-27 00:14:40,042 p=11996 u=root n=ansible | PLAY [proxmoxServerProvision] ***************************************************************************************************
+2021-07-27 00:14:40,078 p=11996 u=root n=ansible | TASK [Gathering Facts] **********************************************************************************************************
+2021-07-27 00:14:43,011 p=11996 u=root n=ansible | [DEPRECATION WARNING]: Distribution Ubuntu 20.04 on host test should use /usr/bin/python3, but is using /usr/bin/python for 
+backward compatibility with prior Ansible releases. A future Ansible release will default to using the discovered platform 
+python for this host. See https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more 
+information. This feature will be removed in version 2.12. Deprecation warnings can be disabled by setting 
+deprecation_warnings=False in ansible.cfg.
+2021-07-27 00:14:43,013 p=11996 u=root n=ansible | ok: [test]
+2021-07-27 00:14:43,120 p=11996 u=root n=ansible | TASK [update repo cache (CentOS)] ***********************************************************************************************
+2021-07-27 00:14:43,236 p=11996 u=root n=ansible | skipping: [test]
+2021-07-27 00:14:43,323 p=11996 u=root n=ansible | TASK [update repo cache (Ubuntu)] ***********************************************************************************************
+2021-07-27 00:14:44,303 p=11996 u=root n=ansible |  [ERROR]: User interrupted execution
+
+2021-07-27 00:14:49,857 p=12475 u=root n=ansible | [WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+
+2021-07-27 00:14:52,062 p=12475 u=root n=ansible | PLAY [provision_servers] ********************************************************************************************************
+2021-07-27 00:14:52,390 p=12475 u=root n=ansible | TASK [Generate locals] **********************************************************************************************************
+2021-07-27 00:14:54,326 p=12475 u=root n=ansible | ok: [test]
+2021-07-27 00:14:54,598 p=12475 u=root n=ansible | TASK [check if python2 is installed & install if neccessary] ********************************************************************
+2021-07-27 00:14:54,866 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:14:56,259 p=12475 u=root n=ansible | PLAY [proxmoxServerProvision] ***************************************************************************************************
+2021-07-27 00:14:56,422 p=12475 u=root n=ansible | TASK [update repo cache (CentOS)] ***********************************************************************************************
+2021-07-27 00:14:56,568 p=12475 u=root n=ansible | skipping: [test]
+2021-07-27 00:14:56,713 p=12475 u=root n=ansible | TASK [update repo cache (Ubuntu)] ***********************************************************************************************
+2021-07-27 00:15:50,387 p=12475 u=root n=ansible | [WARNING]: The value True (type bool) in a string field was converted to u'True' (type string). If this does not look like what
+you expect, quote the entire value to ensure it does not change.
+
+2021-07-27 00:15:50,392 p=12475 u=root n=ansible | [WARNING]: Updating cache and auto-installing missing dependency: python-apt
+
+2021-07-27 00:15:50,394 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:15:50,566 p=12475 u=root n=ansible | TASK [add packages I want] ******************************************************************************************************
+2021-07-27 00:18:44,988 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:18:45,138 p=12475 u=root n=ansible | TASK [install_bat : Check that the /usr/local/bin/bat exists] *******************************************************************
+2021-07-27 00:18:46,253 p=12475 u=root n=ansible | ok: [test]
+2021-07-27 00:18:46,379 p=12475 u=root n=ansible | TASK [install_bat : download latest bat binary into /tmp] ***********************************************************************
+2021-07-27 00:18:48,788 p=12475 u=root n=ansible | [WARNING]: Consider using the get_url or uri module rather than running 'curl'.  If you need to use command because get_url or
+uri is insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in ansible.cfg to get rid of
+this message.
+
+2021-07-27 00:18:48,789 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:18:48,914 p=12475 u=root n=ansible | TASK [install_bat : make folder to put unzipped bat binary in] ******************************************************************
+2021-07-27 00:18:50,012 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:18:50,151 p=12475 u=root n=ansible | TASK [install_bat : unzip bat binary] *******************************************************************************************
+2021-07-27 00:18:51,942 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:18:52,064 p=12475 u=root n=ansible | TASK [install_bat : move bat binary into /usr/local/bin] ************************************************************************
+2021-07-27 00:18:52,514 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:18:52,631 p=12475 u=root n=ansible | TASK [install_bat : move bat man page into /usr/share/man/man1] *****************************************************************
+2021-07-27 00:18:53,062 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:18:53,185 p=12475 u=root n=ansible | TASK [install_bat : move bat shell completetion files into /usr/local/share/zsh/site-functions] *********************************
+2021-07-27 00:18:53,558 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:18:53,719 p=12475 u=root n=ansible | TASK [install_bat : delete files from /tmp] *************************************************************************************
+2021-07-27 00:18:54,140 p=12475 u=root n=ansible | changed: [test] => (item=bat_binary)
+2021-07-27 00:18:54,399 p=12475 u=root n=ansible | changed: [test] => (item=bat_binary.zip)
+2021-07-27 00:18:54,529 p=12475 u=root n=ansible | TASK [Check that the /usr/local/bin/exa exists] *********************************************************************************
+2021-07-27 00:18:54,966 p=12475 u=root n=ansible | ok: [test]
+2021-07-27 00:18:55,088 p=12475 u=root n=ansible | TASK [download latest exa binary into /tmp] *************************************************************************************
+2021-07-27 00:18:56,370 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:18:56,494 p=12475 u=root n=ansible | TASK [make folder to put unzipped exa binary in] ********************************************************************************
+2021-07-27 00:18:56,886 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:18:57,017 p=12475 u=root n=ansible | TASK [unzip exa binary] *********************************************************************************************************
+2021-07-27 00:18:57,904 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:18:58,024 p=12475 u=root n=ansible | TASK [move exa binary into /usr/local/bin] **************************************************************************************
+2021-07-27 00:18:58,459 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:18:58,583 p=12475 u=root n=ansible | TASK [move exa man page into /usr/share/man/man1] *******************************************************************************
+2021-07-27 00:18:58,756 p=12475 u=root n=ansible | TASK [move exa shell completetion files into /usr/local/share/zsh/site-functions] ***********************************************
+2021-07-27 00:18:59,127 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:18:59,263 p=12475 u=root n=ansible | TASK [delete files from /tmp] ***************************************************************************************************
+2021-07-27 00:18:59,728 p=12475 u=root n=ansible | changed: [test] => (item=exa_binary)
+2021-07-27 00:18:59,986 p=12475 u=root n=ansible | changed: [test] => (item=exa_binary.zip)
+2021-07-27 00:19:00,112 p=12475 u=root n=ansible | TASK [set hostname] *************************************************************************************************************
+2021-07-27 00:19:00,688 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:19:00,803 p=12475 u=root n=ansible | TASK [change /etc/hosts file to correct hostname] *******************************************************************************
+2021-07-27 00:19:03,584 p=12475 u=root n=ansible | [WARNING]: Module remote_tmp /root/.ansible/tmp did not exist and was created with a mode of 0700, this may cause issues when
+running as another user. To avoid this, create the remote_tmp dir with the correct permissions manually
+
+2021-07-27 00:19:03,585 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:19:03,704 p=12475 u=root n=ansible | TASK [remove files that came with the template and need to be reset] ************************************************************
+2021-07-27 00:19:04,116 p=12475 u=root n=ansible | changed: [test] => (item=/etc/machine-id)
+2021-07-27 00:19:04,370 p=12475 u=root n=ansible | changed: [test] => (item=/var/lib/dbus/machine-id)
+2021-07-27 00:19:04,508 p=12475 u=root n=ansible | TASK [reset the machine ID] *****************************************************************************************************
+2021-07-27 00:19:05,026 p=12475 u=root n=ansible | changed: [test] => (item=dbus-uuidgen --ensure=/etc/machine-id)
+2021-07-27 00:19:05,306 p=12475 u=root n=ansible | changed: [test] => (item=dbus-uuidgen --ensure)
+2021-07-27 00:19:05,430 p=12475 u=root n=ansible | TASK [regenerate ssh keys] ******************************************************************************************************
+2021-07-27 00:19:05,883 p=12475 u=root n=ansible | changed: [test] => (item=rm /etc/ssh/ssh_host_*)
+2021-07-27 00:19:11,475 p=12475 u=root n=ansible | changed: [test] => (item=dpkg-reconfigure openssh-server)
+2021-07-27 00:19:11,487 p=12475 u=root n=ansible | [WARNING]: Consider using the file module with state=absent rather than running 'rm'.  If you need to use command because file
+is insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in ansible.cfg to get rid of this
+message.
+
+2021-07-27 00:19:11,610 p=12475 u=root n=ansible | TASK [add admin group] **********************************************************************************************************
+2021-07-27 00:19:13,128 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:19:13,366 p=12475 u=root n=ansible | TASK [add dax group] ************************************************************************************************************
+2021-07-27 00:19:13,913 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:19:14,046 p=12475 u=root n=ansible | TASK [add local user dax] *******************************************************************************************************
+2021-07-27 00:19:15,945 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:19:16,190 p=12475 u=root n=ansible | TASK [Add local user dax to sudo] ***********************************************************************************************
+2021-07-27 00:19:17,114 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:19:17,242 p=12475 u=root n=ansible | TASK [add SSH public key for local user] ****************************************************************************************
+2021-07-27 00:19:18,452 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:19:18,584 p=12475 u=root n=ansible | TASK [add sshd config file] *****************************************************************************************************
+2021-07-27 00:19:20,263 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:19:20,386 p=12475 u=root n=ansible | TASK [create ~/.zshrc file for local user] **************************************************************************************
+2021-07-27 00:19:20,708 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:19:20,836 p=12475 u=root n=ansible | TASK [Check for Oh My ZSH Installation] *****************************************************************************************
+2021-07-27 00:19:21,183 p=12475 u=root n=ansible | ok: [test]
+2021-07-27 00:19:21,307 p=12475 u=root n=ansible | TASK [Install Oh My ZSH] ********************************************************************************************************
+2021-07-27 00:19:25,076 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:19:25,200 p=12475 u=root n=ansible | TASK [Checkout powerlevel10k repo and use refspec to fetch all pull requests] ***************************************************
+2021-07-27 00:19:42,841 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:19:42,977 p=12475 u=root n=ansible | TASK [Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests] *********************************************
+2021-07-27 00:19:45,367 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:19:45,514 p=12475 u=root n=ansible | TASK [clone dotfiles repository to localhost] ***********************************************************************************
+2021-07-27 00:19:55,865 p=12475 u=root n=ansible | ok: [test]
+2021-07-27 00:19:55,985 p=12475 u=root n=ansible | TASK [copy dotfiles into ~/] ****************************************************************************************************
+2021-07-27 00:19:56,888 p=12475 u=root n=ansible | changed: [test] => (item=.zshrc)
+2021-07-27 00:19:57,680 p=12475 u=root n=ansible | changed: [test] => (item=.p10k.zsh)
+2021-07-27 00:19:58,478 p=12475 u=root n=ansible | changed: [test] => (item=.tmux.conf)
+2021-07-27 00:19:59,247 p=12475 u=root n=ansible | changed: [test] => (item=.wgetrc)
+2021-07-27 00:20:00,024 p=12475 u=root n=ansible | changed: [test] => (item=.vimrc)
+2021-07-27 00:20:00,169 p=12475 u=root n=ansible | TASK [delete dotfiles from /tmp] ************************************************************************************************
+2021-07-27 00:20:00,508 p=12475 u=root n=ansible | ok: [test]
+2021-07-27 00:20:00,651 p=12475 u=root n=ansible | TASK [source new .zshrc file] ***************************************************************************************************
+2021-07-27 00:20:01,024 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:20:01,181 p=12475 u=root n=ansible | TASK [Check if tmuxinator plugin manager is installed.] *************************************************************************
+2021-07-27 00:20:01,509 p=12475 u=root n=ansible | ok: [test]
+2021-07-27 00:20:01,636 p=12475 u=root n=ansible | TASK [Create tmux plugin directory] *********************************************************************************************
+2021-07-27 00:20:01,958 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:20:02,083 p=12475 u=root n=ansible | TASK [Install tmux plugin manager] **********************************************************************************************
+2021-07-27 00:20:05,290 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:20:05,420 p=12475 u=root n=ansible | TASK [Check if reboot is required] **********************************************************************************************
+2021-07-27 00:20:05,779 p=12475 u=root n=ansible | ok: [test]
+2021-07-27 00:20:05,928 p=12475 u=root n=ansible | RUNNING HANDLER [Reload SSH] ****************************************************************************************************
+2021-07-27 00:20:08,028 p=12475 u=root n=ansible | changed: [test]
+2021-07-27 00:20:08,033 p=12475 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
+2021-07-27 00:20:08,035 p=12475 u=root n=ansible | test                       : ok=44   changed=36   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   

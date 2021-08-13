@@ -13,3 +13,5 @@
 proxmox_template_password: "{{ vault_proxmox_template_password }}"
 
 k3s_mysql_password: "{{ vault_k3s_mysql_password }}"
+
+dax_password: "{{ vault_dax_password }}"

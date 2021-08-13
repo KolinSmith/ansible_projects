@@ -1,0 +1,55 @@
+---
+    - name: Check that the /usr/local/bin/exa exists
+      stat:
+        path: /usr/local/bin/exa
+      register: stat_result
+
+      #got from: https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
+    - name: download latest exa binary into /tmp
+      shell: curl -s https://api.github.com/repos/ogham/exa/releases/latest | grep -E 'browser_download_url' | grep linux-x86_64-v | cut -d '"' -f 4 | wget -qi - -O /tmp/exa_binary.zip
+      when: not stat_result.stat.exists
+
+    - name: make folder to put unzipped exa binary in
+      file:
+        state: directory
+        path: /tmp/exa_binary
+      when: not stat_result.stat.exists
+
+    - name: unzip exa binary
+      unarchive:
+        src: /tmp/exa_binary.zip
+        dest: /tmp/exa_binary
+        remote_src: yes
+      when: not stat_result.stat.exists
+
+    - name: move exa binary into /usr/local/bin
+      file:
+        src: /tmp/exa_binary/bin/exa
+        dest: /usr/local/bin/exa
+        state: hard
+      when: not stat_result.stat.exists
+
+    - name: move exa man page into /usr/share/man/man1
+      file:
+        src: /tmp/exa_binary/man/{{ item }}
+        dest: /usr/share/man/man1/{{ item }}
+        state: hard
+      with_fileglob:
+        - exa*
+      when: not stat_result.stat.exists
+
+    - name: move exa shell completetion files into /usr/local/share/zsh/site-functions
+      file:
+        src: /tmp/exa_binary/completions/exa.zsh
+        dest: /usr/local/share/zsh/site-functions/exa.zsh
+        state: hard
+      when: not stat_result.stat.exists
+
+    - name: delete files from /tmp
+      file:
+        state: absent
+        path: /tmp/{{ item }}
+      with_items:
+        - exa_binary
+        - exa_binary.zip
+      when: not stat_result.stat.exists

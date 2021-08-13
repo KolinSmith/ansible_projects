@@ -66,16 +66,11 @@
 
       - name: import the install_bat role
         import_role:
-          name: /home/dax/code_base/ansible_projects/roles/install_bat
+          name: install_bat
 
-
-
-
-      # - name: install bat
-      #   include: install_bat.yml
-
-      - name: install exa
-        include: install_exa.yml
+      - name: import the install_exa role
+        import_role:
+          name: install_exa
 
       - name: set hostname
 #        hostname:
@@ -154,6 +149,7 @@
           home: /home/{{ user }}
           create_home: yes
           state: present
+          password: "{{ dax_password }}"
 
       - name: Add local user {{ user }} to sudo
         lineinfile:
@@ -284,6 +280,13 @@
           repo: 'https://github.com/tmux-plugins/tpm'
           dest: /home/{{ user }}/.tmux/plugins/tpm
         when: tpm_installed.stat.exists == False
+
+      # can't run since it's using the user
+      # - name: remove serveradmin user
+      #   user:
+      #     name: serveradmin
+      #     state: absent
+      #     remove: yes
 
       - name: Check if reboot is required
         stat:

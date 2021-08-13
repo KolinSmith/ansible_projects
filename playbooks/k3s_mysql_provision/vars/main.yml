@@ -6,6 +6,6 @@ mysql_databases:
 mysql_users:
   - name: k3s
     host: "%"
-    password: "{{ vault_k3s_mysql_password }}"
+    password: "{{ k3s_mysql_password }}"
     encrypted: no
     priv: "*.*:ALL"

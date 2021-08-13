@@ -1,9 +1,6 @@
 - hosts: provision_servers
   gather_facts: false
   become: true
-  vars_files:
-    # - /home/dax/code_base/ansible_projects/secrets.yml
-    - /home/dax/code_base/ansible_projects/vars.yml
   # vars:
   #   isPythonInstalled: "1"
   pre_tasks:
