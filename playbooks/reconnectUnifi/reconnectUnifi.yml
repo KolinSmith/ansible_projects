@@ -1,13 +1,14 @@
 ---
 - hosts: unifi_devices
-  remote_user: admin
+  # remote_user: admin
   gather_facts: no
+  become: no
 
   #vars:
     #- ssh_key: '~/.ssh/id_ecdsa.pub'
 
   tasks:
-    - name: "run the command"
+    - name: "run the adoption request command"
       #file:
         #path: /.ssh/authorized_keys
         #state: touch
@@ -15,8 +16,8 @@
       #args:
         #free_form: set-inform http://192.168.3.7:8282/inform
       raw: "mca-cli-op set-inform http://192.168.3.7:8282/inform"
-      args:
-           executable: /usr/bin/mca-cli-op
+      # args:
+      #      executable: /usr/bin/sh
       #    executable: /usr/bin/mca-cli-op
     #- name: "Copy SSH key to server"
       #lineinfile:

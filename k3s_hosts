@@ -1,5 +1,5 @@
 [server_nodes]
-k3s-master-1 ansible_host=192.168.9.124
+k3s-master-1 ansible_host=192.168.9.142
 
 [server_nodes:vars]
 ansible_connection=ssh
@@ -8,9 +8,9 @@ ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa
 ansible_python_interpreter=/usr/bin/python3
 
 [agent_nodes]
-k3s-worker-1 ansible_host=192.168.9.125
-k3s-worker-2 ansible_host=192.168.9.126
-k3s-worker-3 ansible_host=192.168.9.127
+k3s-worker-1 ansible_host=192.168.9.143
+k3s-worker-2 ansible_host=192.168.9.144
+k3s-worker-3 ansible_host=192.168.9.146
 
 [agent_nodes:vars]
 ansible_connection=ssh
@@ -21,3 +21,21 @@ ansible_python_interpreter=/usr/bin/python3
 [k3s_cluster:children]
 server_nodes
 agent_nodes
+
+[mysql_servers]
+k3s-mysql-1 ansible_host=192.168.9.147
+
+[mysql_servers:vars]
+ansible_connection=ssh
+ansible_user=dax
+ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa
+ansible_python_interpreter=/usr/bin/python3
+
+[load_balancers]
+k3s-haproxy-1 ansible_host=192.168.9.148
+
+[load_balancers:vars]
+ansible_connection=ssh
+ansible_user=dax
+ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa
+ansible_python_interpreter=/usr/bin/python3

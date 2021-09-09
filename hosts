@@ -1,6 +1,11 @@
 [unifi_devices]
-ubntSW ansible_host=192.168.3.32 ansible_ssh_private_key_file=/home/dax/.ssh/id_rsa
-ubntAP ansible_host=192.168.3.10 ansible_ssh_private_key_file=/home/dax/.ssh/id_rsa
+ubntSW ansible_host=192.168.3.32
+ubntAP ansible_host=192.168.3.10
+
+[unifi_devices:vars]
+ansible_connection=ssh
+ansible_user=admin
+ansible_ssh_private_key_file=/home/dax/.ssh/id_rsa
 
 [dns_servers]
 ds9 ansible_host=192.168.9.4 ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa ansible_user=dax
@@ -43,7 +48,7 @@ k3s-masters
 k3s-workers
 
 [provision_servers]
-test ansible_host=192.168.9.132
+test ansible_host=192.168.9.145
 
 [provision_servers:vars]
 

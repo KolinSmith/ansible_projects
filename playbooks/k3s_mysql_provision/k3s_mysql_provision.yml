@@ -1,5 +1,5 @@
 ---
-  - hosts: mysql_servers
+  - hosts: provision_servers
     become: yes
     roles:
       - role: ansible-role-mysql
