@@ -29,24 +29,6 @@ ansible_connection=ssh
 #ansible_user=serveradmin
 #ansible_become_pass=nilok3
 
-[k3s-masters]
-k3s-master-1 ansible_host=192.168.9.124 ansible_python_interpreter=/usr/bin/python2.7
-
-[k3s-workers]
-k3s-worker-1 ansible_host=192.168.9.125
-k3s-worker-2 ansible_host=192.168.9.126
-k3s-worker-3 ansible_host=192.168.9.127
-
-[k3s-workers:vars]
-ansible_connection=ssh
-ansible_user=dax
-ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa
-ansible_python_interpreter=/usr/bin/python2.7
-
-[k3s-cluster:children]
-k3s-masters
-k3s-workers
-
 [provision_servers]
 test ansible_host=192.168.9.145
 
@@ -65,12 +47,12 @@ ansible_become_password={{ proxmox_template_password }}
 # ansible_python_interpreter=/usr/bin/python3
 
 
-[mysql-servers]
+[mysql_servers]
 k3s-mysql-1 ansible_host=192.168.9.129
 k3s-mysql-2 ansible_host=192.168.9.133
 
 
-[mysql-servers:vars]
+[mysql_servers:vars]
 ansible_connection=ssh
 ansible_user=dax
 ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa

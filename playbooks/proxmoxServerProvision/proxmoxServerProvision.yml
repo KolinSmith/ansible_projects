@@ -293,13 +293,15 @@
           path: /var/run/reboot-required
         register: reboot_required
 
-        #should end the play if the remote server needs to reboot
-      - meta: end_play
+      - name: Reboot for any important updates & disconnect after 5 seconds if it ssh isn’t working
+        reboot:
+          connect_timeout: 5
         when: reboot_required.stat.exists
 
-      - name: Reboot for any important updates
-        reboot:
-        when: reboot_required.stat.exists
+      #   should end the play if the remote server needs to reboot
+      # - meta: end_play
+      #   when: reboot_required.stat.exists
+
 
 
     handlers:

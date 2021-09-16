@@ -3,13 +3,13 @@
     hosts: dns_servers
     gather_facts: yes
     #become_user: dax
+    become: yes
     tasks:
       - name: Update and upgrade apt packages
-        become: true
         apt:
           upgrade: yes
           update_cache: yes
           cache_valid_time: 86400 #One day
       - name: update pihole
-        become: true
-        shell: pihole -up
+        #I had to use this instead of the normal "pihole -up" because of the way I have DNS setup
+        shell: "PIHOLE_SKIP_OS_CHECK=true sudo -E pihole -up"
