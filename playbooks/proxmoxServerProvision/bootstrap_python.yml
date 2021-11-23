@@ -1,4 +1,4 @@
-- hosts: provision_servers
+- hosts: all
   gather_facts: false
   become: true
   # vars:
@@ -11,7 +11,15 @@
     # test if python binary exists on remote. if it doesn't echo 0 and registerisPythonInstalled
     - name: check if python2 is installed & install if neccessary
       #raw: test -e /usr/bin/python || (apt -y update && apt install -y python2-minimal)
-      raw: test -e /usr/bin/python || (apt -y install python2-minimal && ln -s /usr/bin/python2 /usr/bin/python)
+
+      #test if python binary exists on remote, if not then install it and make a symbolic link to those two places
+      raw: test -e /usr/bin/python || (apt -y install python2-minimal python-setuptools && ln -s /usr/bin/python2 /usr/bin/python)
+
+    - name: check if python3 is installed and try to install it. ignore error if you can't install
+      raw: test -e /usr/bin/python3 || (apt -y install python3 && ln -s /usr/bin/python3)
+      ignore_errors: True
+
+
       # register: isPythonInstalled
       # changed_when: false
     #

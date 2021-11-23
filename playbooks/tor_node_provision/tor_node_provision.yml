@@ -1,0 +1,61 @@
+---
+  - name: tor_node_provision
+    hosts: all
+    gather_facts: yes
+    #become_user: dax
+    become: yes
+    vars:
+      necessary_packages:
+        - tor
+        - tor-geoipdb
+      necessary_packages_rpi:
+        - tor
+        - tor-arm
+        - tor-geoipdb
+    tasks:
+
+############################################################################################
+
+      - name: Test for raspberry pi /proc/cpuinfo
+        command: grep -E "Raspberry Pi|BCM2708|BCM2709|BCM2835|BCM2836" /proc/cpuinfo
+        register: grep_cpuinfo_raspberrypi
+        failed_when: false
+        changed_when: false
+
+      - name: Test for raspberry pi /proc/device-tree/model
+        command: grep -E "Raspberry Pi" /proc/device-tree/model
+        register: grep_device_tree_model_raspberrypi
+        failed_when: false
+        changed_when: false
+
+      - name: Set raspberry_pi fact to true
+        set_fact:
+          raspberry_pi: true
+        when:
+          grep_cpuinfo_raspberrypi.rc == 0 or grep_device_tree_model_raspberrypi.rc == 0
+
+############################################################################################
+
+      - name: Update and upgrade apt packages
+        tags: always
+        apt:
+          upgrade: yes
+          update_cache: yes
+          cache_valid_time: "86400"
+          autoremove: yes
+          autoclean: yes
+        ignore_errors: yes
+
+      - name: add packages I want (non-rpi)
+        package:
+          name: "{{ necessary_packages }}"
+          state: latest
+        when:
+          - raspberry_pi|default(false) == false
+#REALLY NEED TO TEST WHAT VALUE IT"S USING FOR RASPBERRRY PI VARIABLE
+      - name: add packages I want (non-rpi)
+        package:
+          name: "{{ necessary_packages_rpi }}"
+          state: latest
+        when:
+          - raspberry_pi|default(false)

@@ -2,7 +2,7 @@
   - import_playbook: bootstrap_python.yml
 
   - name: proxmoxServerProvision
-    hosts: provision_servers
+    hosts: all
     gather_facts: yes
     become: yes
     vars_prompt:
@@ -34,6 +34,7 @@
           - neofetch
           - pigz
           - locate
+          - build-essential
         # allow_world_readable_tmpfiles: true
     #roles:
       #- { role: viasite-ansible.zsh, zsh_user: dax }
@@ -60,7 +61,7 @@
 
     tasks:
       - name: add packages I want
-        package:
+        apt:
           name: "{{ necessary_packages }}"
           state: latest
 

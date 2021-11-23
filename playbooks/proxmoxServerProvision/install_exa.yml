@@ -10,7 +10,8 @@
 
       #got from: https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
     - name: download latest exa binary into /tmp
-      shell: curl -s https://api.github.com/repos/ogham/exa/releases/latest | grep -E 'browser_download_url' | grep linux-x86_64-v | cut -d '"' -f 4 | wget -qi - -O /tmp/exa_binary.zip
+      shell: curl -s https://api.github.com/repos/ogham/exa/releases/latest | grep linux-x86_64-v | cut -d '"' -f 4 | wget -qi - -O /tmp/exa_binary.zip
+      #shell: curl -s https://api.github.com/repos/ogham/exa/releases/latest | grep -E 'browser_download_url' | grep linux-x86_64-v | cut -d '"' -f 4 | wget -qi - -O /tmp/exa_binary.zip
       when: not stat_result.stat.exists
 
     - name: make folder to put unzipped exa binary in
