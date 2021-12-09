@@ -1,8 +1,10 @@
 to run:
-sudo ansible-playbook -i <ip of new server with username and password setup>, /home/dax/code_base/ansible_projects/playbooks/proxmoxServerProvision/proxmoxServerProvision.yml --ask-pass --user serveradmin -K
+sudo ansible-playbook -i <ip of new server with username and password setup>, /home/dax/code_base/ansible_projects/playbooks/proxmoxServerProvision/proxmoxServerProvision.yml -e ansible_python_interpreter=/usr/bin/python --ask-pass --user serveradmin -K
 
 ***
 keep "," on the end of the ip for it to work
+
+might need to specify the python interpreter either python, python2.7, python3, etc
 
 keep in mind that you need to change the hosts in the main file and bootstrap_python file to target "all" if you wanna target not in the hosts file
 ***

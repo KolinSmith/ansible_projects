@@ -9,49 +9,77 @@ fi
 PWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # update software
-echo "== Updating software"
+echo "===== Updating software"
 apt update -y
 apt upgrade -y
 apt dist-upgrade -y
 
 
 # add official Tor repository
-if ! grep -q "https://deb.torproject.org/torproject.org" /etc/apt/sources.list; then
-    echo "== Adding the official Tor repository"
-    echo "deb https://deb.torproject.org/torproject.org `lsb_release -cs` main" >> /etc/apt/sources.list
-    gpg --keyserver keys.gnupg.net --recv A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
-    gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | apt-key add -
-    apt-get update
-fi
+# apt-get install -y deb.torproject.org-keyring
+# if ! grep -q "https://deb.torproject.org/torproject.org" /etc/apt/sources.list; then
+#     echo "===== Adding the official Tor repository"
+#     echo "deb https://deb.torproject.org/torproject.org/dists/ `lsb_release -cs` main" >> /etc/apt/sources.list
+#     gpg --keyserver keys.gnupg.net --recv A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
+#     gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | apt-key add -
+#     apt-get update
+# fi
+
+#another way to add the key
+#wget -q https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc -O- | sudo apt-key add -
 
 # install tor and related packages
-echo "== Installing Tor and related packages"
-apt-get install -y deb.torproject.org-keyring tor tor-arm tor-geoipdb
+echo "===== Installing Tor and related packages"
+apt-get install -y tor tor-arm tor-geoipdb bc
 service tor stop
 
 #prompt user for tor node name
-read -p "Enter in a name for the tor node (this name will be publicly visible): " tor_node_name
+read -p "===== Enter in a name for the tor node (this name will be publicly visible): " tor_node_name
 
-#test internet speed and set variables to use in torrc
-mapfile -t speeds < <(
-    curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py |
-    python - |
-    grep -oP '(Up|Down)load: \K[\d.]+'
-)
-upload_speed=$((speeds[1] / 12))
-download_speed=$((speeds[1] / 10))
+# echo 'Before speed test'
+# #test internet speed and set variables to use in torrc
+# mapfile -t speeds < <(
+#     curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py |
+#     python - |
+#     grep -oP '(Up|Down)load: \K[\d.]+'
+# )
+# echo 'After speed test'
+# upload_speed_max=${speed[1]}
+# echo $upload_speed_max
+# echo 'HEYTHERE'
+# upload_speed=${speeds[1] / 12}
+# download_speed=${speeds[1] / 10}
+
+#run speedtest and pull the speed values from it to use in torrc
+echo "===== Beginning speedtest"
+result=$(curl https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -)
+if [[ $result =~ 'Download: '([[:digit:].]+)' Mbit' ]]; then
+    actual_download_speed=${BASH_REMATCH[1]}
+fi
+if [[ $result =~ 'Upload: '([[:digit:].]+)' Mbit' ]]; then
+    actual_upload_speed=${BASH_REMATCH[1]}
+fi
+
+echo "== Setting the variables"
+upload_speed=$(echo "scale=0;$actual_upload_speed/10" | bc)
+if
+   [[ "$upload_speed" == 0 ]]; then
+     upload_speed=1
+fi
+download_speed=$(( upload_speed + 1 ))
 
 #prompt user for tor node ports
-read -p "ControlPort Number [9051]: " control_port
+read -p "===== ControlPort Number [9051]: " control_port
 control_port=${control_port:-9051}
 
-read -p "ORPort Number [8443]: " orport
+read -p "===== ORPort Number [8443]: " orport
 orport=${orport:-8443}
 
-read -p "DirPort Number [8444]: " dirport
+read -p "===== DirPort Number [8444]: " dirport
 dirport=${dirport:-8444}
 
 #create torrc file
+echo '===== Creating torrc file'
 cat <<EOF >/etc/tor/torrc
 ## Configuration file for a typical Tor user
 ## Last updated 28 February 2019 for Tor 0.3.5.1-alpha.
@@ -307,19 +335,14 @@ ExitPolicy reject *:* # no exits allowed
 EOF
 ############################################################################################################
 
-
-
-# configure tor
-cp $PWD/etc/tor/torrc /etc/tor/torrc
-
 # configure automatic updates
-echo "== Configuring unattended upgrades"
+echo "===== Configuring unattended upgrades"
 apt install -y unattended-upgrades apt-listchanges
-cp $PWD/etc/apt/apt.conf.d/20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
+# cp $PWD/etc/apt/apt.conf.d/20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
 
 # attempt to forward tor ports on user's router
 # decent explanation of upnpc: https://po-ru.com/2013/02/17/using-upnp-igd-for-simpler-port-forwarding
-echo "== Configuring port forwarding"
+echo "===== Configuring port forwarding"
 apt install -y miniupnpc
 cat <<EOF >/usr/local/bin/update-upnp-forwards
 #!/bin/bash
@@ -329,7 +352,11 @@ upnpc -u $root_description_url -e 'Forward DirPort' -r $dirport TCP >/dev/null
 EOF
 chmod a+x /usr/local/bin/update-upnp-forwards
 
-cat <<EOF /etc/systemd/system/upnp-forward-ports.service
+#####################
+#add in part where if it fails to port forward to tell the user to do it themselves
+#####################
+
+cat <<EOF >/etc/systemd/system/upnp-forward-ports.service
 [Unit]
 Description=Update UPnP forward leases
 
@@ -341,7 +368,7 @@ ExecStart=/usr/local/bin/update-upnp-forwards
 WantedBy=multi-user.target
 EOF
 
-cat <<EOF /etc/systemd/system/upnp-forward-ports.timer
+cat <<EOF >/etc/systemd/system/upnp-forward-ports.timer
 [Unit]
 Description=Update UPnP forward leases every 30 minutes
 

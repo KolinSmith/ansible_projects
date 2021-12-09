@@ -2,7 +2,7 @@
   - import_playbook: bootstrap_python.yml
 
   - name: proxmoxServerProvision
-    hosts: all
+    hosts: provision_servers
     gather_facts: yes
     become: yes
     vars_prompt:
@@ -11,6 +11,7 @@
       private: no
     vars:
       - user: 'dax'
+      - extra_path: '/usr/local/bin'
       - dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
         necessary_packages:
           - wget
@@ -34,18 +35,19 @@
           - neofetch
           - pigz
           - locate
-          - build-essential
+          - vim
+          - atop
         # allow_world_readable_tmpfiles: true
     #roles:
       #- { role: viasite-ansible.zsh, zsh_user: dax }
 
     pre_tasks:
-      - name: update repo cache (CentOS)
-        tags: always
-        dnf:
-          update_cache: yes
-        changed_when: false
-        when: ansible_distribution == "CentOS"
+      # - name: update repo cache (CentOS)
+      #   tags: always
+      #   dnf:
+      #     update_cache: yes
+      #   changed_when: false
+      #   when: ansible_distribution == "CentOS"
 
       - name: update repo cache (Ubuntu)
         tags: always
@@ -56,7 +58,29 @@
           autoremove: yes
           autoclean: yes
         ignore_errors: yes
-        when: ansible_distribution == "Ubuntu"
+        # when: ansible_distribution == "Ubuntu"
+
+############################################################################################
+
+      - name: Test for raspberry pi /proc/cpuinfo
+        command: grep -E "Raspberry Pi|BCM2708|BCM2709|BCM2835|BCM2836" /proc/cpuinfo
+        register: grep_cpuinfo_raspberrypi
+        failed_when: false
+        changed_when: false
+
+      - name: Test for raspberry pi /proc/device-tree/model
+        command: grep -E "Raspberry Pi" /proc/device-tree/model
+        register: grep_device_tree_model_raspberrypi
+        failed_when: false
+        changed_when: false
+
+      - name: Set raspberry_pi fact to true
+        set_fact:
+          raspberry_pi: true
+        when:
+          grep_cpuinfo_raspberrypi.rc == 0 or grep_device_tree_model_raspberrypi.rc == 0
+
+############################################################################################
 
 
     tasks:
@@ -64,6 +88,18 @@
         apt:
           name: "{{ necessary_packages }}"
           state: latest
+
+      - name: update PATH variable
+        lineinfile:
+          dest: /etc/environment
+          state: present
+          backrefs: yes
+          regexp: 'PATH=(["]*)((?!.*?{{extra_path}}).*?)(["]*)$'
+          line: 'PATH=\1\2:{{extra_path}}\3'
+
+        # copy:
+        #   dest: /etc/profile.d/custom-path.sh
+        #   content: 'PATH=/usr/local/bin:$PATH'
 
       - name: import the install_bat role
         import_role:
@@ -78,11 +114,14 @@
 #          name: "{{ hostname }}"
         command: hostnamectl set-hostname {{ hostname }}
         become: true
+        # when:
+        #   - raspberry_pi|default(false) == false #when not a raspberry pi
+
 
       - name: change /etc/hosts file to correct hostname
         replace:
           path: /etc/hosts
-          regexp: 'template'
+          regexp: "{{ ansible_nodename }}"
           replace: '{{ hostname }}'
 
       - name: remove files that came with the template and need to be reset
@@ -98,6 +137,9 @@
         with_items:
           - dbus-uuidgen --ensure=/etc/machine-id
           - dbus-uuidgen --ensure
+        # when:
+        #   - raspberry_pi|default(false) == false #when not a raspberry pi
+
 
       #regenerating the keys requires first deleting the ssh_host_* files then running the reconfigure option.
       #they must run in the same task one after the other for it to work.

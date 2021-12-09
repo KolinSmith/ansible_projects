@@ -12,8 +12,8 @@ ds9 ansible_host=192.168.9.4 ansible_ssh_private_key_file=/home/dax/.ssh/id_ecds
 defiant ansible_host=192.168.9.3 ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa ansible_user=dax
 
 [load_balancers]
-stargazer ansible_host=192.168.9.6
-shenzhou ansible_host=192.168.9.5
+stargazer ansible_host=192.168.9.6 ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa ansible_user=dax
+shenzhou ansible_host=192.168.9.5 ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa ansible_user=dax
 
 [all_raspberry_pis:children]
 dns_servers
@@ -30,15 +30,19 @@ ansible_connection=ssh
 #ansible_become_pass=nilok3
 
 [provision_servers]
-test ansible_host=192.168.9.145
+test ansible_host=192.168.9.156
 
 [provision_servers:vars]
 
 #pre provisioning
-ansible_user=serveradmin
-ansible_password={{ proxmox_template_password }}
+ansible_connection=ssh
+ansible_ssh_pass=raspberry
+ansible_user=pi
+ansible_password=raspberry # {{ proxmox_template_password }}
 ansible_become=yes
-ansible_become_password={{ proxmox_template_password }}
+ansible_become_method=sudo
+ansible_become_password=raspberry # {{ proxmox_template_password }}
+ansible_python_interpreter=/usr/bin/python
 
 #post provisioning
 # ansible_connection=ssh

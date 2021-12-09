@@ -1,4 +1,27 @@
 ---
+
+  ############################################################################################
+
+    - name: Test for raspberry pi /proc/cpuinfo
+      command: grep -E "Raspberry Pi|BCM2708|BCM2709|BCM2835|BCM2836" /proc/cpuinfo
+      register: grep_cpuinfo_raspberrypi
+      failed_when: false
+      changed_when: false
+
+    - name: Test for raspberry pi /proc/device-tree/model
+      command: grep -E "Raspberry Pi" /proc/device-tree/model
+      register: grep_device_tree_model_raspberrypi
+      failed_when: false
+      changed_when: false
+
+    - name: Set raspberry_pi fact to true
+      set_fact:
+        raspberry_pi: true
+      when:
+        grep_cpuinfo_raspberrypi.rc == 0 or grep_device_tree_model_raspberrypi.rc == 0
+
+  ############################################################################################
+
     - name: Check that the /usr/local/bin/bat exists
       stat:
         path: /usr/local/bin/bat
@@ -6,7 +29,15 @@
 
     - name: download latest bat binary into /tmp
       shell: curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep -E 'browser_download_url' | grep 'x86_64-unknown-linux-gnu' | cut -d '"' -f 4 | wget -qi - -O /tmp/bat_binary.zip
-      when: not stat_result.stat.exists
+      when:
+        - not stat_result.stat.exists
+        - raspberry_pi|default(false) == false
+
+    - name: download latest bat binary into /tmp
+      shell: curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep -E 'browser_download_url' | grep 'arm-unknown-linux-gnueabihf' | cut -d '"' -f 4 | wget -qi - -O /tmp/bat_binary.zip
+      when:
+        - not stat_result.stat.exists
+        - raspberry_pi|default(false)
 
     - name: make folder to put unzipped bat binary in
       file:
