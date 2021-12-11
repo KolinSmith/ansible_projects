@@ -30,11 +30,13 @@ apt dist-upgrade -y
 
 # install tor and related packages
 echo "===== Installing Tor and related packages"
+sudo apt-key adv --recv-keys --keyserver keys.gnupg.net 74A941BA219EC810
 apt-get install -y tor tor-arm tor-geoipdb bc
 service tor stop
 
 #prompt user for tor node name
 read -p "===== Enter in a name for the tor node (this name will be publicly visible): " tor_node_name
+tor_node_name=${tor_node_name:-"ididntchangethename"}
 
 # echo 'Before speed test'
 # #test internet speed and set variables to use in torrc
@@ -61,7 +63,7 @@ if [[ $result =~ 'Upload: '([[:digit:].]+)' Mbit' ]]; then
 fi
 
 echo "== Setting the variables"
-upload_speed=$(echo "scale=0;$actual_upload_speed/10" | bc)
+#upload_speed=$(echo "scale=0;$actual_upload_speed/10" | bc)
 if
    [[ "$upload_speed" == 0 ]]; then
      upload_speed=1
@@ -352,9 +354,13 @@ upnpc -u $root_description_url -e 'Forward DirPort' -r $dirport TCP >/dev/null
 EOF
 chmod a+x /usr/local/bin/update-upnp-forwards
 
-#####################
-#add in part where if it fails to port forward to tell the user to do it themselves
-#####################
+local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
+
+echo "===== You should make ensure the following ports are forwarded from your router:"
+echo "===== Control Port: " $control_port
+echo "===== ORPort: " $orport
+echo "===== DirPort: " $dirport
+echo "===== IP address to forward to: " $local_ip
 
 cat <<EOF >/etc/systemd/system/upnp-forward-ports.service
 [Unit]
@@ -385,13 +391,6 @@ systemctl daemon-reload
 systemctl enable upnp-forward-ports.timer
 
 # final instructions
-echo "== Change pi user password"
-echo "  - Make sure you have changed the default pi user password"
-echo ""
-echo "== Edit /etc/tor/torrc"
-echo "  - Set Address, Nickname, Contact Info, and MyFamily for your Tor relay"
-echo "  - Check your Bandwidth numbers: you probably want half of your residential upload speed"
-echo "  - Optional: limit the amount of data transferred by your Tor relay (to avoid additional hosting costs)"
-echo "    - Uncomment the lines beginning with '#AccountingMax' and '#AccountingStart'"
-echo ""
-echo "== REBOOT THIS SERVER"
+echo "========================================="
+echo "========== REBOOT THIS SERVER============"
+echo "========================================="
