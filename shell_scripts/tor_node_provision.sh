@@ -13,6 +13,7 @@ echo "===== Updating software"
 apt update -y
 apt upgrade -y
 apt dist-upgrade -y
+apt autoclean
 
 ########################################
 # left this out since the repository doesn't have an arm image (need to test if arm)
@@ -54,6 +55,8 @@ tor_node_name=${tor_node_name:-"ididntchangethename"}
 # upload_speed=${speeds[1] / 12}
 # download_speed=${speeds[1] / 10}
 ########################################
+
+#check for python before running
 
 #run speedtest and pull the speed values from it to use in torrc
 echo "===== Beginning speedtest"
@@ -392,19 +395,16 @@ WantedBy=timers.target
 EOF
 
 shopt -s expand_aliases
-#check what shell environment they are using (could be $0 or $SHELL)
-case $0 in
-*/zsh)
-   echo alias status='sudo -u debian-tor nyx' > ~/.zshrc
-   source ~/.zshrc
-   ;;
-*/bash)
-   echo alias status='sudo -u debian-tor nyx' > ~/.bashrc
-   source ~/.bashrc
-   ;;
-*)
-   echo "=====Could not detect shell..."
-esac
+#check what shell environment they are using
+if [ ! -z ${ZSH_VERSION+x} ]; then
+  echo "alias status='sudo -u debian-tor nyx'" > ~/.zshrc
+  source ~/.zshrc
+elif [ ! -z ${BASH_VERSION+x} ]; then
+  echo "alias status='sudo -u debian-tor nyx'" > ~/.bashrc
+  source ~/.bashrc
+else
+  echo "===== Could not detect shell..."
+fi
 
 
 systemctl daemon-reload
