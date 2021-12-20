@@ -14,7 +14,9 @@ apt update -y
 apt upgrade -y
 apt dist-upgrade -y
 
-
+########################################
+# left this out since the repository doesn't have an arm image (need to test if arm)
+########################################
 # add official Tor repository
 # apt-get install -y deb.torproject.org-keyring
 # if ! grep -q "https://deb.torproject.org/torproject.org" /etc/apt/sources.list; then
@@ -24,33 +26,34 @@ apt dist-upgrade -y
 #     gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | apt-key add -
 #     apt-get update
 # fi
+########################################
 
 #another way to add the key
 #wget -q https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc -O- | sudo apt-key add -
 
 # install tor and related packages
 echo "===== Installing Tor and related packages"
-sudo apt-key adv --recv-keys --keyserver keys.gnupg.net 74A941BA219EC810
-apt-get install -y tor tor-arm tor-geoipdb bc
+#apt-key adv --recv-keys --keyserver keys.gnupg.net 74A941BA219EC810
+curl -sSL https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --import -
+apt install -y tor tor-arm tor-geoipdb bc
 service tor stop
 
 #prompt user for tor node name
 read -p "===== Enter in a name for the tor node (this name will be publicly visible): " tor_node_name
 tor_node_name=${tor_node_name:-"ididntchangethename"}
 
-# echo 'Before speed test'
-# #test internet speed and set variables to use in torrc
+########################################
+# another way I tried initially
+########################################
 # mapfile -t speeds < <(
 #     curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py |
 #     python - |
 #     grep -oP '(Up|Down)load: \K[\d.]+'
 # )
-# echo 'After speed test'
 # upload_speed_max=${speed[1]}
-# echo $upload_speed_max
-# echo 'HEYTHERE'
 # upload_speed=${speeds[1] / 12}
 # download_speed=${speeds[1] / 10}
+########################################
 
 #run speedtest and pull the speed values from it to use in torrc
 echo "===== Beginning speedtest"
@@ -62,8 +65,8 @@ if [[ $result =~ 'Upload: '([[:digit:].]+)' Mbit' ]]; then
     actual_upload_speed=${BASH_REMATCH[1]}
 fi
 
-echo "== Setting the variables"
-#upload_speed=$(echo "scale=0;$actual_upload_speed/10" | bc)
+echo "===== Setting the variables"
+upload_speed=$(echo "scale=0;$actual_upload_speed/10" | bc)
 if
    [[ "$upload_speed" == 0 ]]; then
      upload_speed=1
@@ -349,13 +352,14 @@ apt install -y miniupnpc
 cat <<EOF >/usr/local/bin/update-upnp-forwards
 #!/bin/bash
 root_description_url=$(upnpc -l | grep desc: | cut -c8-)
-upnpc -u $root_description_url -e 'Forward OrPort'  -r $orport TCP  >/dev/null
+upnpc -u $root_description_url -e 'Forward OrPort'  -r $orport TCP >/dev/null
 upnpc -u $root_description_url -e 'Forward DirPort' -r $dirport TCP >/dev/null
 EOF
 chmod a+x /usr/local/bin/update-upnp-forwards
 
 local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
 
+echo "========================================="
 echo "===== You should make ensure the following ports are forwarded from your router:"
 echo "===== Control Port: " $control_port
 echo "===== ORPort: " $orport
@@ -387,10 +391,29 @@ OnUnitActiveSec=30min
 WantedBy=timers.target
 EOF
 
+shopt -s expand_aliases
+#check what shell environment they are using (could be $0 or $SHELL)
+case $0 in
+*/zsh)
+   echo alias status='sudo -u debian-tor nyx' > ~/.zshrc
+   source ~/.zshrc
+   ;;
+*/bash)
+   echo alias status='sudo -u debian-tor nyx' > ~/.bashrc
+   source ~/.bashrc
+   ;;
+*)
+   echo "=====Could not detect shell..."
+esac
+
+
 systemctl daemon-reload
 systemctl enable upnp-forward-ports.timer
+systemctl start tor
 
 # final instructions
+echo "========================================="
+echo "===== Run 'status' to get tor node stats"
 echo "========================================="
 echo "========== REBOOT THIS SERVER============"
 echo "========================================="
