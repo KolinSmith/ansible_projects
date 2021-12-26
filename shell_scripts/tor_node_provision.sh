@@ -13,7 +13,8 @@ echo "===== Updating software"
 apt update -y
 apt upgrade -y
 apt dist-upgrade -y
-apt autoclean
+apt autoclean -y
+apt autoremove -y
 
 ########################################
 # left this out since the repository doesn't have an arm image (need to test if arm)

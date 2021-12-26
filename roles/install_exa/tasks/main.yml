@@ -27,31 +27,51 @@
         path: /usr/local/bin/exa
       register: stat_result
 
+    # - debug: msg="{{ hostvars[inventory_hostname]['ansible_machine'] }}"
+
+    #unfortunately kills this play and the main playbook so effectivly stops everyting
+    # - block:
+    #     - name: "end play if not supported architecture"
+    #       debug:
+    #         msg: "installation only works on x86_64 & armv7l"
+    #
+    #     - meta: end_play
+    #   when: ansible_machine != "x86_64" or ansible_machine != "armv7l"
+
       #got from: https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
+      #for non-arm
     - name: download latest exa binary into /tmp
       shell: curl -s https://api.github.com/repos/ogham/exa/releases/latest | grep -E 'browser_download_url' | grep linux-x86_64-v | cut -d '"' -f 4 | wget -qi - -O /tmp/exa_binary.zip
       when:
         - not stat_result.stat.exists
         - raspberry_pi|default(false) == false
+        - ansible_machine == "x86_64"
 
+      #for arm (will only work on armv7 which the rpi zeroes don't have)
+      #need to check if it's armv7 before running
     - name: download latest exa binary into /tmp
       shell: curl -s https://api.github.com/repos/ogham/exa/releases/latest | grep -E 'browser_download_url' | grep linux-armv7-v | cut -d '"' -f 4 | wget -qi - -O /tmp/exa_binary.zip
       when:
         - not stat_result.stat.exists
-        - raspberry_pi|default(false)
+        - raspberry_pi|default(false) == true
+        - ansible_machine == "armv7l"
 
     - name: make folder to put unzipped exa binary in
       file:
         state: directory
         path: /tmp/exa_binary
-      when: not stat_result.stat.exists
+      when:
+        - not stat_result.stat.exists
+        - ansible_machine == "x86_64" or ansible_machine == "armv7l"
 
     - name: unzip exa binary
       unarchive:
         src: /tmp/exa_binary.zip
         dest: /tmp/exa_binary
         remote_src: yes
-      when: not stat_result.stat.exists
+      when:
+        - not stat_result.stat.exists
+        - ansible_machine == "x86_64" or ansible_machine == "armv7l"
 
     - name: move exa binary into /usr/local/bin
       copy:
@@ -63,7 +83,9 @@
       #   src: /tmp/exa_binary/bin/exa
       #   dest: /usr/local/bin/exa
       #   state: hard
-      when: not stat_result.stat.exists
+      when:
+        - not stat_result.stat.exists
+        - ansible_machine == "x86_64" or ansible_machine == "armv7l"
 
     - name: move exa man page into /usr/share/man/man1
       file:
@@ -72,7 +94,9 @@
         state: hard
       with_fileglob:
         - exa*
-      when: not stat_result.stat.exists
+      when:
+        - not stat_result.stat.exists
+        - ansible_machine == "x86_64" or ansible_machine == "armv7l"
 
     - name: move exa shell completetion files into /usr/local/share/zsh/site-functions
       copy:
@@ -83,7 +107,9 @@
       #   src: /tmp/exa_binary/completions/exa.zsh
       #   dest: /usr/local/share/zsh/site-functions/exa.zsh
       #   state: hard
-      when: not stat_result.stat.exists
+      when:
+        - not stat_result.stat.exists
+        - ansible_machine == "x86_64" or ansible_machine == "armv7l"
 
     - name: delete files from /tmp
       file:
@@ -92,4 +118,6 @@
       with_items:
         - exa_binary
         - exa_binary.zip
-      when: not stat_result.stat.exists
+      when:
+        - not stat_result.stat.exists
+        - ansible_machine == "x86_64" or ansible_machine == "armv7l"

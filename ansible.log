@@ -13749,3 +13749,362 @@ change.
 2021-11-26 01:26:25,787 p=11886 u=root n=ansible | fatal: [test]: UNREACHABLE! => {"changed": false, "msg": "Invalid/incorrect password: Warning: Permanently added '192.168.9.156' (ECDSA) to the list of known hosts.\r\nno such identity: /home/dax/code_base/ansible_projects/private/id_ecdsa: No such file or directory\r\nPermission denied, please try again.", "unreachable": true}
 2021-11-26 01:26:25,793 p=11886 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
 2021-11-26 01:26:25,801 p=11886 u=root n=ansible | test                       : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+2021-12-24 14:39:09,021 p=15875 u=root n=ansible | PLAY [provision_servers] ********************************************************************************************************
+2021-12-24 14:39:09,236 p=15875 u=root n=ansible | TASK [Generate locals] **********************************************************************************************************
+2021-12-24 14:40:06,440 p=15875 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:40:06,461 p=15875 u=root n=ansible | TASK [check if python2 is installed & install if neccessary] ********************************************************************
+2021-12-24 14:40:06,762 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:40:06,778 p=15875 u=root n=ansible | TASK [check if python3 is installed and try to install it. ignore error if you can't install] ***********************************
+2021-12-24 14:40:07,080 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:40:07,098 p=15875 u=root n=ansible | PLAY [proxmoxServerProvision] ***************************************************************************************************
+2021-12-24 14:40:07,146 p=15875 u=root n=ansible | TASK [Gathering Facts] **********************************************************************************************************
+2021-12-24 14:40:17,929 p=15875 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:40:18,021 p=15875 u=root n=ansible | TASK [update repo cache (Ubuntu)] ***********************************************************************************************
+2021-12-24 14:40:34,069 p=15875 u=root n=ansible | [WARNING]: The value True (type bool) in a string field was converted to u'True' (type string). If this does not look like what
+you expect, quote the entire value to ensure it does not change.
+
+2021-12-24 14:40:34,071 p=15875 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:40:34,210 p=15875 u=root n=ansible | TASK [Test for raspberry pi /proc/cpuinfo] **************************************************************************************
+2021-12-24 14:40:37,411 p=15875 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:40:37,535 p=15875 u=root n=ansible | TASK [Test for raspberry pi /proc/device-tree/model] ****************************************************************************
+2021-12-24 14:40:40,065 p=15875 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:40:40,189 p=15875 u=root n=ansible | TASK [Set raspberry_pi fact to true] ********************************************************************************************
+2021-12-24 14:40:40,310 p=15875 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:40:40,407 p=15875 u=root n=ansible | TASK [add packages I want] ******************************************************************************************************
+2021-12-24 14:40:51,736 p=15875 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:40:51,860 p=15875 u=root n=ansible | TASK [update PATH variable] *****************************************************************************************************
+2021-12-24 14:40:55,125 p=15875 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:40:55,228 p=15875 u=root n=ansible | TASK [set hostname] *************************************************************************************************************
+2021-12-24 14:40:58,818 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:40:58,916 p=15875 u=root n=ansible | TASK [change /etc/hosts file to correct hostname] *******************************************************************************
+2021-12-24 14:41:02,204 p=15875 u=root n=ansible | [WARNING]: Module remote_tmp /root/.ansible/tmp did not exist and was created with a mode of 0700, this may cause issues when
+running as another user. To avoid this, create the remote_tmp dir with the correct permissions manually
+
+2021-12-24 14:41:02,207 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:41:02,331 p=15875 u=root n=ansible | TASK [remove files that came with the template and need to be reset] ************************************************************
+2021-12-24 14:41:05,698 p=15875 u=root n=ansible | changed: [stargazer] => (item=/etc/machine-id)
+2021-12-24 14:41:08,341 p=15875 u=root n=ansible | changed: [stargazer] => (item=/var/lib/dbus/machine-id)
+2021-12-24 14:41:08,452 p=15875 u=root n=ansible | TASK [reset the machine ID] *****************************************************************************************************
+2021-12-24 14:41:11,059 p=15875 u=root n=ansible | changed: [stargazer] => (item=dbus-uuidgen --ensure=/etc/machine-id)
+2021-12-24 14:41:13,534 p=15875 u=root n=ansible | changed: [stargazer] => (item=dbus-uuidgen --ensure)
+2021-12-24 14:41:13,641 p=15875 u=root n=ansible | TASK [regenerate ssh keys] ******************************************************************************************************
+2021-12-24 14:41:16,298 p=15875 u=root n=ansible | changed: [stargazer] => (item=rm /etc/ssh/ssh_host_*)
+2021-12-24 14:42:02,029 p=15875 u=root n=ansible | changed: [stargazer] => (item=dpkg-reconfigure openssh-server)
+2021-12-24 14:42:02,042 p=15875 u=root n=ansible | [WARNING]: Consider using the file module with state=absent rather than running 'rm'.  If you need to use command because file
+is insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in ansible.cfg to get rid of this
+message.
+
+2021-12-24 14:42:02,136 p=15875 u=root n=ansible | TASK [add admin group] **********************************************************************************************************
+2021-12-24 14:42:05,598 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:42:05,728 p=15875 u=root n=ansible | TASK [add dax group] ************************************************************************************************************
+2021-12-24 14:42:08,512 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:42:08,614 p=15875 u=root n=ansible | TASK [add local user dax] *******************************************************************************************************
+2021-12-24 14:42:13,075 p=15875 u=root n=ansible | [WARNING]: The input password appears not to have been hashed. The 'password' argument must be encrypted for this module to work
+properly.
+
+2021-12-24 14:42:13,076 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:42:13,205 p=15875 u=root n=ansible | TASK [Add local user dax to sudo] ***********************************************************************************************
+2021-12-24 14:42:15,871 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:42:15,968 p=15875 u=root n=ansible | TASK [add SSH public key for local user] ****************************************************************************************
+2021-12-24 14:42:20,228 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:42:20,351 p=15875 u=root n=ansible | TASK [add sshd config file] *****************************************************************************************************
+2021-12-24 14:42:28,343 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:42:28,469 p=15875 u=root n=ansible | TASK [create ~/.zshrc file for local user] **************************************************************************************
+2021-12-24 14:42:31,212 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:42:31,323 p=15875 u=root n=ansible | TASK [Check for Oh My ZSH Installation] *****************************************************************************************
+2021-12-24 14:42:33,808 p=15875 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:42:33,902 p=15875 u=root n=ansible | TASK [Install Oh My ZSH] ********************************************************************************************************
+2021-12-24 14:43:05,974 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:43:06,079 p=15875 u=root n=ansible | TASK [Checkout powerlevel10k repo and use refspec to fetch all pull requests] ***************************************************
+2021-12-24 14:44:49,965 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:44:50,061 p=15875 u=root n=ansible | TASK [Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests] *********************************************
+2021-12-24 14:45:02,203 p=15875 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:45:02,324 p=15875 u=root n=ansible | TASK [clone dotfiles repository to localhost] ***********************************************************************************
+2021-12-24 14:45:08,186 p=15875 u=root n=ansible | fatal: [stargazer -> localhost]: FAILED! => {"changed": false, "cmd": ["/usr/bin/git", "fetch", "--tags", "origin"], "msg": "Failed to download remote objects and refs:  ssh: Could not resolve hostname github.com: Temporary failure in name resolution\r\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.\n"}
+2021-12-24 14:45:08,188 p=15875 u=root n=ansible | NO MORE HOSTS LEFT **************************************************************************************************************
+2021-12-24 14:45:08,190 p=15875 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
+2021-12-24 14:45:08,191 p=15875 u=root n=ansible | stargazer                  : ok=26   changed=17   unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2021-12-24 14:45:25,357 p=16537 u=root n=ansible | PLAY [provision_servers] ********************************************************************************************************
+2021-12-24 14:45:25,721 p=16537 u=root n=ansible | TASK [Generate locals] **********************************************************************************************************
+2021-12-24 14:46:23,680 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:46:23,822 p=16537 u=root n=ansible | TASK [check if python2 is installed & install if neccessary] ********************************************************************
+2021-12-24 14:46:24,140 p=16537 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:46:24,307 p=16537 u=root n=ansible | TASK [check if python3 is installed and try to install it. ignore error if you can't install] ***********************************
+2021-12-24 14:46:24,632 p=16537 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:46:24,648 p=16537 u=root n=ansible | PLAY [proxmoxServerProvision] ***************************************************************************************************
+2021-12-24 14:46:24,800 p=16537 u=root n=ansible | TASK [update repo cache (Ubuntu)] ***********************************************************************************************
+2021-12-24 14:46:40,627 p=16537 u=root n=ansible | [WARNING]: The value True (type bool) in a string field was converted to u'True' (type string). If this does not look like what
+you expect, quote the entire value to ensure it does not change.
+
+2021-12-24 14:46:40,630 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:46:40,779 p=16537 u=root n=ansible | TASK [Test for raspberry pi /proc/cpuinfo] **************************************************************************************
+2021-12-24 14:46:43,911 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:46:44,048 p=16537 u=root n=ansible | TASK [Test for raspberry pi /proc/device-tree/model] ****************************************************************************
+2021-12-24 14:46:46,630 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:46:46,767 p=16537 u=root n=ansible | TASK [Set raspberry_pi fact to true] ********************************************************************************************
+2021-12-24 14:46:46,890 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:46:47,032 p=16537 u=root n=ansible | TASK [add packages I want] ******************************************************************************************************
+2021-12-24 14:46:58,355 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:46:58,509 p=16537 u=root n=ansible | TASK [update PATH variable] *****************************************************************************************************
+2021-12-24 14:47:01,736 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:47:01,874 p=16537 u=root n=ansible | TASK [set hostname] *************************************************************************************************************
+2021-12-24 14:47:05,446 p=16537 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:47:05,585 p=16537 u=root n=ansible | TASK [change /etc/hosts file to correct hostname] *******************************************************************************
+2021-12-24 14:47:08,937 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:47:09,122 p=16537 u=root n=ansible | TASK [remove files that came with the template and need to be reset] ************************************************************
+2021-12-24 14:47:12,531 p=16537 u=root n=ansible | changed: [stargazer] => (item=/etc/machine-id)
+2021-12-24 14:47:15,098 p=16537 u=root n=ansible | changed: [stargazer] => (item=/var/lib/dbus/machine-id)
+2021-12-24 14:47:15,279 p=16537 u=root n=ansible | TASK [reset the machine ID] *****************************************************************************************************
+2021-12-24 14:47:17,891 p=16537 u=root n=ansible | changed: [stargazer] => (item=dbus-uuidgen --ensure=/etc/machine-id)
+2021-12-24 14:47:20,358 p=16537 u=root n=ansible | changed: [stargazer] => (item=dbus-uuidgen --ensure)
+2021-12-24 14:47:20,537 p=16537 u=root n=ansible | TASK [regenerate ssh keys] ******************************************************************************************************
+2021-12-24 14:47:23,146 p=16537 u=root n=ansible | changed: [stargazer] => (item=rm /etc/ssh/ssh_host_*)
+2021-12-24 14:48:11,172 p=16537 u=root n=ansible | changed: [stargazer] => (item=dpkg-reconfigure openssh-server)
+2021-12-24 14:48:11,187 p=16537 u=root n=ansible | [WARNING]: Consider using the file module with state=absent rather than running 'rm'.  If you need to use command because file
+is insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in ansible.cfg to get rid of this
+message.
+
+2021-12-24 14:48:11,333 p=16537 u=root n=ansible | TASK [add admin group] **********************************************************************************************************
+2021-12-24 14:48:14,582 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:48:14,756 p=16537 u=root n=ansible | TASK [add dax group] ************************************************************************************************************
+2021-12-24 14:48:17,402 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:48:17,575 p=16537 u=root n=ansible | TASK [add local user dax] *******************************************************************************************************
+2021-12-24 14:48:21,812 p=16537 u=root n=ansible | [WARNING]: The input password appears not to have been hashed. The 'password' argument must be encrypted for this module to work
+properly.
+
+2021-12-24 14:48:21,814 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:48:21,962 p=16537 u=root n=ansible | TASK [Add local user dax to sudo] ***********************************************************************************************
+2021-12-24 14:48:24,523 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:48:24,660 p=16537 u=root n=ansible | TASK [add SSH public key for local user] ****************************************************************************************
+2021-12-24 14:48:28,578 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:48:28,740 p=16537 u=root n=ansible | TASK [add sshd config file] *****************************************************************************************************
+2021-12-24 14:48:36,906 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:48:37,045 p=16537 u=root n=ansible | TASK [create ~/.zshrc file for local user] **************************************************************************************
+2021-12-24 14:48:39,737 p=16537 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:48:39,873 p=16537 u=root n=ansible | TASK [Check for Oh My ZSH Installation] *****************************************************************************************
+2021-12-24 14:48:42,502 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:48:42,647 p=16537 u=root n=ansible | TASK [Install Oh My ZSH] ********************************************************************************************************
+2021-12-24 14:48:42,720 p=16537 u=root n=ansible | skipping: [stargazer]
+2021-12-24 14:48:42,863 p=16537 u=root n=ansible | TASK [Checkout powerlevel10k repo and use refspec to fetch all pull requests] ***************************************************
+2021-12-24 14:48:50,231 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:48:50,392 p=16537 u=root n=ansible | TASK [Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests] *********************************************
+2021-12-24 14:48:56,111 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:48:56,308 p=16537 u=root n=ansible | TASK [clone dotfiles repository to localhost] ***********************************************************************************
+2021-12-24 14:48:58,196 p=16537 u=root n=ansible | ok: [stargazer -> localhost]
+2021-12-24 14:48:58,337 p=16537 u=root n=ansible | TASK [copy dotfiles into ~/] ****************************************************************************************************
+2021-12-24 14:49:04,883 p=16537 u=root n=ansible | changed: [stargazer] => (item=.zshrc)
+2021-12-24 14:49:10,577 p=16537 u=root n=ansible | changed: [stargazer] => (item=.p10k.zsh)
+2021-12-24 14:49:16,245 p=16537 u=root n=ansible | changed: [stargazer] => (item=.tmux.conf)
+2021-12-24 14:49:21,902 p=16537 u=root n=ansible | changed: [stargazer] => (item=.wgetrc)
+2021-12-24 14:49:27,586 p=16537 u=root n=ansible | changed: [stargazer] => (item=.vimrc)
+2021-12-24 14:49:27,789 p=16537 u=root n=ansible | TASK [install_bat : Test for raspberry pi /proc/cpuinfo] ************************************************************************
+2021-12-24 14:49:30,397 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:49:30,689 p=16537 u=root n=ansible | TASK [install_bat : Test for raspberry pi /proc/device-tree/model] **************************************************************
+2021-12-24 14:49:33,249 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:49:33,419 p=16537 u=root n=ansible | TASK [install_bat : Set raspberry_pi fact to true] ******************************************************************************
+2021-12-24 14:49:33,511 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:49:33,651 p=16537 u=root n=ansible | TASK [install_bat : Check that the /usr/local/bin/bat exists] *******************************************************************
+2021-12-24 14:49:36,092 p=16537 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:49:36,278 p=16537 u=root n=ansible | TASK [install_bat : download latest bat binary into /tmp] ***********************************************************************
+2021-12-24 14:49:36,363 p=16537 u=root n=ansible | skipping: [stargazer]
+2021-12-24 14:49:36,510 p=16537 u=root n=ansible | TASK [install_bat : download latest bat binary into /tmp] ***********************************************************************
+2021-12-24 14:49:42,845 p=16537 u=root n=ansible | [WARNING]: Consider using the get_url or uri module rather than running 'curl'.  If you need to use command because get_url or
+uri is insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in ansible.cfg to get rid of
+this message.
+
+2021-12-24 14:49:42,847 p=16537 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:49:43,004 p=16537 u=root n=ansible | TASK [install_bat : make folder to put unzipped bat binary in] ******************************************************************
+2021-12-24 14:49:45,688 p=16537 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:49:45,836 p=16537 u=root n=ansible | TASK [install_bat : unzip bat binary] *******************************************************************************************
+2021-12-24 14:49:54,970 p=16537 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:49:55,152 p=16537 u=root n=ansible | TASK [install_bat : move bat binary into /usr/local/bin] ************************************************************************
+2021-12-24 14:49:57,814 p=16537 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:49:57,961 p=16537 u=root n=ansible | TASK [install_bat : move bat man page into /usr/share/man/man1] *****************************************************************
+2021-12-24 14:50:00,511 p=16537 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:50:00,653 p=16537 u=root n=ansible | TASK [install_bat : move bat shell completetion files into /usr/local/share/zsh/site-functions] *********************************
+2021-12-24 14:50:03,213 p=16537 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:50:03,398 p=16537 u=root n=ansible | TASK [install_bat : delete files from /tmp] *************************************************************************************
+2021-12-24 14:50:06,140 p=16537 u=root n=ansible | changed: [stargazer] => (item=bat_binary)
+2021-12-24 14:50:08,758 p=16537 u=root n=ansible | changed: [stargazer] => (item=bat_binary.zip)
+2021-12-24 14:50:08,925 p=16537 u=root n=ansible | TASK [debug] ********************************************************************************************************************
+2021-12-24 14:50:09,161 p=16537 u=root n=ansible | ok: [stargazer] => {
+    "msg": "armv6l"
+}
+2021-12-24 14:50:09,301 p=16537 u=root n=ansible | TASK [debug] ********************************************************************************************************************
+2021-12-24 14:50:09,386 p=16537 u=root n=ansible | ok: [stargazer] => {
+    "msg": "armv6l"
+}
+2021-12-24 14:50:09,528 p=16537 u=root n=ansible | TASK [install_exa : Test for raspberry pi /proc/cpuinfo] ************************************************************************
+2021-12-24 14:50:09,644 p=16537 u=root n=ansible | fatal: [stargazer]: FAILED! => {"msg": "The conditional check 'ansible_facts['ansible_machine'] == \"x86_64\" or ansible_facts['ansible_machine'] == \"armv7l\"' failed. The error was: error while evaluating conditional (ansible_facts['ansible_machine'] == \"x86_64\" or ansible_facts['ansible_machine'] == \"armv7l\"): 'dict object' has no attribute 'ansible_machine'\n\nThe error appears to be in '/home/dax/code_base/ansible_projects/roles/install_exa/tasks/main.yml': line 5, column 7, but may\nbe elsewhere in the file depending on the exact syntax problem.\n\nThe offending line appears to be:\n\n\n    - name: Test for raspberry pi /proc/cpuinfo\n      ^ here\n"}
+2021-12-24 14:50:09,647 p=16537 u=root n=ansible | RUNNING HANDLER [Reload SSH] ****************************************************************************************************
+2021-12-24 14:50:09,654 p=16537 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
+2021-12-24 14:50:09,655 p=16537 u=root n=ansible | stargazer                  : ok=39   changed=15   unreachable=0    failed=1    skipped=2    rescued=0    ignored=0   
+2021-12-24 14:52:31,379 p=17354 u=root n=ansible | ERROR! We were unable to read either as JSON nor YAML, these are the errors we got from each:
+JSON: No JSON object could be decoded
+
+Syntax Error while loading YAML.
+  did not find expected ',' or '}'
+
+The error appears to be in '/home/dax/code_base/ansible_projects/playbooks/proxmoxServerProvision/proxmoxServerProvision.yml': line 307, column 32, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+          name: install_exa
+        when:  {{ ansible_facts['ansible_machine'] }} == "x86_64" or {{ ansible_facts['ansible_machine'] == "armv7l" }}
+                               ^ here
+We could be wrong, but this one looks like it might be an issue with
+missing quotes. Always quote template expression brackets when they
+start a value. For instance:
+
+    with_items:
+      - {{ foo }}
+
+Should be written as:
+
+    with_items:
+      - "{{ foo }}"
+
+2021-12-24 14:53:04,514 p=17410 u=root n=ansible | ERROR! We were unable to read either as JSON nor YAML, these are the errors we got from each:
+JSON: No JSON object could be decoded
+
+Syntax Error while loading YAML.
+  did not find expected key
+
+The error appears to be in '/home/dax/code_base/ansible_projects/playbooks/proxmoxServerProvision/proxmoxServerProvision.yml': line 307, column 57, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+          name: install_exa
+        when:  "{{ ansible_facts['ansible_machine'] }}" == "x86_64" or "{{ ansible_facts['ansible_machine'] == "armv7l" }}"
+                                                        ^ here
+We could be wrong, but this one looks like it might be an issue with
+missing quotes. Always quote template expression brackets when they
+start a value. For instance:
+
+    with_items:
+      - {{ foo }}
+
+Should be written as:
+
+    with_items:
+      - "{{ foo }}"
+
+2021-12-24 14:55:50,278 p=17626 u=root n=ansible | PLAY [provision_servers] ********************************************************************************************************
+2021-12-24 14:55:50,503 p=17626 u=root n=ansible | TASK [Generate locals] **********************************************************************************************************
+2021-12-24 14:56:47,800 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:56:47,821 p=17626 u=root n=ansible | TASK [check if python2 is installed & install if neccessary] ********************************************************************
+2021-12-24 14:56:48,150 p=17626 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:56:48,174 p=17626 u=root n=ansible | TASK [check if python3 is installed and try to install it. ignore error if you can't install] ***********************************
+2021-12-24 14:56:48,497 p=17626 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:56:48,519 p=17626 u=root n=ansible | PLAY [proxmoxServerProvision] ***************************************************************************************************
+2021-12-24 14:56:48,553 p=17626 u=root n=ansible | TASK [Gathering Facts] **********************************************************************************************************
+2021-12-24 14:56:58,893 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:56:58,986 p=17626 u=root n=ansible | TASK [update repo cache (Ubuntu)] ***********************************************************************************************
+2021-12-24 14:57:15,055 p=17626 u=root n=ansible | [WARNING]: The value True (type bool) in a string field was converted to u'True' (type string). If this does not look like what
+you expect, quote the entire value to ensure it does not change.
+
+2021-12-24 14:57:15,056 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:57:15,167 p=17626 u=root n=ansible | TASK [Test for raspberry pi /proc/cpuinfo] **************************************************************************************
+2021-12-24 14:57:18,357 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:57:18,488 p=17626 u=root n=ansible | TASK [Test for raspberry pi /proc/device-tree/model] ****************************************************************************
+2021-12-24 14:57:21,059 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:57:21,163 p=17626 u=root n=ansible | TASK [Set raspberry_pi fact to true] ********************************************************************************************
+2021-12-24 14:57:21,322 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:57:21,431 p=17626 u=root n=ansible | TASK [add packages I want] ******************************************************************************************************
+2021-12-24 14:57:32,693 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:57:32,788 p=17626 u=root n=ansible | TASK [update PATH variable] *****************************************************************************************************
+2021-12-24 14:57:36,011 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:57:36,108 p=17626 u=root n=ansible | TASK [set hostname] *************************************************************************************************************
+2021-12-24 14:57:39,671 p=17626 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:57:39,794 p=17626 u=root n=ansible | TASK [change /etc/hosts file to correct hostname] *******************************************************************************
+2021-12-24 14:57:43,101 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:57:43,230 p=17626 u=root n=ansible | TASK [remove files that came with the template and need to be reset] ************************************************************
+2021-12-24 14:57:46,636 p=17626 u=root n=ansible | changed: [stargazer] => (item=/etc/machine-id)
+2021-12-24 14:57:49,219 p=17626 u=root n=ansible | changed: [stargazer] => (item=/var/lib/dbus/machine-id)
+2021-12-24 14:57:49,330 p=17626 u=root n=ansible | TASK [reset the machine ID] *****************************************************************************************************
+2021-12-24 14:57:51,993 p=17626 u=root n=ansible | changed: [stargazer] => (item=dbus-uuidgen --ensure=/etc/machine-id)
+2021-12-24 14:57:54,473 p=17626 u=root n=ansible | changed: [stargazer] => (item=dbus-uuidgen --ensure)
+2021-12-24 14:57:54,574 p=17626 u=root n=ansible | TASK [regenerate ssh keys] ******************************************************************************************************
+2021-12-24 14:57:57,203 p=17626 u=root n=ansible | changed: [stargazer] => (item=rm /etc/ssh/ssh_host_*)
+2021-12-24 14:59:00,556 p=17626 u=root n=ansible | changed: [stargazer] => (item=dpkg-reconfigure openssh-server)
+2021-12-24 14:59:00,563 p=17626 u=root n=ansible | [WARNING]: Consider using the file module with state=absent rather than running 'rm'.  If you need to use command because file
+is insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in ansible.cfg to get rid of this
+message.
+
+2021-12-24 14:59:00,657 p=17626 u=root n=ansible | TASK [add admin group] **********************************************************************************************************
+2021-12-24 14:59:03,948 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:59:04,111 p=17626 u=root n=ansible | TASK [add dax group] ************************************************************************************************************
+2021-12-24 14:59:06,770 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:59:06,898 p=17626 u=root n=ansible | TASK [add local user dax] *******************************************************************************************************
+2021-12-24 14:59:11,090 p=17626 u=root n=ansible | [WARNING]: The input password appears not to have been hashed. The 'password' argument must be encrypted for this module to work
+properly.
+
+2021-12-24 14:59:11,092 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:59:11,232 p=17626 u=root n=ansible | TASK [Add local user dax to sudo] ***********************************************************************************************
+2021-12-24 14:59:13,827 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:59:13,925 p=17626 u=root n=ansible | TASK [add SSH public key for local user] ****************************************************************************************
+2021-12-24 14:59:17,879 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:59:17,983 p=17626 u=root n=ansible | TASK [add sshd config file] *****************************************************************************************************
+2021-12-24 14:59:24,539 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:59:24,637 p=17626 u=root n=ansible | TASK [create ~/.zshrc file for local user] **************************************************************************************
+2021-12-24 14:59:27,309 p=17626 u=root n=ansible | changed: [stargazer]
+2021-12-24 14:59:27,431 p=17626 u=root n=ansible | TASK [Check for Oh My ZSH Installation] *****************************************************************************************
+2021-12-24 14:59:30,063 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:59:30,185 p=17626 u=root n=ansible | TASK [Install Oh My ZSH] ********************************************************************************************************
+2021-12-24 14:59:30,261 p=17626 u=root n=ansible | skipping: [stargazer]
+2021-12-24 14:59:30,384 p=17626 u=root n=ansible | TASK [Checkout powerlevel10k repo and use refspec to fetch all pull requests] ***************************************************
+2021-12-24 14:59:37,711 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:59:37,822 p=17626 u=root n=ansible | TASK [Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests] *********************************************
+2021-12-24 14:59:43,511 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 14:59:43,620 p=17626 u=root n=ansible | TASK [clone dotfiles repository to localhost] ***********************************************************************************
+2021-12-24 14:59:45,305 p=17626 u=root n=ansible | ok: [stargazer -> localhost]
+2021-12-24 14:59:45,405 p=17626 u=root n=ansible | TASK [copy dotfiles into ~/] ****************************************************************************************************
+2021-12-24 14:59:51,389 p=17626 u=root n=ansible | changed: [stargazer] => (item=.zshrc)
+2021-12-24 14:59:57,139 p=17626 u=root n=ansible | ok: [stargazer] => (item=.p10k.zsh)
+2021-12-24 15:00:02,783 p=17626 u=root n=ansible | ok: [stargazer] => (item=.tmux.conf)
+2021-12-24 15:00:08,508 p=17626 u=root n=ansible | ok: [stargazer] => (item=.wgetrc)
+2021-12-24 15:00:14,194 p=17626 u=root n=ansible | ok: [stargazer] => (item=.vimrc)
+2021-12-24 15:00:14,350 p=17626 u=root n=ansible | TASK [install_bat : Test for raspberry pi /proc/cpuinfo] ************************************************************************
+2021-12-24 15:00:16,896 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 15:00:16,996 p=17626 u=root n=ansible | TASK [install_bat : Test for raspberry pi /proc/device-tree/model] **************************************************************
+2021-12-24 15:00:19,528 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 15:00:19,627 p=17626 u=root n=ansible | TASK [install_bat : Set raspberry_pi fact to true] ******************************************************************************
+2021-12-24 15:00:19,720 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 15:00:19,817 p=17626 u=root n=ansible | TASK [install_bat : Check that the /usr/local/bin/bat exists] *******************************************************************
+2021-12-24 15:00:22,715 p=17626 u=root n=ansible | ok: [stargazer]
+2021-12-24 15:00:22,851 p=17626 u=root n=ansible | TASK [install_bat : download latest bat binary into /tmp] ***********************************************************************
+2021-12-24 15:00:22,924 p=17626 u=root n=ansible | skipping: [stargazer]
+2021-12-24 15:00:23,019 p=17626 u=root n=ansible | TASK [install_bat : download latest bat binary into /tmp] ***********************************************************************
+2021-12-24 15:00:23,088 p=17626 u=root n=ansible | skipping: [stargazer]
+2021-12-24 15:00:23,183 p=17626 u=root n=ansible | TASK [install_bat : make folder to put unzipped bat binary in] ******************************************************************
+2021-12-24 15:00:23,252 p=17626 u=root n=ansible | skipping: [stargazer]
+2021-12-24 15:00:23,350 p=17626 u=root n=ansible | TASK [install_bat : unzip bat binary] *******************************************************************************************
+2021-12-24 15:00:23,422 p=17626 u=root n=ansible | skipping: [stargazer]
+2021-12-24 15:00:23,516 p=17626 u=root n=ansible | TASK [install_bat : move bat binary into /usr/local/bin] ************************************************************************
+2021-12-24 15:00:23,584 p=17626 u=root n=ansible | skipping: [stargazer]
+2021-12-24 15:00:23,679 p=17626 u=root n=ansible | TASK [install_bat : move bat man page into /usr/share/man/man1] *****************************************************************
+2021-12-24 15:00:23,754 p=17626 u=root n=ansible | skipping: [stargazer]
+2021-12-24 15:00:23,848 p=17626 u=root n=ansible | TASK [install_bat : move bat shell completetion files into /usr/local/share/zsh/site-functions] *********************************
+2021-12-24 15:00:23,918 p=17626 u=root n=ansible | skipping: [stargazer]
+2021-12-24 15:00:24,014 p=17626 u=root n=ansible | TASK [install_bat : delete files from /tmp] *************************************************************************************
+2021-12-24 15:00:24,109 p=17626 u=root n=ansible | skipping: [stargazer] => (item=bat_binary) 
+2021-12-24 15:00:24,135 p=17626 u=root n=ansible | skipping: [stargazer] => (item=bat_binary.zip) 
+2021-12-24 15:00:24,242 p=17626 u=root n=ansible | TASK [debug] ********************************************************************************************************************
+2021-12-24 15:00:24,441 p=17626 u=root n=ansible | ok: [stargazer] => {
+    "msg": "armv6l"
+}
+2021-12-24 15:00:24,536 p=17626 u=root n=ansible | TASK [debug] ********************************************************************************************************************
+2021-12-24 15:00:24,615 p=17626 u=root n=ansible | ok: [stargazer] => {
+    "msg": "armv6l"
+}
+2021-12-24 15:00:24,710 p=17626 u=root n=ansible | TASK [install_exa : Test for raspberry pi /proc/cpuinfo] ************************************************************************
+2021-12-24 15:00:24,811 p=17626 u=root n=ansible | fatal: [stargazer]: FAILED! => {"msg": "The conditional check '(ansible_facts['ansible_machine'] == \"x86_64\") or (ansible_facts['ansible_machine'] == \"armv7l\")' failed. The error was: error while evaluating conditional ((ansible_facts['ansible_machine'] == \"x86_64\") or (ansible_facts['ansible_machine'] == \"armv7l\")): 'dict object' has no attribute 'ansible_machine'\n\nThe error appears to be in '/home/dax/code_base/ansible_projects/roles/install_exa/tasks/main.yml': line 5, column 7, but may\nbe elsewhere in the file depending on the exact syntax problem.\n\nThe offending line appears to be:\n\n\n    - name: Test for raspberry pi /proc/cpuinfo\n      ^ here\n"}
+2021-12-24 15:00:24,814 p=17626 u=root n=ansible | RUNNING HANDLER [Reload SSH] ****************************************************************************************************
+2021-12-24 15:00:24,818 p=17626 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
+2021-12-24 15:00:24,819 p=17626 u=root n=ansible | stargazer                  : ok=33   changed=8    unreachable=0    failed=1    skipped=9    rescued=0    ignored=0   
+2021-12-24 15:02:00,744 p=18308 u=root n=ansible | PLAY [provision_servers] ********************************************************************************************************
+2021-12-24 15:02:01,106 p=18308 u=root n=ansible | TASK [Generate locals] **********************************************************************************************************
+2021-12-24 15:02:50,003 p=18308 u=root n=ansible |  [ERROR]: User interrupted execution
+
