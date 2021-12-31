@@ -60,29 +60,6 @@
         ignore_errors: yes
         # when: ansible_os_family == "Debian"
 
-############################################################################################
-
-      - name: Test for raspberry pi /proc/cpuinfo
-        command: grep -E "Raspberry Pi|BCM2708|BCM2709|BCM2835|BCM2836" /proc/cpuinfo
-        register: grep_cpuinfo_raspberrypi
-        failed_when: false
-        changed_when: false
-
-      - name: Test for raspberry pi /proc/device-tree/model
-        command: grep -E "Raspberry Pi" /proc/device-tree/model
-        register: grep_device_tree_model_raspberrypi
-        failed_when: false
-        changed_when: false
-
-      - name: Set raspberry_pi fact to true
-        set_fact:
-          raspberry_pi: true
-        when:
-          grep_cpuinfo_raspberrypi.rc == 0 or grep_device_tree_model_raspberrypi.rc == 0
-
-############################################################################################
-
-
     tasks:
       - name: add packages I want
         apt:
@@ -115,6 +92,14 @@
           path: /etc/hosts
           regexp: "{{ ansible_nodename }}"
           replace: "{{ hostvars[groups['provision_servers'][0]]['inventory_hostname_short'] }}"
+
+
+#      - name: update /etc/hosts files with hostname
+#        lineinfile:
+#          path: /etc/hosts
+#          regexp: '^127\.0\.1\.1[ \t]+template'
+#          line: '127.0.1.1 "{{ hostname }}"'
+#          state: present
 
       - name: remove files that came with the template and need to be reset
         file:
@@ -170,12 +155,6 @@
             name: "{{ user }}"
             state: present
 
-      # - name: import the viasite-ansible role
-      #   import_role:
-      #     name: viasite-ansible.zsh
-      #   vars:
-      #     zsh_user: "{{ user }}"
-
       - name: add local user {{ user }}
         user:
           name: "{{ user }}"
@@ -208,13 +187,6 @@
       #         {{ user }} ALL=(ALL:ALL) ALL
       #         %{{ user }} ALL=(ALL:ALL) NOPASSWD:ALL
       #       backup: yes
-
-#      - name: update /etc/hosts files with hostname
-#        lineinfile:
-#          path: /etc/hosts
-#          regexp: '^127\.0\.1\.1[ \t]+template'
-#          line: '127.0.1.1 "{{ hostname }}"'
-#          state: present
 
       - name: add SSH public key for local user
         authorized_key:
@@ -303,11 +275,6 @@
           name: install_exa
         when:  (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
 
-
-#add logic to edit ls from .zshrc if no exa
-
-
-
       - name: Remove ls aliases from .zshrc if exa isn't installed
         lineinfile:
           path: /home/dax/.zshrc
@@ -319,7 +286,6 @@
           - lsd="exa -a -l -i --git -H"
        #when raspberry not pi 1 or pi zero
         when: not (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
-
 
       - name: delete dotfiles from /tmp
         file:

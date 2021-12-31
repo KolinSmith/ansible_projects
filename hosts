@@ -46,37 +46,40 @@ shenzhou ansible_host=192.168.9.5
 
 #pre provisioning
 #######################################################################
-ansible_connection=ssh
-
-# ansible_ssh_pass={{ proxmox_template_password }}
-ansible_ssh_pass=raspberry
-
-ansible_user=pi
-# ansible_user=serveradmin
-
-# ansible_password={{ proxmox_template_password }}
-ansible_password=raspberry
-
-ansible_become=yes
-
-ansible_become_method=sudo
-
-# ansible_become_password={{ proxmox_template_password }}
-ansible_become_password=raspberry
-
-ansible_python_interpreter=/usr/bin/python3
-#ansible_python_interpreter=/usr/bin/python
+# ansible_connection=ssh
+#
+# # ansible_ssh_pass={{ proxmox_template_password }}
+# ansible_ssh_pass=raspberry
+#
+# ansible_user=pi
+# # ansible_user=serveradmin
+#
+# # ansible_password={{ proxmox_template_password }}
+# ansible_password=raspberry
+#
+# ansible_become=yes
+#
+# ansible_become_method=sudo
+#
+# # ansible_become_password={{ proxmox_template_password }}
+# ansible_become_password=raspberry
+#
+# ansible_python_interpreter=/usr/bin/python3
+# #ansible_python_interpreter=/usr/bin/python
 #######################################################################
 
 #post provisioning
 #######################################################################
-# ansible_connection=ssh
-# ansible_user=dax
-# ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa
-# ansible_python_interpreter=/usr/bin/python3
-# primary_load_balancer=192.168.9.6
-# secondary_load_balancer=192.168.9.5
+ansible_connection=ssh
+ansible_user=dax
+ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa
+ansible_python_interpreter=/usr/bin/python3
+primary_load_balancer=192.168.9.6
+secondary_load_balancer=192.168.9.5
+loadbalancer_vip_ip=192.168.9.90
 ######################################################################
+default_user=raspberry
+# default_user=serveradmin
 
 [mysql_servers]
 k3s-mysql-1 ansible_host=192.168.9.129

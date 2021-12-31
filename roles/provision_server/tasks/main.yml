@@ -1,0 +1,191 @@
+---
+  # - name: update repo cache (CentOS)
+  #   tags: always
+  #   dnf:
+  #     update_cache: yes
+  #   changed_when: false
+  #   when: ansible_distribution == "CentOS"
+
+  - name: update repo cache (Debian)
+    tags: always
+    apt:
+      upgrade: yes
+      update_cache: yes
+      cache_valid_time: "86400"
+      autoremove: yes
+      autoclean: yes
+    ignore_errors: yes
+    # when: ansible_os_family == "Debian"
+
+  - name: add packages I want
+    apt:
+      name: "{{ necessary_packages }}"
+      state: latest
+
+  - name: update PATH variable
+    lineinfile:
+      dest: /etc/environment
+      state: present
+      backrefs: yes
+      regexp: 'PATH=(["]*)((?!.*?{{extra_path}}).*?)(["]*)$'
+      line: 'PATH=\1\2:{{extra_path}}\3'
+
+  - name: set hostname
+    command: hostnamectl set-hostname {{ hostvars[groups['provision_servers'][0]]['inventory_hostname_short'] }}
+    become: true
+
+  - name: change /etc/hosts file to correct hostname
+    replace:
+      path: /etc/hosts
+      regexp: "{{ ansible_nodename }}"
+      replace: "{{ hostvars[groups['provision_servers'][0]]['inventory_hostname_short'] }}"
+
+  - name: remove files that came with the template and need to be reset
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+      - /etc/machine-id
+      - /var/lib/dbus/machine-id
+
+  - name: reset the machine ID
+    command: "{{ item }}"
+    with_items:
+      - dbus-uuidgen --ensure=/etc/machine-id
+      - dbus-uuidgen --ensure
+
+  #regenerating the keys requires first deleting the ssh_host_* files then running the reconfigure option.
+  #they must run in the same task one after the other for it to work.
+  - name: regenerate ssh keys
+    shell: "{{ item }}"
+    ignore_errors: yes
+    with_items:
+      - rm /etc/ssh/ssh_host_*
+      - dpkg-reconfigure openssh-server
+    become: yes
+    notify: Reload SSH
+
+  - name: add admin group
+    group:
+      name: admin
+      state: present
+
+  - name: add {{ user }} group
+    group:
+        name: "{{ user }}"
+        state: present
+
+  - name: add local user {{ user }}
+    user:
+      name: "{{ user }}"
+      groups: admin
+      shell: /bin/zsh
+      home: /home/{{ user }}
+      create_home: yes
+      state: present
+      password: "{{ dax_password }}"
+
+  - name: Add local user {{ user }} to sudo
+    lineinfile:
+      path: /etc/sudoers.d/{{ user }}
+      line: '{{ user }} ALL=(ALL) NOPASSWD: ALL'
+      state: present
+      mode: 0440
+      create: yes
+      validate: 'visudo -cf %s'
+
+  - name: add SSH public key for local user
+    authorized_key:
+        user: "{{ user }}"
+        key: "{{ lookup('file', '/home/dax/.ssh/id_ecdsa.pub') }}"
+        state: present
+        manage_dir: yes
+
+#might end up using the one from the dotfiles
+  - name: add sshd config file
+    template:
+      src: /home/dax/code_base/ansible_projects/templates/sshd_config.j2
+      dest: /etc/ssh/sshd_config
+      owner: root
+      group: root
+      mode: 0600
+      validate: /usr/sbin/sshd -t -f %s
+      backup: yes
+    notify: Reload SSH
+
+  - name: create ~/.zshrc file for local user
+    file:
+      path: /home/{{ user }}/.zshrc
+      state: touch
+      mode: 0600
+
+  - name: Check for Oh My ZSH Installation
+    stat:
+      path: ~/.oh-my-zsh
+    become_user: "{{ user }}"
+    register: omz_installed
+
+  - name: Install Oh My ZSH
+    git:
+      repo: 'https://github.com/ohmyzsh/ohmyzsh.git'
+      dest: ~/.oh-my-zsh
+    become_user: "{{ user }}"
+    when: omz_installed.stat.exists == False
+
+  - name: Checkout powerlevel10k repo and use refspec to fetch all pull requests
+    git:
+      repo: https://github.com/romkatv/powerlevel10k.git
+      dest: /home/{{ user }}/.oh-my-zsh/custom/themes/powerlevel10k
+      refspec: '+refs/pull/*:refs/heads/*'
+      depth: 1
+
+  - name: Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests
+    git:
+      repo: https://github.com/zsh-users/zsh-autosuggestions
+      dest: /home/{{ user }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+      refspec: '+refs/pull/*:refs/heads/*'
+
+  - name: import the install_bat role
+    import_role:
+      name: install_bat
+
+  #for some reason even with the when it still goes into each task
+  #in the role and skips it one by one
+  - name: import the install_exa role
+    import_role:
+      name: install_exa
+    when:  (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
+
+  - name: import the import_dotfiles role
+    import_role:
+      name: import_dotfiles
+
+  - name: Check if tmuxinator plugin manager is installed.
+    stat:
+      path: /home/{{ user }}/.tmux/plugins/tpm
+    register: tpm_installed
+
+  - name: Create tmux plugin directory
+    file:
+      state: directory
+      path: /home/{{ user }}/.tmux/plugins
+
+  - name: Install tmux plugin manager
+    git:
+      repo: 'https://github.com/tmux-plugins/tpm'
+      dest: /home/{{ user }}/.tmux/plugins/tpm
+    when: tpm_installed.stat.exists == False
+
+  - name: Set default user fact
+    set_fact:
+      default_user: {{ ansible_user }}
+
+  - name: Reboot the machine (Wait for 1 sec)
+    reboot:
+      reboot_timeout: 1
+
+handlers:
+  - name: Reload SSH
+    service:
+      name: sshd
+      state: restarted
