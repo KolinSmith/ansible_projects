@@ -1,4 +1,4 @@
 - name: Test Ping
-  hosts: all
+  hosts: all_raspberry_pis
   tasks:
   - action: ping

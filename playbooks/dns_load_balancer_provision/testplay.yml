@@ -6,11 +6,24 @@
       - debug: msg="HERE It is"
         when:  (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
 
-      #when conditional doesn't seem to affect it
-      - name: import the install_exa role
-        import_role:
-          name: install_exa
-        when:  (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
+      # #when conditional doesn't seem to affect it
+      # - name: import the install_exa role
+      #   import_role:
+      #     name: install_exa
+      #   when:  (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
+      #
+      # - debug: msg="HERE It is NOW"
+      #   when:  (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
 
-      - debug: msg="HERE It is NOW"
-        when:  (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
+
+      - name: Remove ls aliases from .zshrc if exa isn't installed
+        lineinfile:
+          path: /home/dax/.zshrc
+          regexp: "{{ item }}"
+          state: absent
+          backup: yes
+        with_items:
+          - ls="exa --git" 
+          - lsd="exa -a -l -i --git -H"
+       #when raspberry not pi 1 or pi zero
+        when: not (ansible_machine == "x86_64") or (ansible_machine == "armv7l")

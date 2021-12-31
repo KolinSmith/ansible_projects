@@ -32,13 +32,19 @@
           grep_cpuinfo_raspberrypi.rc == 0 or grep_device_tree_model_raspberrypi.rc == 0
   ############################################################################################
 
-      #eventually i'd like to add logic to check if it's a rpi before running this
       #check if running x86 or something and download different repo
-      - name: create repo source file for dnsdist
+      - name: create repo source file for dnsdist when raspberry pi
+        copy:
+          dest: "/etc/apt/sources.list.d/pdns.list"
+          content: |
+             deb http://repo.powerdns.com/{{ hostvars[inventory_hostname]['ansible_distribution'] }} {{ hostvars[inventory_hostname]['ansible_lsb']['codename'] }}-dnsdist-master main
+
+      - name: create repo source file for dnsdist when not raspberry pi
         copy:
           dest: "/etc/apt/sources.list.d/pdns.list"
           content: |
              deb http://repo.powerdns.com/raspbian {{ hostvars[inventory_hostname]['ansible_lsb']['codename'] }}-dnsdist-master main
+        when: raspberry_pi|default(false) #when raspberry pi
 
       - name: add apt key
         apt_key:
@@ -98,6 +104,7 @@
 
       # - debug: msg="{{ keepalived_password }}"
 
+      #this config creates a VIP, sets a password, and sets the backend servers (for this it's dns loadbalancers using port 53)
       - name: create keepalived config file for primary
         copy:
           dest: "/etc/keepalived/keepalived.conf"
@@ -122,6 +129,26 @@
                 192.168.9.90/24
               }
             }
+            virtual_server {{ loadbalancer_vip_ip }} 53 {
+              delay_loop 6
+              lb_algo wlc
+              protocol UDP
+
+              real_server {{ primary_load_balancer }} 53 {
+                weight 100
+                MISC_CHECK {
+                  connect_timeout 6
+                }
+              }
+
+              real_server {{ secondary_load_balancer }} 53 {
+                weight 100
+                MISC_CHECK {
+                  connect_timeout 6
+                }
+              }
+            }
+
         #run when node is primary load balancer
         when: hostvars[inventory_hostname]['ansible_default_ipv4']['address'] == primary_load_balancer
 
@@ -148,6 +175,25 @@
                   192.168.9.90/24
               }
             }
+            virtual_server {{ loadbalancer_vip_ip }} 53 {
+              delay_loop 6
+              lb_algo wlc
+              protocol UDP
+
+              real_server {{ primary_load_balancer }} 53 {
+                weight 100
+                MISC_CHECK {
+                  connect_timeout 6
+                }
+              }
+
+              real_server {{ secondary_load_balancer }} 53 {
+                weight 100
+                MISC_CHECK {
+                  connect_timeout 6
+                }
+              }
+            }
         #run when node is primary load balancer
         when: hostvars[inventory_hostname]['ansible_default_ipv4']['address'] == secondary_load_balancer
 
@@ -160,29 +206,32 @@
       #     state: enabled
 
       #gave me the same glob patterns error
-      # - name: enable and start dnsdist
-      #   service:
-      #     name: "{{ necessary_packages }}"
-      #     state: started
-      #     enabled: yes
+      - name: enable and start dnsdist & keepalived
+        service:
+          name: "{{ item }}"
+          state: restarted
+          enabled: yes
+        with_items:
+          - dnsdist
+          - keepalived
 
       #   #systemd doesn't allow glob patterns(ie. enabling or starting multiple things in one commmand) so I had to do each one individually
-      - name: enable dnsdist to run on boot
-        systemd:
-          name: dnsdist@dnsdist.service
-          enabled: yes
-
-      - name: enable keepalived to run on boot
-        systemd:
-          name: keepalived.service
-          enabled: yes
-
-      - name: start keepalived
-        systemd:
-          name: keepalived
-          state: restarted
-
-      - name: restart dnsdist
-        systemd:
-          name: dnsdist
-          state: restarted
+      # - name: enable dnsdist to run on boot
+      #   systemd:
+      #     name: dnsdist@dnsdist.service
+      #     enabled: yes
+      #
+      # - name: enable keepalived to run on boot
+      #   systemd:
+      #     name: keepalived.service
+      #     enabled: yes
+      #
+      # - name: start keepalived
+      #   systemd:
+      #     name: keepalived
+      #     state: restarted
+      #
+      # - name: restart dnsdist
+      #   systemd:
+      #     name: dnsdist
+      #     state: restarted

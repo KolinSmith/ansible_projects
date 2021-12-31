@@ -4,9 +4,10 @@
   # vars:
   #   isPythonInstalled: "1"
   pre_tasks:
-    - name: Generate locals
-      raw: export LC_ALL="en_GB.UTF-8"; locale-gen en_GB.UTF-8
-      changed_when: false
+    # - name: Generate locals
+    #   raw: export LC_ALL="en_GB.UTF-8"; locale-gen en_GB.UTF-8
+    #   changed_when: false
+    #   ignore_errors: yes
 
     # test if python binary exists on remote. if it doesn't, echo 0 and registerisPythonInstalled
     - name: check if python2 is installed & install if neccessary
