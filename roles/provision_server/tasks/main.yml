@@ -63,7 +63,7 @@
       - rm /etc/ssh/ssh_host_*
       - dpkg-reconfigure openssh-server
     become: yes
-    notify: Reload SSH
+    notify: Reload ssh
 
   - name: add admin group
     group:
@@ -111,7 +111,7 @@
       mode: 0600
       validate: /usr/sbin/sshd -t -f %s
       backup: yes
-    notify: Reload SSH
+    notify: Reload ssh
 
   - name: create ~/.zshrc file for local user
     file:
@@ -176,16 +176,27 @@
       dest: /home/{{ user }}/.tmux/plugins/tpm
     when: tpm_installed.stat.exists == False
 
-  - name: Set default user fact
-    set_fact:
-      default_user: {{ ansible_user }}
+  # - name: Set raspberry_pi fact
+  #   set_fact:
+  #     raspberry_pi: "{{ raspberry_pi }}"
 
-  - name: Reboot the machine (Wait for 1 sec)
-    reboot:
-      reboot_timeout: 1
+  # - name: remove default user for raspberry pi
+  #   user:
+  #     name: "{{ default_user }}"
+  #     state: absent
+  #     remove: yes
+  #   when: raspberry_pi == true
+  #   become_user: "{{ user }}"
+  #
+  # - name: remove default user for proxmox servers
+  #   user:
+  #     name: "{{ default_user }}"
+  #     state: absent
+  #     remove: yes
+  #   when: raspberry_pi == false
+  #   become_user: "{{ user }}"
 
-handlers:
-  - name: Reload SSH
-    service:
-      name: sshd
-      state: restarted
+  # - name: Reboot the machine (Wait for 60 sec)
+  #   reboot:
+  #     reboot_timeout: 60
+    # become_user: "{{ user }}"

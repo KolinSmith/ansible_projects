@@ -1,2 +1,5 @@
 ---
-# handlers file for provision_server
+  - name: Reload ssh
+    service:
+      name: sshd
+      state: restarted

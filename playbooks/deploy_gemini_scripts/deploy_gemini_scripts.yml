@@ -1,0 +1,65 @@
+---
+  - name: deploy gemini scripts
+    hosts: post_provision_servers
+    gather_facts: yes
+    become: yes
+    become_user: dax
+    vars:
+      - user: 'dax'
+      - dest: '/home/dax/scripts'
+    tasks:
+
+      - name: check if python3 is installed and try to install it. ignore error if you can't install
+        raw: test -e /usr/bin/python3 || (apt -y install python3)
+
+      - name: make folder for scripts
+        file:
+          path: "{{ dest }}"
+          state: directory
+          mode: 0755
+
+      - name: add gemini scripts
+        template:
+          src: /home/dax/code_base/ansible_projects/templates/gemini_api_scripts/{{ item }}.j2
+          dest: "{{ dest }}/{{ item }}.py"
+          owner: "{{ user }}"
+          mode: 0644
+        with_items:
+          - convert_gusd_to_usd
+          - buy_btc
+          - buy_eth
+          - withdraw_solo_account
+
+      - name: create cron jobs
+        block:
+          - name: create convert_gusd_to_usd job
+            cron:
+              name: convert_gusd_to_usd
+              minute: "5"
+              hour: "4"
+              day: "1,15"
+              job: "python3 {{ dest }}/convert_gusd_to_usd.py"
+
+          - name: create buy_btc job
+            cron:
+              name: buy_btc
+              minute: "10"
+              hour: "4"
+              day: "1,15"
+              job: "python3 {{ dest }}/buy_btc.py"
+
+          - name: create buy_eth job
+            cron:
+              name: buy_eth
+              minute: "15"
+              hour: "4"
+              day: "1,15"
+              job: "python3 {{ dest }}/buy_eth.py"
+
+          - name: create withdraw_solo_account job
+            cron:
+              name: withdraw_solo_account
+              minute: "0"
+              hour: "4"
+              day: "7,21"
+              job: "python3 {{ dest }}/withdraw_solo_account.py"

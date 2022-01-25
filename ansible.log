@@ -14337,3 +14337,369 @@ The offending line appears to be:
 2021-12-30 20:44:44,687 p=23383 u=root n=ansible | skipping: [shenzhou]
 2021-12-30 20:44:44,694 p=23383 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
 2021-12-30 20:44:44,696 p=23383 u=root n=ansible | shenzhou                   : ok=0    changed=0    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+2021-12-30 23:56:25,017 p=5309 u=root n=ansible | ERROR! We were unable to read either as JSON nor YAML, these are the errors we got from each:
+JSON: No JSON object could be decoded
+
+Syntax Error while loading YAML.
+  did not find expected <document start>
+
+The error appears to be in '/home/dax/code_base/ansible_projects/roles/provision_server/tasks/main.yml': line 187, column 1, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+
+handlers:
+^ here
+
+2021-12-30 23:56:53,709 p=5367 u=root n=ansible | ERROR! We were unable to read either as JSON nor YAML, these are the errors we got from each:
+JSON: No JSON object could be decoded
+
+Syntax Error while loading YAML.
+  did not find expected '-' indicator
+
+The error appears to be in '/home/dax/code_base/ansible_projects/roles/provision_server/tasks/main.yml': line 187, column 3, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+
+  handlers:
+  ^ here
+
+2021-12-30 23:57:49,747 p=5435 u=root n=ansible | ERROR! We were unable to read either as JSON nor YAML, these are the errors we got from each:
+JSON: No JSON object could be decoded
+
+Syntax Error while loading YAML.
+  did not find expected '-' indicator
+
+The error appears to be in '/home/dax/code_base/ansible_projects/roles/provision_server/tasks/main.yml': line 187, column 3, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+
+  handlers:
+  ^ here
+
+2021-12-30 23:58:06,384 p=5475 u=root n=ansible | ERROR! We were unable to read either as JSON nor YAML, these are the errors we got from each:
+JSON: No JSON object could be decoded
+
+Syntax Error while loading YAML.
+  found unacceptable key (unhashable type: 'AnsibleMapping')
+
+The error appears to be in '/home/dax/code_base/ansible_projects/roles/provision_server/tasks/main.yml': line 181, column 22, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+    set_fact:
+      default_user: {{ ansible_user }}
+                     ^ here
+We could be wrong, but this one looks like it might be an issue with
+missing quotes. Always quote template expression brackets when they
+start a value. For instance:
+
+    with_items:
+      - {{ foo }}
+
+Should be written as:
+
+    with_items:
+      - "{{ foo }}"
+
+2021-12-30 23:58:38,375 p=5526 u=root n=ansible | PLAY [server provision] *********************************************************************************************************
+2021-12-30 23:58:38,721 p=5526 u=root n=ansible | TASK [Gathering Facts] **********************************************************************************************************
+2021-12-30 23:58:39,224 p=5526 u=root n=ansible |  [ERROR]: User interrupted execution
+
+2021-12-31 00:00:13,320 p=5732 u=root n=ansible | ERROR! conflicting action statements: reboot, handlers
+
+The error appears to be in '/home/dax/code_base/ansible_projects/roles/provision_server/tasks/main.yml': line 183, column 5, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+
+  - name: Reboot the machine (Wait for 1 sec)
+    ^ here
+
+2021-12-31 00:00:41,586 p=5786 u=root n=ansible | ERROR! We were unable to read either as JSON nor YAML, these are the errors we got from each:
+JSON: No JSON object could be decoded
+
+Syntax Error while loading YAML.
+  did not find expected '-' indicator
+
+The error appears to be in '/home/dax/code_base/ansible_projects/roles/provision_server/tasks/main.yml': line 187, column 3, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+
+  handlers:
+  ^ here
+
+2021-12-31 00:01:28,550 p=5857 u=root n=ansible | ERROR! We were unable to read either as JSON nor YAML, these are the errors we got from each:
+JSON: No JSON object could be decoded
+
+Syntax Error while loading YAML.
+  did not find expected <document start>
+
+The error appears to be in '/home/dax/code_base/ansible_projects/roles/provision_server/tasks/main.yml': line 187, column 1, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+
+handlers:
+^ here
+
+2021-12-31 00:04:55,799 p=6125 u=root n=ansible | ERROR! We were unable to read either as JSON nor YAML, these are the errors we got from each:
+JSON: No JSON object could be decoded
+
+Syntax Error while loading YAML.
+  did not find expected '-' indicator
+
+The error appears to be in '/home/dax/code_base/ansible_projects/roles/provision_server/tasks/main.yml': line 187, column 3, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+
+  handlers:
+  ^ here
+
+2021-12-31 00:05:20,826 p=6167 u=root n=ansible | ERROR! The handlers/main.yml file for role 'provision_server' must contain a list of tasks
+
+The error appears to be in '/home/dax/code_base/ansible_projects/roles/provision_server/handlers/main.yml': line 2, column 3, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+---
+  handlers:
+  ^ here
+
+2021-12-31 00:05:34,420 p=6195 u=root n=ansible | ERROR! The handlers/main.yml file for role 'provision_server' must contain a list of tasks
+
+The error appears to be in '/home/dax/code_base/ansible_projects/roles/provision_server/handlers/main.yml': line 2, column 1, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+---
+handlers:
+^ here
+
+2021-12-31 00:05:47,265 p=6227 u=root n=ansible | PLAY [server provision] *********************************************************************************************************
+2021-12-31 00:05:47,608 p=6227 u=root n=ansible | TASK [Gathering Facts] **********************************************************************************************************
+2021-12-31 00:05:48,652 p=6227 u=root n=ansible |  [ERROR]: User interrupted execution
+
+2021-12-31 00:06:26,774 p=6294 u=root n=ansible | PLAY [server provision] *********************************************************************************************************
+2021-12-31 00:06:27,172 p=6294 u=root n=ansible | TASK [Gathering Facts] **********************************************************************************************************
+2021-12-31 00:06:41,411 p=6294 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:06:41,526 p=6294 u=root n=ansible | TASK [check_if_raspberry_pi : Test for raspberry pi /proc/cpuinfo] **************************************************************
+2021-12-31 00:06:45,301 p=6294 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:06:45,437 p=6294 u=root n=ansible | TASK [check_if_raspberry_pi : Test for raspberry pi /proc/device-tree/model] ****************************************************
+2021-12-31 00:06:49,467 p=6294 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:06:49,954 p=6294 u=root n=ansible | TASK [check_if_raspberry_pi : Set raspberry_pi fact to true] ********************************************************************
+2021-12-31 00:06:50,201 p=6294 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:06:50,326 p=6294 u=root n=ansible | TASK [bootstrap_python : check if python2 is installed & install if neccessary] *************************************************
+2021-12-31 00:06:50,646 p=6294 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:06:50,756 p=6294 u=root n=ansible | TASK [bootstrap_python : check if python3 is installed and try to install it. ignore error if you can't install] ****************
+2021-12-31 00:06:51,046 p=6294 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:06:51,147 p=6294 u=root n=ansible | TASK [provision_server : update repo cache (Debian)] ****************************************************************************
+2021-12-31 00:08:28,905 p=6294 u=root n=ansible | [WARNING]: The value True (type bool) in a string field was converted to 'True' (type string). If this does not look like what
+you expect, quote the entire value to ensure it does not change.
+
+2021-12-31 00:08:28,907 p=6294 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:08:29,041 p=6294 u=root n=ansible | TASK [provision_server : add packages I want] ***********************************************************************************
+2021-12-31 00:10:48,259 p=6294 u=root n=ansible |  [ERROR]: User interrupted execution
+
+2021-12-31 00:11:00,829 p=6697 u=root n=ansible | PLAY [server provision] *********************************************************************************************************
+2021-12-31 00:11:01,350 p=6697 u=root n=ansible | TASK [check_if_raspberry_pi : Test for raspberry pi /proc/cpuinfo] **************************************************************
+2021-12-31 00:11:07,648 p=6697 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:11:07,823 p=6697 u=root n=ansible | TASK [check_if_raspberry_pi : Test for raspberry pi /proc/device-tree/model] ****************************************************
+2021-12-31 00:11:13,680 p=6697 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:11:13,824 p=6697 u=root n=ansible | TASK [check_if_raspberry_pi : Set raspberry_pi fact to true] ********************************************************************
+2021-12-31 00:11:13,948 p=6697 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:11:14,124 p=6697 u=root n=ansible | TASK [bootstrap_python : check if python2 is installed & install if neccessary] *************************************************
+2021-12-31 00:11:14,504 p=6697 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:11:14,644 p=6697 u=root n=ansible | TASK [bootstrap_python : check if python3 is installed and try to install it. ignore error if you can't install] ****************
+2021-12-31 00:11:15,011 p=6697 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:11:15,179 p=6697 u=root n=ansible | TASK [provision_server : update repo cache (Debian)] ****************************************************************************
+2021-12-31 00:11:37,828 p=6697 u=root n=ansible | [WARNING]: The value True (type bool) in a string field was converted to 'True' (type string). If this does not look like what
+you expect, quote the entire value to ensure it does not change.
+
+2021-12-31 00:11:37,831 p=6697 u=root n=ansible | fatal: [shenzhou]: FAILED! => {"changed": false, "msg": "'/usr/bin/apt-get upgrade --with-new-pkgs --auto-remove' failed: E: Could not get lock /var/lib/dpkg/lock-frontend - open (11: Resource temporarily unavailable)\nE: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?\n", "rc": 100, "stdout": "", "stdout_lines": []}
+2021-12-31 00:11:37,832 p=6697 u=root n=ansible | ...ignoring
+2021-12-31 00:11:37,982 p=6697 u=root n=ansible | TASK [provision_server : add packages I want] ***********************************************************************************
+2021-12-31 00:12:03,434 p=6697 u=root n=ansible | fatal: [shenzhou]: FAILED! => {"cache_update_time": 1640930848, "cache_updated": false, "changed": false, "msg": "'/usr/bin/apt-get -y -o \"Dpkg::Options::=--force-confdef\" -o \"Dpkg::Options::=--force-confold\"      install 'zsh' 'powerline' 'fonts-powerline' 'git' 'dnsutils' 'acl' 'fzf' 'apt-transport-https' 'unattended-upgrades' 'tmux' 'cmatrix' 'neofetch' 'locate' 'vim' 'atop'' failed: E: Could not get lock /var/lib/dpkg/lock-frontend - open (11: Resource temporarily unavailable)\nE: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?\n", "rc": 100, "stderr": "E: Could not get lock /var/lib/dpkg/lock-frontend - open (11: Resource temporarily unavailable)\nE: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?\n", "stderr_lines": ["E: Could not get lock /var/lib/dpkg/lock-frontend - open (11: Resource temporarily unavailable)", "E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?"], "stdout": "", "stdout_lines": []}
+2021-12-31 00:12:03,440 p=6697 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
+2021-12-31 00:12:03,442 p=6697 u=root n=ansible | shenzhou                   : ok=6    changed=2    unreachable=0    failed=1    skipped=0    rescued=0    ignored=1   
+2021-12-31 00:13:32,658 p=6935 u=root n=ansible | PLAY [server provision] *********************************************************************************************************
+2021-12-31 00:13:33,145 p=6935 u=root n=ansible | TASK [check_if_raspberry_pi : Test for raspberry pi /proc/cpuinfo] **************************************************************
+2021-12-31 00:13:39,517 p=6935 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:13:39,660 p=6935 u=root n=ansible | TASK [check_if_raspberry_pi : Test for raspberry pi /proc/device-tree/model] ****************************************************
+2021-12-31 00:13:42,613 p=6935 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:13:42,760 p=6935 u=root n=ansible | TASK [check_if_raspberry_pi : Set raspberry_pi fact to true] ********************************************************************
+2021-12-31 00:13:42,899 p=6935 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:13:43,038 p=6935 u=root n=ansible | TASK [bootstrap_python : check if python2 is installed & install if neccessary] *************************************************
+2021-12-31 00:13:43,295 p=6935 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:13:43,437 p=6935 u=root n=ansible | TASK [bootstrap_python : check if python3 is installed and try to install it. ignore error if you can't install] ****************
+2021-12-31 00:13:43,714 p=6935 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:13:43,854 p=6935 u=root n=ansible | TASK [provision_server : update repo cache (Debian)] ****************************************************************************
+2021-12-31 00:13:54,587 p=6935 u=root n=ansible | [WARNING]: The value True (type bool) in a string field was converted to 'True' (type string). If this does not look like what
+you expect, quote the entire value to ensure it does not change.
+
+2021-12-31 00:13:54,590 p=6935 u=root n=ansible | fatal: [shenzhou]: FAILED! => {"changed": false, "msg": "'/usr/bin/apt-get upgrade --with-new-pkgs --auto-remove' failed: E: dpkg was interrupted, you must manually run 'sudo dpkg --configure -a' to correct the problem. \n", "rc": 100, "stdout": "", "stdout_lines": []}
+2021-12-31 00:13:54,591 p=6935 u=root n=ansible | ...ignoring
+2021-12-31 00:13:54,737 p=6935 u=root n=ansible | TASK [provision_server : add packages I want] ***********************************************************************************
+2021-12-31 00:14:05,567 p=6935 u=root n=ansible | fatal: [shenzhou]: FAILED! => {"cache_update_time": 1640930848, "cache_updated": false, "changed": false, "msg": "'/usr/bin/apt-get -y -o \"Dpkg::Options::=--force-confdef\" -o \"Dpkg::Options::=--force-confold\"      install 'zsh' 'powerline' 'fonts-powerline' 'git' 'dnsutils' 'acl' 'fzf' 'apt-transport-https' 'unattended-upgrades' 'tmux' 'cmatrix' 'neofetch' 'locate' 'vim' 'atop'' failed: E: dpkg was interrupted, you must manually run 'sudo dpkg --configure -a' to correct the problem. \n", "rc": 100, "stderr": "E: dpkg was interrupted, you must manually run 'sudo dpkg --configure -a' to correct the problem. \n", "stderr_lines": ["E: dpkg was interrupted, you must manually run 'sudo dpkg --configure -a' to correct the problem. "], "stdout": "", "stdout_lines": []}
+2021-12-31 00:14:05,572 p=6935 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
+2021-12-31 00:14:05,574 p=6935 u=root n=ansible | shenzhou                   : ok=6    changed=2    unreachable=0    failed=1    skipped=0    rescued=0    ignored=1   
+2021-12-31 00:15:59,780 p=7148 u=root n=ansible | PLAY [server provision] *********************************************************************************************************
+2021-12-31 00:16:00,270 p=7148 u=root n=ansible | TASK [check_if_raspberry_pi : Test for raspberry pi /proc/cpuinfo] **************************************************************
+2021-12-31 00:16:03,912 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:16:04,078 p=7148 u=root n=ansible | TASK [check_if_raspberry_pi : Test for raspberry pi /proc/device-tree/model] ****************************************************
+2021-12-31 00:16:07,024 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:16:07,168 p=7148 u=root n=ansible | TASK [check_if_raspberry_pi : Set raspberry_pi fact to true] ********************************************************************
+2021-12-31 00:16:07,305 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:16:07,449 p=7148 u=root n=ansible | TASK [bootstrap_python : check if python2 is installed & install if neccessary] *************************************************
+2021-12-31 00:16:08,949 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:16:09,094 p=7148 u=root n=ansible | TASK [bootstrap_python : check if python3 is installed and try to install it. ignore error if you can't install] ****************
+2021-12-31 00:16:09,356 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:16:09,500 p=7148 u=root n=ansible | TASK [provision_server : update repo cache (Debian)] ****************************************************************************
+2021-12-31 00:16:26,897 p=7148 u=root n=ansible | [WARNING]: The value True (type bool) in a string field was converted to 'True' (type string). If this does not look like what
+you expect, quote the entire value to ensure it does not change.
+
+2021-12-31 00:16:26,899 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:16:27,052 p=7148 u=root n=ansible | TASK [provision_server : add packages I want] ***********************************************************************************
+2021-12-31 00:16:37,748 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:16:37,890 p=7148 u=root n=ansible | TASK [provision_server : update PATH variable] **********************************************************************************
+2021-12-31 00:16:41,565 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:16:41,722 p=7148 u=root n=ansible | TASK [provision_server : set hostname] ******************************************************************************************
+2021-12-31 00:16:45,456 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:16:45,605 p=7148 u=root n=ansible | TASK [provision_server : change /etc/hosts file to correct hostname] ************************************************************
+2021-12-31 00:16:49,373 p=7148 u=root n=ansible | [WARNING]: Module remote_tmp /root/.ansible/tmp did not exist and was created with a mode of 0700, this may cause issues when
+running as another user. To avoid this, create the remote_tmp dir with the correct permissions manually
+
+2021-12-31 00:16:49,375 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:16:49,523 p=7148 u=root n=ansible | TASK [provision_server : remove files that came with the template and need to be reset] *****************************************
+2021-12-31 00:16:53,371 p=7148 u=root n=ansible | changed: [shenzhou] => (item=/etc/machine-id)
+2021-12-31 00:16:56,386 p=7148 u=root n=ansible | changed: [shenzhou] => (item=/var/lib/dbus/machine-id)
+2021-12-31 00:16:56,556 p=7148 u=root n=ansible | TASK [provision_server : reset the machine ID] **********************************************************************************
+2021-12-31 00:16:59,615 p=7148 u=root n=ansible | changed: [shenzhou] => (item=dbus-uuidgen --ensure=/etc/machine-id)
+2021-12-31 00:17:02,606 p=7148 u=root n=ansible | changed: [shenzhou] => (item=dbus-uuidgen --ensure)
+2021-12-31 00:17:02,755 p=7148 u=root n=ansible | TASK [provision_server : regenerate ssh keys] ***********************************************************************************
+2021-12-31 00:17:05,781 p=7148 u=root n=ansible | changed: [shenzhou] => (item=rm /etc/ssh/ssh_host_*)
+2021-12-31 00:17:37,767 p=7148 u=root n=ansible | changed: [shenzhou] => (item=dpkg-reconfigure openssh-server)
+2021-12-31 00:17:37,776 p=7148 u=root n=ansible | [WARNING]: Consider using the file module with state=absent rather than running 'rm'.  If you need to use command because file
+is insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in ansible.cfg to get rid of this
+message.
+
+2021-12-31 00:17:37,916 p=7148 u=root n=ansible | TASK [provision_server : add admin group] ***************************************************************************************
+2021-12-31 00:17:41,807 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:17:42,028 p=7148 u=root n=ansible | TASK [provision_server : add dax group] *****************************************************************************************
+2021-12-31 00:17:45,217 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:17:45,406 p=7148 u=root n=ansible | TASK [provision_server : add local user dax] ************************************************************************************
+2021-12-31 00:17:50,242 p=7148 u=root n=ansible | [WARNING]: The input password appears not to have been hashed. The 'password' argument must be encrypted for this module to work
+properly.
+
+2021-12-31 00:17:50,243 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:17:50,415 p=7148 u=root n=ansible | TASK [provision_server : Add local user dax to sudo] ****************************************************************************
+2021-12-31 00:17:53,459 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:17:53,625 p=7148 u=root n=ansible | TASK [provision_server : add SSH public key for local user] *********************************************************************
+2021-12-31 00:17:59,083 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:17:59,276 p=7148 u=root n=ansible | TASK [provision_server : add sshd config file] **********************************************************************************
+2021-12-31 00:18:09,715 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:18:09,857 p=7148 u=root n=ansible | TASK [provision_server : create ~/.zshrc file for local user] *******************************************************************
+2021-12-31 00:18:12,949 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:18:13,090 p=7148 u=root n=ansible | TASK [provision_server : Check for Oh My ZSH Installation] **********************************************************************
+2021-12-31 00:18:16,024 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:18:18,865 p=7148 u=root n=ansible | TASK [provision_server : Install Oh My ZSH] *************************************************************************************
+2021-12-31 00:18:43,546 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:18:43,688 p=7148 u=root n=ansible | TASK [provision_server : Checkout powerlevel10k repo and use refspec to fetch all pull requests] ********************************
+2021-12-31 00:20:02,762 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:20:02,908 p=7148 u=root n=ansible | TASK [provision_server : Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests] **************************
+2021-12-31 00:20:13,359 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:20:13,505 p=7148 u=root n=ansible | TASK [install_bat : Test for raspberry pi /proc/cpuinfo] ************************************************************************
+2021-12-31 00:20:16,451 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:20:16,595 p=7148 u=root n=ansible | TASK [install_bat : Test for raspberry pi /proc/device-tree/model] **************************************************************
+2021-12-31 00:20:19,574 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:20:19,720 p=7148 u=root n=ansible | TASK [install_bat : Set raspberry_pi fact to true] ******************************************************************************
+2021-12-31 00:20:19,816 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:20:19,959 p=7148 u=root n=ansible | TASK [install_bat : Check that the /usr/local/bin/bat exists] *******************************************************************
+2021-12-31 00:20:22,848 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:20:22,991 p=7148 u=root n=ansible | TASK [install_bat : download latest bat binary into /tmp] ***********************************************************************
+2021-12-31 00:20:23,086 p=7148 u=root n=ansible | skipping: [shenzhou]
+2021-12-31 00:20:23,247 p=7148 u=root n=ansible | TASK [install_bat : download latest bat binary into /tmp] ***********************************************************************
+2021-12-31 00:20:29,437 p=7148 u=root n=ansible | [WARNING]: Consider using the get_url or uri module rather than running 'curl'.  If you need to use command because get_url or
+uri is insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in ansible.cfg to get rid of
+this message.
+
+2021-12-31 00:20:29,439 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:20:29,581 p=7148 u=root n=ansible | TASK [install_bat : make folder to put unzipped bat binary in] ******************************************************************
+2021-12-31 00:20:32,650 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:20:32,803 p=7148 u=root n=ansible | TASK [install_bat : unzip bat binary] *******************************************************************************************
+2021-12-31 00:20:43,442 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:20:43,613 p=7148 u=root n=ansible | TASK [install_bat : move bat binary into /usr/local/bin] ************************************************************************
+2021-12-31 00:20:46,813 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:20:46,961 p=7148 u=root n=ansible | TASK [install_bat : move bat man page into /usr/share/man/man1] *****************************************************************
+2021-12-31 00:20:49,938 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:20:50,090 p=7148 u=root n=ansible | TASK [install_bat : move bat shell completetion files into /usr/local/share/zsh/site-functions] *********************************
+2021-12-31 00:20:53,117 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:20:53,304 p=7148 u=root n=ansible | TASK [install_bat : delete files from /tmp] *************************************************************************************
+2021-12-31 00:20:56,407 p=7148 u=root n=ansible | changed: [shenzhou] => (item=bat_binary)
+2021-12-31 00:20:59,367 p=7148 u=root n=ansible | changed: [shenzhou] => (item=bat_binary.zip)
+2021-12-31 00:20:59,520 p=7148 u=root n=ansible | TASK [install_exa : Test for raspberry pi /proc/cpuinfo] ************************************************************************
+2021-12-31 00:20:59,591 p=7148 u=root n=ansible | skipping: [shenzhou]
+2021-12-31 00:20:59,735 p=7148 u=root n=ansible | TASK [install_exa : Test for raspberry pi /proc/device-tree/model] **************************************************************
+2021-12-31 00:20:59,809 p=7148 u=root n=ansible | skipping: [shenzhou]
+2021-12-31 00:20:59,953 p=7148 u=root n=ansible | TASK [install_exa : Set raspberry_pi fact to true] ******************************************************************************
+2021-12-31 00:21:00,024 p=7148 u=root n=ansible | skipping: [shenzhou]
+2021-12-31 00:21:00,168 p=7148 u=root n=ansible | TASK [install_exa : Check that the /usr/local/bin/exa exists] *******************************************************************
+2021-12-31 00:21:00,238 p=7148 u=root n=ansible | skipping: [shenzhou]
+2021-12-31 00:21:00,381 p=7148 u=root n=ansible | TASK [install_exa : download latest exa binary into /tmp] ***********************************************************************
+2021-12-31 00:21:00,458 p=7148 u=root n=ansible | skipping: [shenzhou]
+2021-12-31 00:21:00,600 p=7148 u=root n=ansible | TASK [install_exa : download latest exa binary into /tmp] ***********************************************************************
+2021-12-31 00:21:00,676 p=7148 u=root n=ansible | skipping: [shenzhou]
+2021-12-31 00:21:00,820 p=7148 u=root n=ansible | TASK [install_exa : make folder to put unzipped exa binary in] ******************************************************************
+2021-12-31 00:21:00,891 p=7148 u=root n=ansible | skipping: [shenzhou]
+2021-12-31 00:21:01,034 p=7148 u=root n=ansible | TASK [install_exa : unzip exa binary] *******************************************************************************************
+2021-12-31 00:21:01,110 p=7148 u=root n=ansible | skipping: [shenzhou]
+2021-12-31 00:21:01,252 p=7148 u=root n=ansible | TASK [install_exa : move exa binary into /usr/local/bin] ************************************************************************
+2021-12-31 00:21:01,326 p=7148 u=root n=ansible | skipping: [shenzhou]
+2021-12-31 00:21:01,471 p=7148 u=root n=ansible | TASK [install_exa : move exa man page into /usr/share/man/man1] *****************************************************************
+2021-12-31 00:21:01,675 p=7148 u=root n=ansible | TASK [install_exa : move exa shell completetion files into /usr/local/share/zsh/site-functions] *********************************
+2021-12-31 00:21:01,751 p=7148 u=root n=ansible | skipping: [shenzhou]
+2021-12-31 00:21:01,893 p=7148 u=root n=ansible | TASK [install_exa : delete files from /tmp] *************************************************************************************
+2021-12-31 00:21:02,001 p=7148 u=root n=ansible | skipping: [shenzhou] => (item=exa_binary) 
+2021-12-31 00:21:02,031 p=7148 u=root n=ansible | skipping: [shenzhou] => (item=exa_binary.zip) 
+2021-12-31 00:21:02,192 p=7148 u=root n=ansible | TASK [import_dotfiles : clone dotfiles repository to localhost] *****************************************************************
+2021-12-31 00:21:04,393 p=7148 u=root n=ansible | ok: [shenzhou -> localhost]
+2021-12-31 00:21:04,547 p=7148 u=root n=ansible | TASK [import_dotfiles : copy dotfiles into ~/] **********************************************************************************
+2021-12-31 00:21:11,219 p=7148 u=root n=ansible | changed: [shenzhou] => (item=.zshrc)
+2021-12-31 00:21:17,688 p=7148 u=root n=ansible | changed: [shenzhou] => (item=.p10k.zsh)
+2021-12-31 00:21:24,003 p=7148 u=root n=ansible | changed: [shenzhou] => (item=.tmux.conf)
+2021-12-31 00:21:30,448 p=7148 u=root n=ansible | changed: [shenzhou] => (item=.wgetrc)
+2021-12-31 00:21:36,818 p=7148 u=root n=ansible | changed: [shenzhou] => (item=.vimrc)
+2021-12-31 00:21:37,015 p=7148 u=root n=ansible | TASK [import_dotfiles : Remove ls aliases from .zshrc if exa isn't installed] ***************************************************
+2021-12-31 00:21:40,161 p=7148 u=root n=ansible | changed: [shenzhou] => (item=ls="exa --git")
+2021-12-31 00:21:43,196 p=7148 u=root n=ansible | changed: [shenzhou] => (item=lsd="exa -a -l -i --git -H")
+2021-12-31 00:21:43,366 p=7148 u=root n=ansible | TASK [import_dotfiles : delete dotfiles from /tmp] ******************************************************************************
+2021-12-31 00:21:46,379 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:21:46,522 p=7148 u=root n=ansible | TASK [import_dotfiles : source new .zshrc file] *********************************************************************************
+2021-12-31 00:21:49,551 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:21:49,696 p=7148 u=root n=ansible | TASK [provision_server : Check if tmuxinator plugin manager is installed.] ******************************************************
+2021-12-31 00:21:52,598 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:21:52,745 p=7148 u=root n=ansible | TASK [provision_server : Create tmux plugin directory] **************************************************************************
+2021-12-31 00:21:55,808 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:21:55,953 p=7148 u=root n=ansible | TASK [provision_server : Install tmux plugin manager] ***************************************************************************
+2021-12-31 00:22:04,251 p=7148 u=root n=ansible | changed: [shenzhou]
+2021-12-31 00:22:04,430 p=7148 u=root n=ansible | TASK [provision_server : Set default user fact] *********************************************************************************
+2021-12-31 00:22:04,521 p=7148 u=root n=ansible | ok: [shenzhou]
+2021-12-31 00:22:04,673 p=7148 u=root n=ansible | TASK [provision_server : Reboot the machine (Wait for 1 sec)] *******************************************************************
+2021-12-31 00:22:19,339 p=7148 u=root n=ansible | fatal: [shenzhou]: FAILED! => {"changed": false, "elapsed": 2, "msg": "Timed out waiting for last boot time check (timeout=1)", "rebooted": true}
+2021-12-31 00:22:19,343 p=7148 u=root n=ansible | RUNNING HANDLER [provision_server : Reload ssh] *********************************************************************************
+2021-12-31 00:22:19,351 p=7148 u=root n=ansible | PLAY RECAP **********************************************************************************************************************
+2021-12-31 00:22:19,353 p=7148 u=root n=ansible | shenzhou                   : ok=44   changed=29   unreachable=0    failed=1    skipped=13   rescued=0    ignored=0   

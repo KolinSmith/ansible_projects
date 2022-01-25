@@ -9,10 +9,12 @@
       - role: bootstrap_python
       - role: provision_server
 
-  - name: post server provision
-    hosts: post_provision_servers
+  - name: proxmoxServerProvision
+    hosts: provision_servers
     gather_facts: yes
     become: yes
-    roles:
-      - role: check_if_raspberry_pi
-      - role: remove_default_user
+    vars_prompt:
+    # - name: hostname
+    #   prompt: What do you want to set as the hostname?
+    #   private: no
+    vars:

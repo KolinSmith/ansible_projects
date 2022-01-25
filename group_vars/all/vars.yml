@@ -17,3 +17,7 @@ k3s_mysql_password: "{{ vault_k3s_mysql_password }}"
 dax_password: "{{ vault_dax_password }}"
 
 keepalived_password: "{{ vault_keepalived_password }}"
+
+gemini_primary_api_key: "{{ vault_gemini_primary_api_key}}"
+
+gemini_primary_secret_key: "{{ vault_gemini_primary_secret_key}}"

@@ -1,6 +1,6 @@
 ---
   - name: dns_load_balancer_provision
-    hosts: provision_servers
+    hosts: post_provision_servers
     gather_facts: yes
     become: yes
     vars:

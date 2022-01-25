@@ -1,13 +1,10 @@
 ---
   - name: server provision
-    hosts: provision_servers
+    hosts: post_provision_servers
     gather_facts: yes
     become: yes
-    vars_files:
-      - vars/server_provision_script_vars.yml
     roles:
-      - role: bootstrap_python
-      - role: provision_server
+      - role: check_if_raspberry_pi
 
   - name: post server provision
     hosts: post_provision_servers
@@ -15,4 +12,3 @@
     become: yes
     roles:
       - role: check_if_raspberry_pi
-      - role: remove_default_user

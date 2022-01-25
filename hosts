@@ -13,7 +13,7 @@ defiant ansible_host=192.168.9.3 ansible_ssh_private_key_file=/home/dax/.ssh/id_
 
 [load_balancers]
 stargazer ansible_host=192.168.9.6
-# shenzhou ansible_host=192.168.9.5
+shenzhou ansible_host=192.168.9.5
 
 [load_balancers:vars]
 ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa
@@ -40,34 +40,39 @@ ansible_python_interpreter=/usr/bin/python2.7
 [provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-shenzhou ansible_host=192.168.9.5
+test ansible_host=192.168.9.156
 
 [provision_servers:vars]
-
 #pre provisioning
-#######################################################################
-# ansible_connection=ssh
-#
-# # ansible_ssh_pass={{ proxmox_template_password }}
-# ansible_ssh_pass=raspberry
-#
-# ansible_user=pi
-# # ansible_user=serveradmin
-#
-# # ansible_password={{ proxmox_template_password }}
-# ansible_password=raspberry
-#
-# ansible_become=yes
-#
-# ansible_become_method=sudo
-#
-# # ansible_become_password={{ proxmox_template_password }}
-# ansible_become_password=raspberry
-#
-# ansible_python_interpreter=/usr/bin/python3
-# #ansible_python_interpreter=/usr/bin/python
+######################################################################
+ansible_connection=ssh
+
+# ansible_ssh_pass={{ proxmox_template_password }}
+ansible_ssh_pass=raspberry
+
+ansible_user=pi
+# ansible_user=serveradmin
+
+# ansible_password={{ proxmox_template_password }}
+ansible_password=raspberry
+
+ansible_become=yes
+
+ansible_become_method=sudo
+
+# ansible_become_password={{ proxmox_template_password }}
+ansible_become_password=raspberry
+
+ansible_python_interpreter=/usr/bin/python3
+#ansible_python_interpreter=/usr/bin/python
 #######################################################################
 
+[post_provision_servers]
+#CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
+#OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
+post_test ansible_host=192.168.9.156
+
+[post_provision_servers:vars]
 #post provisioning
 #######################################################################
 ansible_connection=ssh

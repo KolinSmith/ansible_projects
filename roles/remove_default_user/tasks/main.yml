@@ -1,17 +1,14 @@
 ---
-    # - name: remove default user for raspberry pi
-    #   user:
-    #     name: "pi"
-    #     state: absent
-    #     remove: yes
-    #   when: raspberry_pi == true
-
-    - debug: msg="Here is the user " {{ default_user }}
+    - name: remove default user for raspberry pi
+      user:
+        name: "pi"
+        state: absent
+        remove: yes
       when: raspberry_pi == true
-    #
-    # - name: remove default user for proxmox servers
-    #   user:
-    #     name: "serveradmin"
-    #     state: absent
-    #     remove: yes
-    #   when: raspberry_pi == false
+
+    - name: remove default user for proxmox servers
+      user:
+        name: "serveradmin"
+        state: absent
+        remove: yes
+      when: raspberry_pi == false

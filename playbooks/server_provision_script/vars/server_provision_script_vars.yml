@@ -25,4 +25,4 @@ necessary_packages:
   - locate
   - vim
   - atop
-  default_user: ''
+  - bpytop
