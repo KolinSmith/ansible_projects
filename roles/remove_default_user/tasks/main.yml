@@ -1,4 +1,7 @@
 ---
+    - name: kill processes used by pi user
+      shell: sudo pkill -u pi
+
     - name: remove default user for raspberry pi
       user:
         name: "pi"
@@ -6,7 +9,7 @@
         remove: yes
       when: raspberry_pi == true
 
-    - name: remove default user for proxmox servers
+    - name: remove default user for proxmox vms
       user:
         name: "serveradmin"
         state: absent

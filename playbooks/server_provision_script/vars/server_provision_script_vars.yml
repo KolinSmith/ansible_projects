@@ -25,4 +25,3 @@ necessary_packages:
   - locate
   - vim
   - atop
-  - bpytop
