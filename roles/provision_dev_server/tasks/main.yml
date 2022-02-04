@@ -1,0 +1,80 @@
+---
+  - name: Create code_base directory
+    file:
+      state: directory
+      path: /home/{{ user }}/code_base
+
+  - name: clone code_base repository to localhost
+    git:
+      repo: "{{ code_base_repo }}"
+      dest: /tmp/tmp-code-base
+      accept_hostkey: yes
+      force: yes
+      recursive: no
+      key_file: /home/dax/.ssh/id_ecdsa
+    delegate_to: localhost
+    run_once: true
+
+  - name: copy code_base into ~/code_base
+    copy:
+      src: /tmp/tmp-code-base/{{ item }}
+      dest: "/home/{{ user }}/code_base/{{ item }}"
+      owner: "{{ user }}"
+      group: "admin"
+    with_items:
+      - deprecated_playbooks
+      - facts
+      - group_vars
+      - playbooks
+      - python_scripts
+      - roles
+      - shell_scripts
+      - templates
+      - README.md
+      - ansible.cfg
+      - ansible.cfg.EXAMPLE
+      - ansible.log
+      - hosts
+      - hosts.yml.EXAMPLE
+      - k3s_hosts
+
+  - name: Remove ls aliases from .zshrc if exa isn't installed
+    lineinfile:
+      path: /home/dax/.zshrc
+      regexp: "{{ item }}"
+      state: absent
+      backup: yes
+    with_items:
+      - ls="exa --git"
+      - lsd="exa -a -l -i --git -H"
+   #when raspberry not pi 1 or pi zero which are both armv6l
+    when: not (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
+
+  - name: delete dotfiles from /tmp
+    file:
+      state: absent
+      path: /tmp/tmp-code-base
+
+  - name: create cron jobs
+    block:
+      - name: create github_backup job
+        cron:
+          name: github_backup
+          minute: "0"
+          hour: "4"
+          job: "~/code_base/GitHub-Backup/github_backup/github_backup.py KolinSmith -p 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 ~/github_backups && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/0e28c1ba-2933-4981-96f3-5a8634c93f2c"
+
+      # - name: create piHoleUpdate job
+      #   cron:
+      #     name: piHoleUpdate
+      #     minute: "0"
+      #     hour: "3"
+      #     day: "3"
+      #     job: "ansible-playbook /home/dax/code_base/ansible_projects/playbooks/piHoleUpdate/piHoleUpdate.yml -i /home/dax/code_base/ansible_projects/hosts"
+
+      - name: create reconnectUnifi job
+        cron:
+          name: reconnectUnifi
+          minute: "0"
+          hour: "2"
+          job: "ansible-playbook /home/dax/code_base/ansible_projects/playbooks/reconnectUnifi/reconnectUnifi.yml && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/fde13bd7-10af-4762-b3d3-112c805b3e33"

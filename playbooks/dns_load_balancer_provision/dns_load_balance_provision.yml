@@ -12,6 +12,14 @@
       #learned the hard way that when installing dnsdist on the raspberry pi that you need to make sure your distro is supported
       #I had installed raspbian bullseye on the pi zeroes, but dndist only had a build for raspbian buster so I had to reinstall with buster
 
+    - name: add SSH public key for borg so it can login to make backups
+      authorized_key:
+          user: "{{ user }}"
+          key: "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOax0ZYUe5CpSHS+h4dPYEOpZs/aUbUol5b4ypwPV9jEdNsBUateQhzwtSXZJbosW4VpGIBtfQVhFgaJri2Fftc= root@Borg"
+          state: present
+          manage_dir: yes
+
+
   ############################################################################################
       - name: Test for raspberry pi /proc/cpuinfo
         command: grep -E "Raspberry Pi|BCM2708|BCM2709|BCM2835|BCM2836" /proc/cpuinfo

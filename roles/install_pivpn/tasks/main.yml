@@ -1,0 +1,22 @@
+---
+  - name: download pivpn install.sh
+    get_url:
+      url: https://install.pivpn.io
+      dest: /tmp/install.sh
+      mode: 0755
+
+  - name: add options.conf file for unattended install
+    template:
+      src: /home/dax/code_base/ansible_projects/templates/pivpn_options.j2
+      dest: /tmp/options.conf
+
+  - name: run install script with unattended
+    shell: /tmp/install.sh --unattended /tmp/options.conf
+
+  - name: remove files used for install
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+      - /tmp/install.sh
+      - /tmp/options.conf

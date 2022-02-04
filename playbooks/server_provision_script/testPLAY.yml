@@ -1,14 +1,14 @@
 ---
-  - name: server provision
+  - name: install i2p
     hosts: post_provision_servers
     gather_facts: yes
     become: yes
     roles:
-      - role: check_if_raspberry_pi
+      - role: install_i2p
 
-  - name: post server provision
-    hosts: post_provision_servers
-    gather_facts: yes
-    become: yes
-    roles:
-      - role: check_if_raspberry_pi
+  # - name: post server provision
+  #   hosts: post_provision_servers
+  #   gather_facts: yes
+  #   become: yes
+  #   roles:
+  #     - role: check_if_raspberry_pi

@@ -1,0 +1,21 @@
+---
+  - name: download pihole install.sh
+    get_url:
+      url: https://install.pi-hole.net
+      dest: /tmp/install.sh
+      mode: 0755
+
+  - name: add setupVars.conf file for unattended install
+    template:
+      src: /home/dax/code_base/ansible_projects/templates/pihole_setup_vars.j2
+      dest: /etc/pihole/setupVars.conf
+
+  - name: run install script with unattended
+    shell: /tmp/install.sh --unattended
+
+  - name: remove files used for install
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+      - /tmp/install.sh

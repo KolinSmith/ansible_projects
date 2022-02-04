@@ -95,11 +95,18 @@
       validate: 'visudo -cf %s'
 
   - name: add SSH public key for local user
+    # authorized_key:
+    #     user: "{{ user }}"
+    #     key: "{{ lookup('file', '/home/dax/.ssh/id_ecdsa.pub') }}"
+    #     state: present
+    #     manage_dir: yes
     authorized_key:
         user: "{{ user }}"
-        key: "{{ lookup('file', '/home/dax/.ssh/id_ecdsa.pub') }}"
         state: present
+        key: '{{ item }}'
         manage_dir: yes
+    with_file:
+      - {{ public_keys }}
 
 #might end up using the one from the dotfiles
   - name: add sshd config file

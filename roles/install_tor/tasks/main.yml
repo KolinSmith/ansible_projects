@@ -1,0 +1,20 @@
+---
+  - name: install tor
+    apt:
+      name: "{{ necessary_packages }}"
+      state: latest
+
+  - name: stop tor
+    service:
+      name: tor
+      state: stopped
+
+  - name: add in my torrc file
+    template:
+      src: /home/dax/code_base/ansible_projects/templates/torrc.j2
+      dest: /etc/tor/torrc
+
+  - name: start tor
+    service:
+      name: tor
+      state: start

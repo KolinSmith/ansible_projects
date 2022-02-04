@@ -1,0 +1,20 @@
+---
+  - name: install i2pd
+    apt:
+      name: "{{ necessary_packages }}"
+      state: latest
+
+  - name: stop i2pd
+    service:
+      name: i2pd
+      state: stopped
+
+  - name: add in my i2pd file
+    template:
+      src: /home/dax/code_base/ansible_projects/templates/i2pd.j2
+      dest: /etc/i2pd/i2pd.conf
+
+  - name: start i2pd
+    service:
+      name: i2pd
+      state: started
