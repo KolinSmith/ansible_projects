@@ -1,4 +1,9 @@
 ---
+  - name: install cups
+    apt:
+      name: "cups"
+      state: latest
+
   - name: Create code_base directory
     file:
       state: directory
@@ -62,7 +67,7 @@
           name: github_backup
           minute: "0"
           hour: "4"
-          job: "~/code_base/GitHub-Backup/github_backup/github_backup.py KolinSmith -p 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 ~/github_backups && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/0e28c1ba-2933-4981-96f3-5a8634c93f2c"
+          job: "~/code_base/GitHub-Backup/github_backup/github_backup.py KolinSmith -p {{ github_personal_access_token }} ~/github_backups && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/0e28c1ba-2933-4981-96f3-5a8634c93f2c"
 
       # - name: create piHoleUpdate job
       #   cron:

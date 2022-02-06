@@ -21,3 +21,7 @@ keepalived_password: "{{ vault_keepalived_password }}"
 gemini_primary_api_key: "{{ vault_gemini_primary_api_key}}"
 
 gemini_primary_secret_key: "{{ vault_gemini_primary_secret_key}}"
+
+github_personal_access_token: "{{ vault_github_personal_access_token }}"
+
+prowl_api_key: "{{ vault_prowl_api_key }}"

@@ -6,6 +6,10 @@
   #   changed_when: false
   #   when: ansible_distribution == "CentOS"
 
+  - name: set timezone to America/Chicago
+    timezone:
+      name: America/Chicago
+
   - name: update repo cache (Debian)
     tags: always
     apt:

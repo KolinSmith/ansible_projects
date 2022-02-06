@@ -38,7 +38,7 @@
               minute: "5"
               hour: "4"
               day: "1,15"
-              job: "python3 {{ dest }}/convert_gusd_to_usd.py"
+              job: "{{ dest }}/convert_gusd_to_usd.py && curl --silent "https://api.prowlapp.com/publicapi/add" --form apikey="{{ prowl_api_key }}" --form application="Shenzhou" --form event="Convert GUSD to USD" --form priority="0" >/dev/null 2>&1"
 
           - name: create buy_btc job
             cron:
@@ -46,7 +46,7 @@
               minute: "10"
               hour: "4"
               day: "1,15"
-              job: "python3 {{ dest }}/buy_btc.py"
+              job: "{{ dest }}/buy_btc.py && curl --silent "https://api.prowlapp.com/publicapi/add" --form apikey="{{ prowl_api_key }}" --form application="Shenzhou" --form event="Bought some BTC" --form priority="0" >/dev/null 2>&1"
 
           - name: create buy_eth job
             cron:
@@ -54,7 +54,7 @@
               minute: "15"
               hour: "4"
               day: "1,15"
-              job: "python3 {{ dest }}/buy_eth.py"
+              job: "{{ dest }}/buy_eth.py && curl --silent "https://api.prowlapp.com/publicapi/add" --form apikey="{{ prowl_api_key }}" --form application="Shenzhou" --form event="Bought some ETH" --form priority="0" >/dev/null 2>&1"
 
           - name: create withdraw_solo_account job
             cron:
@@ -62,4 +62,4 @@
               minute: "0"
               hour: "4"
               day: "7,21"
-              job: "python3 {{ dest }}/withdraw_solo_account.py"
+              job: "{{ dest }}/withdraw_solo_account.py && curl --silent "https://api.prowlapp.com/publicapi/add" --form apikey="{{ prowl_api_key }}" --form application="Shenzhou" --form event="Withdrew all crypto to Celsius" --form priority="0" >/dev/null 2>&1"
