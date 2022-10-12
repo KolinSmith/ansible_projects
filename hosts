@@ -1,11 +1,23 @@
 [unifi_devices]
-ubntSW ansible_host=192.168.3.32
-ubntAP ansible_host=192.168.3.10
+ubntSW ansible_host=192.168.3.247
+ubntAP ansible_host=192.168.3.248
 
 [unifi_devices:vars]
 ansible_connection=ssh
 ansible_user=admin
 ansible_ssh_private_key_file=/home/dax/.ssh/id_rsa
+
+[windows_test]
+window_node_1 ansible_host=192.168.9.172
+
+[windows]
+enterprise ansible_host=192.168.3.3 
+
+[windows:vars]
+ansible_connection=winrm 
+ansible_user=kolin 
+ansible_password=r$eBQNgc5U&A2at8kDwpWo.KzLT5NvHd 
+ansible_winrm_server_cert_validation=ignore
 
 [dns_servers]
 ds9 ansible_host=192.168.9.4 ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa ansible_user=dax

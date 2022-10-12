@@ -1,0 +1,170 @@
+---
+configure_explorer: true
+configure_hostname: false
+custom_hostname: Enterprise
+configure_start_menu: true
+configure_taskbar: true
+disable_mouse_acceleration: true
+remote_desktop_enabled: true
+remove_desktop_icons: false
+set_sound_scheme: true
+
+install_windows_updates: true
+windows_updates_reboot: true
+update_categories:
+  # You can install only specific updates by uncommenting it
+  # * - installs all updates
+  - "*"
+  # - Critical Updates
+  # - Definition Updates
+  # - Developer Kits
+  # - Feature Packs
+  # - Security Updates
+  # - Service Packs
+  # - Tools
+  # - Update Rollups
+  # - Updates
+  # - Upgrades
+
+change_power_plan: true
+power_plan: "high performance"
+
+choco_installed_packages:
+  # installs 2019.2.2.20191 version of the adobe reader
+  - name: adobereader
+    version: "2022.002.20191"
+  # installs latest version of the auto-dark-mode while ignoring the package checksum
+  - name: auto-dark-mode
+    state: latest
+    choco_args: --ignorechecksum
+  # installs awscli, but won't update it
+  # - awscli
+  - authy-desktop
+  - caffeine
+  - calibre
+  - discord
+  - everything #search everything
+  - ext2fsd #allows reading and writing on ext file systems on windows
+  - firefox
+  - f.lux
+  - geekuninstaller
+  - git
+  # - golang
+  - jre8
+  - kubernetes-cli
+  - ledger-live
+  - libreoffice-fresh
+  - malwarebytes
+  - megasync
+  - microsoft-windows-terminal
+  - msiafterburner
+  - nextcloud-client
+  - notepadplusplus
+  - peazip
+  - plex
+  - powertoys
+  - python
+  - python3
+  - reflect-free #macrium reflect
+  - rufus
+  - spotify
+  - steam-client
+  # - sharex
+  # - telegram
+  - teracopy
+  - terraform
+  - veracrypt
+  - vlc
+  - vscodium #FOSS binaries of vscode
+  # - zoom
+  - windirstat
+
+  #stuff I can't find on chocolatey:
+  # IPMIView
+  # Microsoft Remote Desktop
+  # Sidebar Diagnostics
+  # Super F4
+  # Razer Synapse
+  # ProfExam Simulator
+  # VCE Player
+
+install_fonts: true
+installed_nerdfonts:
+  - FiraCode
+  - FantasqueSansMono
+
+install_ohmyposh: true
+
+# List of features: "Get-WindowsOptionalFeature -Online"
+install_windows_features: false
+windows_features:
+  Microsoft-Hyper-V: true
+
+# List of valid distributions that can be installed:
+# wsl-alpine
+# wsl-archlinux
+# wsl-debiangnulinux
+# wsl-fedoraremix
+# wsl-kalilinux
+# wsl-opensuse
+# wsl-sles
+# wsl-ubuntu-1604
+# wsl-ubuntu-1804
+# wsl-ubuntu-2004
+install_wsl2: true
+wsl2_distribution: wsl-ubuntu-2004
+
+remove_bloatware: true
+bloatware:
+  - Microsoft.BingFinance
+  - Microsoft.BingHealthAndFitness
+  - Microsoft.BingNews
+  - Microsoft.BingSports
+  - Microsoft.BingTravel
+  - Microsoft.BingWeather
+  - Microsoft.GamingApp
+  - Microsoft.GetHelp
+  - Microsoft.Getstarted
+  # - Microsoft.Messaging
+  - Microsoft.Microsoft3DViewer
+  - Microsoft.MicrosoftOfficeHub
+  - Microsoft.MicrosoftSolitaireCollection
+  - Microsoft.MicrosoftStickyNotes
+  - Microsoft.MixedReality.Portal
+  # - Microsoft.MSPaint
+  # - Microsoft.Office.OneNote
+  - Microsoft.OneConnect
+  - Microsoft.People
+  - Microsoft.PowerAutomateDesktop
+  - Microsoft.Print3D
+  - Microsoft.Reader
+  - Microsoft.ScreenSketch
+  - Microsoft.SoundRecorder
+  - Microsoft.SkypeApp
+  - Microsoft.Todos
+  - Microsoft.Windows.Photos
+  - Microsoft.WindowsAlarms
+  # - Microsoft.WindowsCalculator
+  - Microsoft.Wallet
+  - Microsoft.WindowsCamera
+  # - microsoft.windowscommunicationsapps
+  - Microsoft.WindowsFeedbackHub
+  - Microsoft.WindowsPhone
+  - Microsoft.WindowsMaps
+  - Microsoft.WindowsSoundRecorder
+  - Microsoft.WindowsZuneMusic
+  - Microsoft.Xbox
+  - Microsoft.Xbox.TCUI
+  - Microsoft.XboxApp
+  - Microsoft.XboxGameOverlay
+  - Microsoft.XboxSpeechToTextOverlay
+  # - Microsoft.YourPhone
+  - Microsoft.ZuneMusic
+  - Microsoft.ZuneVideo
+  - MicrosoftTeams
+
+
+defrag_volumes: true
+include_volumes:
+  - C
+  - D

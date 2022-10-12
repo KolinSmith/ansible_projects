@@ -1,4 +1,4 @@
 ---
-public_keys:
-  - /home/dax/code_base/ansible_projects/templates/enterprise_pub_key
-  - /home/dax/code_base/ansible_projects/templates/voyager_pub_key
+# public_keys:
+#   - /home/dax/code_base/ansible_projects/templates/enterprise_pub_key
+#   - /home/dax/code_base/ansible_projects/templates/voyager_pub_key

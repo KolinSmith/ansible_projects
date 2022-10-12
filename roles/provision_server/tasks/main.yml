@@ -107,10 +107,10 @@
     authorized_key:
         user: "{{ user }}"
         state: present
-        key: '{{ item }}'
+        key: "{{ item.key }}"
         manage_dir: yes
-    with_file:
-      - {{ public_keys }}
+    with_items:
+      - "{{ public_keys }}"
 
 #might end up using the one from the dotfiles
   - name: add sshd config file

@@ -1,0 +1,25 @@
+---
+- name: Ensure configured Chocolatey packages are installed.
+  chocolatey.chocolatey.win_chocolatey:
+    name: "{{ item.name | default(item) }}"
+    state: "{{ item.state | default('present') }}"
+    version: "{{ item.version | default(omit) }}"
+    choco_args: "{{ item.choco_args | default(omit) }}"
+  loop: "{{ choco_installed_packages }}"
+
+- name: Clean chocolatey and nuget cache.
+  block:
+    - name: Ensure the chocolatey and NuGet cache is cleaned.
+      ansible.windows.win_file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - '%UserProfile%\AppData\Local\Temp\chocolatey\'
+        - '%UserProfile%\AppData\Local\Temp\nuget\'
+        - '%UserProfile%\AppData\Local\NuGet\Cache\'
+      register: cleanup_task
+  rescue:
+    - name: "{{ cleanup_task.msg }}"
+      ansible.builtin.debug:
+        msg: >
+          "Some chocolatey cache files are still in use. You may need to reboot your machine to resolve the error"

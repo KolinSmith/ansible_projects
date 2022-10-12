@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-import json
+
 import gemini
+import json
 
 public_key = "account-COlk5KHAN8flBuZbdERc"
 private_key = "4DiqsE8F4uSBcRJYWtsd7hZZCjEt"
