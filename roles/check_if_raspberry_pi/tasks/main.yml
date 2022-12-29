@@ -16,3 +16,15 @@
           raspberry_pi: true
         when:
           grep_cpuinfo_raspberrypi.rc == 0 or grep_device_tree_model_raspberrypi.rc == 0
+
+      - name: Test for orange pi /proc/device-tree/model
+        command: grep -E "Orange Pi" /proc/device-tree/model
+        register: grep_device_tree_model_raspberrypi
+        failed_when: false
+        changed_when: false
+
+      - name: Set orange_pi fact to true
+        set_fact:
+          orange_pi: true
+        when:
+          grep_device_tree_model_raspberrypi.rc == 0

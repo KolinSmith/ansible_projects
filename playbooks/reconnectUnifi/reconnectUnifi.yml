@@ -15,7 +15,7 @@
       #action: raw
       #args:
         #free_form: set-inform http://192.168.3.7:8282/inform
-      raw: "mca-cli-op set-inform http://192.168.3.7:8282/inform"
+      raw: "mca-cli-op set-inform http://192.168.9.7:8282/inform"
       # args:
       #      executable: /usr/bin/sh
       #    executable: /usr/bin/mca-cli-op

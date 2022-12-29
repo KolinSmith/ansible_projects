@@ -1,7 +1,8 @@
 ---
     - name: check if python2 is installed & install if neccessary
       raw: test -e /usr/bin/python || (apt -y install python2-minimal python-setuptools && ln -s /usr/bin/python2 /usr/bin/python)
+      ignore_errors: True
 
     - name: check if python3 is installed and try to install it. ignore error if you can't install
-      raw: test -e /usr/bin/python3 || (apt -y install python3)
+      raw: test -e /usr/bin/python3 || (apt -y install python3-minimal)
       ignore_errors: True

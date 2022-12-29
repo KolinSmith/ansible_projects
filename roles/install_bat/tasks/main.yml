@@ -28,13 +28,13 @@
       register: stat_result
 
     - name: download latest bat binary into /tmp
-      shell: curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep -E 'browser_download_url' | grep 'x86_64-unknown-linux-gnu' | cut -d '"' -f 4 | wget -qi - -O /tmp/bat_binary.zip
+      shell: curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep -E 'browser_download_url' | grep 'x86_64-unknown-linux-gnu' | cut -d '"' -f 4 | wget -qi - -O /tmp/bat_binary.gz
       when:
         - not stat_result.stat.exists
         - raspberry_pi|default(false) == false
 
     - name: download latest bat binary into /tmp
-      shell: curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep -E 'browser_download_url' | grep 'arm-unknown-linux-gnueabihf' | cut -d '"' -f 4 | wget -qi - -O /tmp/bat_binary.zip
+      shell: curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep -E 'browser_download_url' | grep 'arm-unknown-linux-gnueabihf' | cut -d '"' -f 4 | wget -qi - -O /tmp/bat_binary.gz
       when:
         - not stat_result.stat.exists
         - raspberry_pi|default(false)
@@ -47,7 +47,7 @@
 
     - name: unzip bat binary
       unarchive:
-        src: /tmp/bat_binary.zip
+        src: /tmp/bat_binary.gz
         dest: /tmp/bat_binary
         remote_src: yes
       when: not stat_result.stat.exists
@@ -70,5 +70,5 @@
         path: /tmp/{{ item }}
       with_items:
         - bat_binary
-        - bat_binary.zip
+        - bat_binary.gz
       when: not stat_result.stat.exists

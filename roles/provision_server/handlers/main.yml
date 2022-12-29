@@ -1,5 +1,7 @@
 ---
   - name: Reload ssh
     service:
-      name: sshd
+      # didn't work on Ubuntu systems (only raspbian)
+      # name: sshd
+      name: ssh
       state: restarted

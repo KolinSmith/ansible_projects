@@ -21,11 +21,24 @@
     ignore_errors: yes
     # when: ansible_os_family == "Debian"
 
+  - name: Add Tailscale signing key
+    apt_key:
+      url: "{{ tailscale_apt_signkey }}"
+      state: present
+
+  - name: Add Tailscale repo to apt sources
+    apt_repository:
+      repo: "{{ tailscale_apt_deb }}"
+      state: present
+      filename: "tailscale-{{ ansible_lsb.id | lower }}"
+
   - name: add packages I want
     apt:
       name: "{{ necessary_packages }}"
       state: latest
 
+  # no clue if this works
+  #https://gist.github.com/carlessanagustin/af38e4585951dc32a320
   - name: update PATH variable
     lineinfile:
       dest: /etc/environment
@@ -97,6 +110,12 @@
       mode: 0440
       create: yes
       validate: 'visudo -cf %s'
+
+  #https://www.jeffgeerling.com/blog/2017/add-path-global-path-ansible
+  - name: Add another bin dir to system-wide $PATH.
+    copy:
+      dest: /etc/profile.d/custom-path.sh
+      content: 'PATH=$PATH:{{ my_custom_path_var }}'
 
   - name: add SSH public key for local user
     # authorized_key:
@@ -186,6 +205,14 @@
       repo: 'https://github.com/tmux-plugins/tpm'
       dest: /home/{{ user }}/.tmux/plugins/tpm
     when: tpm_installed.stat.exists == False
+
+  - name: Setup Tailscale
+    command: tailscale up --authkey={{ tailscale_auth_key }}
+
+  - name: Setup Docker & Docker Compose
+    import_role:
+      name: install_docker
+    
 
   # - name: Set raspberry_pi fact
   #   set_fact:

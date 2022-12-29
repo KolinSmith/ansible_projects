@@ -1,0 +1,43 @@
+user: 'dax'
+my_custom_path_var: '/home/{{ user }}/.local/bin'
+public_keys:
+  - name: Enterprise Public Key File
+    key: "{{ lookup('file', 'enterprise_pub_key.pub') }}"
+  - name: Voyager Public Key File
+    key: "{{ lookup('file', 'voyager_pub_key.pub') }}"
+extra_path: '/usr/local/bin'
+dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
+tailscale_auth_key: 'tskey-auth-k84EcW1CNTRL-SqwZv6pwP8S4gFQmstP6BSM8tju8SRLh'
+tailscale_release_stability: 'stable'
+distro:
+  ubuntu: 'ubuntu'
+tailscale_apt_deb: 'deb https://pkgs.tailscale.com/{{ tailscale_release_stability | lower }}/{{ distro[ansible_distribution | lower] }} {{ ansible_distribution_release | lower }} main'
+tailscale_apt_signkey: 'https://pkgs.tailscale.com/{{ tailscale_release_stability | lower }}/{{ distro[ansible_distribution | lower] }}/{{ ansible_distribution_release | lower }}.gpg'
+necessary_packages:
+  - wget
+  - net-tools
+  - zsh
+  - powerline
+  - fonts-powerline
+  - curl
+  - git
+  - iputils-ping
+  - dnsutils
+  - acl
+  - sudo
+  - fzf
+  - apt-transport-https
+  - unattended-upgrades
+  - tmux
+  - build-essential
+  - unzip
+  - cmatrix
+  - neofetch
+  - pigz
+  - locate
+  - vim
+  - atop
+  - python3-pip
+  - tailscale
+  - ansible
+  

@@ -8,7 +8,7 @@ ansible_user=admin
 ansible_ssh_private_key_file=/home/dax/.ssh/id_rsa
 
 [windows_test]
-window_node_1 ansible_host=192.168.9.172
+window_node_1 ansible_host=192.168.9.176
 
 [windows]
 enterprise ansible_host=192.168.3.3 
@@ -52,7 +52,7 @@ ansible_python_interpreter=/usr/bin/python2.7
 [provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-test ansible_host=192.168.9.156
+internetPi ansible_host=192.168.9.198
 
 [provision_servers:vars]
 #pre provisioning
@@ -60,6 +60,7 @@ test ansible_host=192.168.9.156
 ansible_connection=ssh
 # ansible_ssh_pass={{ proxmox_template_password }}
 ansible_ssh_pass=raspberry
+###need to login to ubuntu server first (login ubuntu:ubuntu) and change password to "raspberry"
 ansible_user=pi
 # ansible_user=serveradmin
 # ansible_password={{ proxmox_template_password }}
@@ -75,7 +76,7 @@ ansible_python_interpreter=/usr/bin/python3
 [post_provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-post_test ansible_host=192.168.9.156
+post_test ansible_host=192.168.9.198
 
 [post_provision_servers:vars]
 #post provisioning
