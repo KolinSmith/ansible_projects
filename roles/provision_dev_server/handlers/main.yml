@@ -1,2 +1,12 @@
 ---
-# handlers file for provision_dev_server
+  - name: Reload ssh
+    service:
+      # didn't work on Ubuntu systems (only raspbian)
+      # name: sshd
+      name: ssh
+      state: restarted
+
+  - name: Reload rsyslog
+    service:
+      name: rsyslog
+      state: restarted

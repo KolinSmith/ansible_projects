@@ -7,7 +7,7 @@
       - vars/dev_server_provision_vars.yml
     roles:
       - role: bootstrap_python
-      - role: provision_server
+      - role: provision_dev_server
 
   - name: post server provision
     hosts: post_provision_servers

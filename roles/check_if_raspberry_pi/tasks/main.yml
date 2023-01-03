@@ -23,8 +23,8 @@
         failed_when: false
         changed_when: false
 
-      - name: Set orange_pi fact to true
-        set_fact:
-          orange_pi: true
-        when:
-          grep_device_tree_model_raspberrypi.rc == 0
+      # - name: Set orange_pi fact to true
+      #   set_fact:
+      #     orange_pi: true
+      #   when:
+      #     grep_device_tree_model_raspberrypi.rc == 0
