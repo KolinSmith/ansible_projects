@@ -188,9 +188,9 @@
   - name: make sure voyager ssh private key is installed
     copy:
       content: '{{ voyager_private_ssh_key }}'
-      dest: ~/.ssh/id_ecdsa
-      owner: root
-      group: root
+      dest: '/home/{{ user }}/.ssh/id_ecdsa'
+      owner: "{{ user }}"
+      group: "{{ user }}"
       mode: 0600
     no_log: true
 
@@ -264,20 +264,25 @@
     import_role:
       name: install_docker
 
-
-
-
-
-
   - name: Create code_base directory
     file:
       state: directory
-      path: /home/{{ user }}/code_base
+      path: /home/{{ user }}/code_base/
 
-  - name: clone code_base repository to localhost
+  - name: Create code_base directories
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: dax
+      group: admin
+    loop:
+      - /home/{{ user }}/code_base/
+      - /home/{{ user }}/code_base/ansible_projects
+
+  - name: clone ansible_projects repository to localhost
     git:
-      repo: "{{ code_base_repo }}"
-      dest: /tmp/tmp-code-base
+      repo: "{{ ansible_projects_repo }}"
+      dest: /tmp/tmp-ansible-projects
       accept_hostkey: yes
       force: yes
       recursive: no
@@ -285,10 +290,10 @@
     delegate_to: localhost
     run_once: true
 
-  - name: copy code_base into ~/code_base
+  - name: copy ansible_projects into ~/code_base/ansible_projects
     copy:
-      src: /tmp/tmp-code-base/{{ item }}
-      dest: "/home/{{ user }}/code_base/{{ item }}"
+      src: /tmp/tmp-ansible-projects/{{ item }}
+      dest: "/home/{{ user }}/code_base/ansible_projects/{{ item }}"
       owner: "{{ user }}"
       group: "admin"
     with_items:
@@ -308,6 +313,25 @@
       - hosts.yml.EXAMPLE
       - k3s_hosts
 
+  - name: clone github_backup_repo repository to localhost
+    git:
+      repo: "{{ github_backup_repo }}"
+      dest: /tmp/tmp-github-backup
+      accept_hostkey: yes
+      force: yes
+      recursive: no
+      key_file: /home/dax/.ssh/id_ecdsa
+    delegate_to: localhost
+    run_once: true
+
+  - name: move github_backup into ~/code_base/
+    synchronize:
+      mode: pull
+      src: /tmp/tmp-github-backup
+      dest: ~/code_base/
+      rsync_opts:
+      - "--remove-source-files"
+
   - name: Remove ls aliases from .zshrc if exa isn't installed
     lineinfile:
       path: /home/dax/.zshrc
@@ -323,7 +347,7 @@
   - name: delete dotfiles from /tmp
     file:
       state: absent
-      path: /tmp/tmp-code-base
+      path: /tmp/tmp-ansible-projects
 
   - name: create cron jobs
     block:
@@ -348,5 +372,5 @@
           name: reconnectUnifi
           minute: "0"
           hour: "2"
-          job: "ansible-playbook /home/dax/code_base/ansible_projects/playbooks/reconnectUnifi/reconnectUnifi.yml && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/fde13bd7-10af-4762-b3d3-112c805b3e33"
+          job: "ansible-playbook ~/code_base/ansible_projects/playbooks/reconnectUnifi/reconnectUnifi.yml && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/fde13bd7-10af-4762-b3d3-112c805b3e33"
         become_user: "{{ user }}"
