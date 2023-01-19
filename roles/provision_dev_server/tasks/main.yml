@@ -278,8 +278,9 @@
     loop:
       - /home/{{ user }}/code_base/
       - /home/{{ user }}/code_base/ansible_projects
+      - /home/{{ user }}/code_base/github_backup
 
-  - name: clone ansible_projects repository to localhost
+  - name: clone ansible_projects repository to {{ inventory_hostname }}
     git:
       repo: "{{ ansible_projects_repo }}"
       dest: /tmp/tmp-ansible-projects
@@ -287,33 +288,50 @@
       force: yes
       recursive: no
       key_file: /home/dax/.ssh/id_ecdsa
-    delegate_to: localhost
+    delegate_to: "{{ inventory_hostname }}"
     run_once: true
 
-  - name: copy ansible_projects into ~/code_base/ansible_projects
+  - name: move ansible_projects into ~/code_base/
+    # synchronize:
+    #   mode: pull
+    #   src: /tmp/tmp-ansible-projects
+    #   dest: /home/{{ user }}/code_base/
+    #   rsync_opts:
+    #   - "--remove-source-files"
+    # delegate_to: "{{ inventory_hostname }}"
     copy:
-      src: /tmp/tmp-ansible-projects/{{ item }}
-      dest: "/home/{{ user }}/code_base/ansible_projects/{{ item }}"
+      src: /tmp/tmp-ansible-projects/
+      dest: /home/{{ user }}/code_base/ansible_projects
       owner: "{{ user }}"
-      group: "admin"
-    with_items:
-      - deprecated_playbooks
-      # - facts
-      - group_vars
-      - playbooks
-      - python_scripts
-      - roles
-      - shell_scripts
-      - templates
-      - README.md
-      - ansible.cfg
-      - ansible.cfg.EXAMPLE
-      - ansible.log
-      - hosts
-      - hosts.yml.EXAMPLE
-      - k3s_hosts
+      group: admin
+      remote_src: yes
 
-  - name: clone github_backup_repo repository to localhost
+
+  # #copy the files from localhost to the remote machine
+  # - name: copy ansible_projects into ~/code_base/ansible_projects
+  #   copy:
+  #     src: /tmp/tmp-ansible-projects/{{ item }}
+  #     dest: "/home/{{ user }}/code_base/ansible_projects/{{ item }}"
+  #     owner: "{{ user }}"
+  #     group: "admin"
+  #   with_items:
+  #     - deprecated_playbooks
+  #     # - facts
+  #     - group_vars
+  #     - playbooks
+  #     - python_scripts
+  #     - roles
+  #     - shell_scripts
+  #     - templates
+  #     - README.md
+  #     - ansible.cfg
+  #     - ansible.cfg.EXAMPLE
+  #     - ansible.log
+  #     - hosts
+  #     - hosts.yml.EXAMPLE
+  #     - k3s_hosts
+
+  - name: clone github_backup_repo repository to {{ inventory_hostname }}
     git:
       repo: "{{ github_backup_repo }}"
       dest: /tmp/tmp-github-backup
@@ -321,16 +339,23 @@
       force: yes
       recursive: no
       key_file: /home/dax/.ssh/id_ecdsa
-    delegate_to: localhost
+    delegate_to: "{{ inventory_hostname }}"
     run_once: true
 
   - name: move github_backup into ~/code_base/
-    synchronize:
-      mode: pull
-      src: /tmp/tmp-github-backup
-      dest: ~/code_base/
-      rsync_opts:
-      - "--remove-source-files"
+    # synchronize:
+    #   mode: pull
+    #   src: /tmp/tmp-github-backup
+    #   dest: /home/{{ user }}/code_base/
+    #   rsync_opts:
+    #   - "--remove-source-files"
+    # delegate_to: "{{ inventory_hostname }}"
+    copy:
+      src: /tmp/tmp-github_backup/
+      dest: /home/{{ user }}/code_base/github_backup
+      owner: "{{ user }}"
+      group: admin
+      remote_src: yes
 
   - name: Remove ls aliases from .zshrc if exa isn't installed
     lineinfile:
@@ -344,10 +369,10 @@
    #when raspberry not pi 1 or pi zero which are both armv6l
     when: not (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
 
-  - name: delete dotfiles from /tmp
-    file:
-      state: absent
-      path: /tmp/tmp-ansible-projects
+  # - name: delete dotfiles from /tmp
+  #   file:
+  #     state: absent
+  #     path: /tmp/tmp-ansible-projects
 
   - name: create cron jobs
     block:
