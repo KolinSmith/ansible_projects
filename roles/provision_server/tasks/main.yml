@@ -175,9 +175,10 @@
       dest: /home/{{ user }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
       refspec: '+refs/pull/*:refs/heads/*'
 
-  - name: import the install_bat role
-    import_role:
-      name: install_bat
+  # not needed since it's in Ubuntu repos already. executable is "batcat". alias to "bat"
+  # - name: import the install_bat role
+  #   import_role:
+  #     name: install_bat
 
   #for some reason even with the when it still goes into each task
   #in the role and skips it one by one
