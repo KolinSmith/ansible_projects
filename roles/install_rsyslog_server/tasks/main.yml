@@ -1,0 +1,40 @@
+---
+
+#
+#https://stackoverflow.com/questions/69830208/configure-a-syslog-server-through-ansible-playbook
+#
+  - name: Install rsyslog
+    apt:
+      name: rsyslog
+      state: present
+
+  - name: Start service rsyslog, if not started
+    ansible.builtin.service:
+      name: rsyslog
+      state: started
+
+  - name: Enable service rsyslog to start on boot
+    ansible.builtin.service:
+      name: rsyslog
+      enabled: yes
+
+  - name: Swap/ edit lines in config (UDP) to enable listening
+    lineinfile:
+      dest: /etc/rsyslog.conf
+      line: 'module(load="imudp")' #new text
+      regexp: '#module(load="imudp")' #old text
+      state: present
+      create: true
+
+  - name: Swap/ edit lines in config (TCP) to enable listening
+    lineinfile:
+      dest: /etc/rsyslog.conf
+      line: 'module(load="imtcp")' #new text
+      regexp: '#module(load="imtcp")' #old text
+      state: present
+      create: true
+
+  - name: Restart rsyslog to take new line in conf
+    ansible.builtin.service:
+      name: rsyslog
+      state: restarted

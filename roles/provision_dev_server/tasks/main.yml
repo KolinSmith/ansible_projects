@@ -304,32 +304,32 @@
       dest: /home/{{ user }}/code_base/ansible_projects
       owner: "{{ user }}"
       group: admin
-      remote_src: yes
+      remote_src: true
 
 
   # #copy the files from localhost to the remote machine
   # - name: copy ansible_projects into ~/code_base/ansible_projects
-  #   copy:
-  #     src: /tmp/tmp-ansible-projects/{{ item }}
-  #     dest: "/home/{{ user }}/code_base/ansible_projects/{{ item }}"
-  #     owner: "{{ user }}"
-  #     group: "admin"
-  #   with_items:
-  #     - deprecated_playbooks
-  #     # - facts
-  #     - group_vars
-  #     - playbooks
-  #     - python_scripts
-  #     - roles
-  #     - shell_scripts
-  #     - templates
-  #     - README.md
-  #     - ansible.cfg
-  #     - ansible.cfg.EXAMPLE
-  #     - ansible.log
-  #     - hosts
-  #     - hosts.yml.EXAMPLE
-  #     - k3s_hosts
+    # copy:
+    #   src: /tmp/tmp-ansible-projects/{{ item }}
+    #   dest: "/home/{{ user }}/code_base/ansible_projects/{{ item }}"
+    #   owner: "{{ user }}"
+    #   group: "admin"
+    # with_items:
+    #   - deprecated_playbooks
+    #   # - facts
+    #   - group_vars
+    #   - playbooks
+    #   - python_scripts
+    #   - roles
+    #   - shell_scripts
+    #   - templates
+    #   - README.md
+    #   - ansible.cfg
+    #   - ansible.cfg.EXAMPLE
+    #   - ansible.log
+    #   - hosts
+    #   - hosts.yml.EXAMPLE
+    #   - k3s_hosts
 
   - name: clone github_backup_repo repository to {{ inventory_hostname }}
     git:
@@ -351,11 +351,11 @@
     #   - "--remove-source-files"
     # delegate_to: "{{ inventory_hostname }}"
     copy:
-      src: /tmp/tmp-github_backup/
-      dest: /home/{{ user }}/code_base/github_backup
+      src: /tmp/tmp-github-backup/
+      dest: /home/{{ user }}/code_base/github-backup
       owner: "{{ user }}"
       group: admin
-      remote_src: yes
+      remote_src: true
 
   - name: Remove ls aliases from .zshrc if exa isn't installed
     lineinfile:
@@ -373,6 +373,10 @@
   #   file:
   #     state: absent
   #     path: /tmp/tmp-ansible-projects
+
+  - name: import the import_dotfiles role
+    import_role:
+      name: install_rsyslog_server
 
   - name: create cron jobs
     block:

@@ -1,27 +1,40 @@
 ---
-      - name: Test for raspberry pi /proc/cpuinfo
-        command: grep -E "Raspberry Pi|BCM2708|BCM2709|BCM2835|BCM2836" /proc/cpuinfo
-        register: grep_cpuinfo_raspberrypi
-        failed_when: false
-        changed_when: false
+  - name: Test for raspberry pi /proc/cpuinfo
+    command: grep -E "Raspberry Pi|BCM2708|BCM2709|BCM2835|BCM2836" /proc/cpuinfo
+    register: grep_cpuinfo_raspberrypi
+    failed_when: false
+    changed_when: false
 
-      - name: Test for raspberry pi /proc/device-tree/model
-        command: grep -E "Raspberry Pi" /proc/device-tree/model
-        register: grep_device_tree_model_raspberrypi
-        failed_when: false
-        changed_when: false
+  - name: Test for raspberry pi /proc/device-tree/model
+    command: grep -E "Raspberry Pi" /proc/device-tree/model
+    register: grep_device_tree_model_raspberrypi
+    failed_when: false
+    changed_when: false
 
-      - name: Set raspberry_pi fact to true
-        set_fact:
-          raspberry_pi: true
-        when:
-          grep_cpuinfo_raspberrypi.rc == 0 or grep_device_tree_model_raspberrypi.rc == 0
+  - name: Set raspberry_pi fact to true
+    set_fact:
+      raspberry_pi: true
+    when:
+      grep_cpuinfo_raspberrypi.rc == 0 or grep_device_tree_model_raspberrypi.rc == 0
 
-      - name: Test for orange pi /proc/device-tree/model
-        command: grep -E "Orange Pi" /proc/device-tree/model
-        register: grep_device_tree_model_raspberrypi
-        failed_when: false
-        changed_when: false
+  - name: Test for orange pi /proc/device-tree/model
+    command: grep -E "Orange Pi" /proc/device-tree/model
+    register: grep_device_tree_model_raspberrypi
+    failed_when: false
+    changed_when: false
+
+    #https://tech.borpin.co.uk/2019/12/17/install-a-package-from-the-testing-repository/
+  # - name: Add Raspbian Testing signing key
+  #   apt_key:
+  #     url: "{{ tailscale_apt_signkey }}"
+  #     state: present
+
+  - name: Add Raspbian Testing repo to apt sources
+    apt_repository:
+      repo: "{{ raspbian_testing_deb }}"
+      state: present
+      filename: "raspbian-testing-{{ ansible_lsb.id | lower }}"
+    when: raspberry_pi == true
 
       # - name: Set orange_pi fact to true
       #   set_fact:

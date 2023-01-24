@@ -212,6 +212,11 @@
   - name: Setup Docker & Docker Compose
     import_role:
       name: install_docker
+
+  - name: import the install_rsyslog_client role
+    import_role:
+      name: install_rsyslog_client
+
     
 
   # - name: Set raspberry_pi fact

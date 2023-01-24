@@ -1,0 +1,33 @@
+---
+
+#
+#https://www.makeuseof.com/set-up-linux-remote-logging-using-rsyslog/
+#
+
+- name: Configure syslog server
+  become: true
+  tasks:
+  - name: Install rsyslog
+    apt:
+      name: rsyslog
+      state: present
+
+  - name: Start service rsyslog, if not started
+    ansible.builtin.service:
+      name: rsyslog
+      state: started
+
+  - name: Enable service rsyslog to start on boot
+    ansible.builtin.service:
+      name: rsyslog
+      enabled: yes
+
+  - name: Edit rsyslog.conf to send logs to rsyslog server
+    lineinfile:
+      path: /etc/rsyslog.conf
+      line: "*.* @192.168.3.8:514"
+
+  - name: Restart rsyslog to take new line in conf
+    ansible.builtin.service:
+      name: rsyslog
+      state: restarted

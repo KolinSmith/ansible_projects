@@ -13,6 +13,7 @@ distro:
   ubuntu: 'ubuntu'
 tailscale_apt_deb: 'deb https://pkgs.tailscale.com/{{ tailscale_release_stability | lower }}/{{ distro[ansible_distribution | lower] }} {{ ansible_distribution_release | lower }} main'
 tailscale_apt_signkey: 'https://pkgs.tailscale.com/{{ tailscale_release_stability | lower }}/{{ distro[ansible_distribution | lower] }}/{{ ansible_distribution_release | lower }}.gpg'
+raspbian_testing_deb: 'deb http://raspbian.raspberrypi.org/raspbian/ testing main'
 necessary_packages:
   - wget
   - net-tools
@@ -40,3 +41,4 @@ necessary_packages:
   - python3-pip
   - tailscale
   - ansible
+  - rsyslog

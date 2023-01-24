@@ -44,3 +44,4 @@ necessary_packages:
   - ansible
   - cups
   - rsyslog
+  - tldr
