@@ -29,12 +29,14 @@
   #     url: "{{ tailscale_apt_signkey }}"
   #     state: present
 
-  - name: Add Raspbian Testing repo to apt sources
-    apt_repository:
-      repo: "{{ raspbian_testing_deb }}"
-      state: present
-      filename: "raspbian-testing-{{ ansible_lsb.id | lower }}"
-    when: raspberry_pi == true
+  # - debug: msg="{{ tailscale_release_stability }}"
+
+  # - name: Add Raspbian Testing repo to apt sources
+  #   apt_repository:
+  #     repo: "{{ raspbian_testing_deb }}"
+  #     state: present
+  #     filename: "raspbian-testing-{{ ansible_lsb.id | lower }}"
+  #   when: raspberry_pi == true
 
       # - name: Set orange_pi fact to true
       #   set_fact:

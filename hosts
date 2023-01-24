@@ -52,7 +52,7 @@ ansible_python_interpreter=/usr/bin/python2.7
 [provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-testRPi ansible_host=192.168.9.239
+testRPi ansible_host=192.168.9.131
 
 [provision_servers:vars]
 #pre provisioning
@@ -76,7 +76,7 @@ ansible_python_interpreter=/usr/bin/python3
 [post_provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-post_test ansible_host=192.168.9.239
+post_test ansible_host=192.168.9.131
 
 [post_provision_servers:vars]
 #post provisioning

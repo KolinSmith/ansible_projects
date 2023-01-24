@@ -13,6 +13,8 @@
     hosts: post_provision_servers
     gather_facts: yes
     become: yes
+    vars_files:
+      - vars/dev_server_provision_vars.yml
     roles:
       - role: check_if_raspberry_pi
       - role: remove_default_user
