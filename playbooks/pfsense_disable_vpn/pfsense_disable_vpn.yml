@@ -1,0 +1,15 @@
+# ansible-playbook pfsense_enable_vpn.yml 
+---
+  - name: pfsense_enable_vpn
+    hosts: pfsense_router
+    gather_facts: yes
+    become: yes
+    collections:
+      - pfsensible.core.pfsense_alias
+    tasks:
+      - name: Add my IP to pia_redirect_group alias
+        pfsense_alias:
+          name: pia_redirect_group
+          address: 192.168.3.3
+          type: host
+          state: absent

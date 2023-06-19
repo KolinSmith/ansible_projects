@@ -1,3 +1,11 @@
+[pfsense_router]
+pfsense ansible_host=192.168.3.1
+
+[pfsense_router:vars]
+ansible_connection=ssh
+ansible_user={{ pfsense_username | lower }}
+ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_ecdsa
+
 [unifi_devices]
 ubntSW ansible_host=192.168.3.247
 ubntAP ansible_host=192.168.3.248
@@ -5,7 +13,7 @@ ubntAP ansible_host=192.168.3.248
 [unifi_devices:vars]
 ansible_connection=ssh
 ansible_user=admin
-ansible_ssh_private_key_file=/home/dax/.ssh/id_rsa
+ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_rsa
 
 [windows_test]
 window_node_1 ansible_host=192.168.9.176
@@ -20,16 +28,20 @@ ansible_password=r$eBQNgc5U&A2at8kDwpWo.KzLT5NvHd
 ansible_winrm_server_cert_validation=ignore
 
 [dns_servers]
-ds9 ansible_host=192.168.9.4 ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa ansible_user=dax
-defiant ansible_host=192.168.9.3 ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa ansible_user=dax
+ds9 ansible_host=192.168.9.4
+defiant ansible_host=192.168.9.3
+
+[dns_servers:vars]
+ansible_user={{ default_username | lower}}
+ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_ecdsa
 
 [load_balancers]
 stargazer ansible_host=192.168.9.6
 shenzhou ansible_host=192.168.9.5
 
 [load_balancers:vars]
-ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa
-ansible_user=dax
+ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_ecdsa
+ansible_user={{ default_username | lower}}
 primary_load_balancer=192.168.9.6
 secondary_load_balancer=192.168.9.5
 loadbalancer_vip_ip=192.168.9.90
@@ -82,8 +94,8 @@ post_test ansible_host=192.168.9.131
 #post provisioning
 #######################################################################
 ansible_connection=ssh
-ansible_user=dax
-ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa
+ansible_user={{ default_username | lower}}
+ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_ecdsa
 ansible_python_interpreter=/usr/bin/python3
 primary_load_balancer=192.168.9.6
 secondary_load_balancer=192.168.9.5
@@ -99,6 +111,6 @@ k3s-mysql-2 ansible_host=192.168.9.133
 
 [mysql_servers:vars]
 ansible_connection=ssh
-ansible_user=dax
-ansible_ssh_private_key_file=/home/dax/.ssh/id_ecdsa
+ansible_user={{ default_username | lower}}
+ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_ecdsa
 ansible_python_interpreter=/usr/bin/python3

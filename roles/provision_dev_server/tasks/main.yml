@@ -83,6 +83,8 @@
       - pfsense
       - borg
 
+    # need to add in ansible galaxy collections that I have downloaded!!!!
+
   # no clue if this works
   #https://gist.github.com/carlessanagustin/af38e4585951dc32a320
   - name: update PATH variable
