@@ -63,6 +63,14 @@
       - pfsense
       - borg
 
+  - name: add logrotate config file
+    template:
+      src: /home/dax/code_base/ansible_projects/templates/logrotate_dot_conf.j2
+      dest: /etc/logrotate.conf
+      owner: root
+      group: root
+      mode: 0644
+
   - name: add logrotate files
     lineinfile:
       dest: /etc/logrotate.d/{{ item }}
@@ -82,6 +90,8 @@
       - Voyager
       - pfsense
       - borg
+      - localhost
+      - 192.168.3.1
 
     # need to add in ansible galaxy collections that I have downloaded!!!!
 

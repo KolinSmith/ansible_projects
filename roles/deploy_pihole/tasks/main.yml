@@ -1,0 +1,52 @@
+---
+  - name: add SSH public key for borg so it can login to make backups
+    authorized_key:
+        user: "{{ user }}"
+        key: "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOax0ZYUe5CpSHS+h4dPYEOpZs/aUbUol5b4ypwPV9jEdNsBUateQhzwtSXZJbosW4VpGIBtfQVhFgaJri2Fftc= root@Borg"
+        state: present
+        manage_dir: yes
+
+  - name: create pihole folder
+    file:
+      path: /etc/pihole
+      state: directory
+      mode: 0644
+
+  - name: add pihole config file setupVars.conf file to /etc/pihole
+    #https://web.archive.org/web/20230102233129/https://www.tecmint.com/install-rsyslog-centralized-logging-in-centos-ubuntu/
+    template:
+      src: /home/dax/code_base/ansible_projects/templates/pihole_setup_vars.j2
+      dest: /etc/pihole/setupVars.conf
+      owner: root
+      group: root
+      mode: 0600
+
+  - name: touch dnsmasq file to setup wildcard DNS
+    file:
+      path: /etc/dnsmasq.d/02-my-wildcard-dns.conf
+      state: touch
+      mode: 0644
+
+  - name: add dnsmasq.d file
+    lineinfile:
+      dest: /etc/dnsmasq.d/02-my-wildcard-dns.conf
+      state: present
+      mode: 0644
+      #should return the IP address of Voyager
+      line: |
+        address=/internal.homelab.gg/{{ hostvars[groups['dev_server'][0]].ansible_host }}
+        
+  - name: Update, Upgrade, & Clean
+    tags: always
+    apt:
+      upgrade: yes
+      update_cache: yes
+      cache_valid_time: "86400"
+      autoremove: yes
+      autoclean: yes
+    ignore_errors: yes
+
+  - name: install pihole
+    command: curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
+    become: true
+---

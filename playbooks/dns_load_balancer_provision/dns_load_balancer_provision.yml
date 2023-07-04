@@ -1,0 +1,22 @@
+---
+  - name: initial setup (stargazer & shenzhou)
+    hosts: provision_servers
+    gather_facts: yes
+    become: yes
+    vars_files:
+      - vars/dns_load_balancer_provision_vars.yml
+    roles:
+      - role: bootstrap_python
+      - role: provision_server
+
+  - name: dnsdist loadbalancer setup (stargazer & shenzhou)
+    hosts: load_balancers
+    gather_facts: yes
+    become: yes
+    vars:
+        necessary_packages:
+        - dnsdist
+        - keepalived
+    roles:
+      - role: check_if_raspberry_pi
+      - role: deploy_dnsdist

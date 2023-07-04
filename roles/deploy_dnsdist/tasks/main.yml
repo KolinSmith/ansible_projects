@@ -1,0 +1,235 @@
+---
+    #learned the hard way that when installing dnsdist on the raspberry pi that you need to make sure your distro is supported
+    #I had installed raspbian bullseye on the pi zeroes, but dndist only had a build for raspbian buster so I had to reinstall with buster
+
+  - name: add SSH public key for borg so it can login to make backups
+    authorized_key:
+        user: "{{ user }}"
+        key: "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOax0ZYUe5CpSHS+h4dPYEOpZs/aUbUol5b4ypwPV9jEdNsBUateQhzwtSXZJbosW4VpGIBtfQVhFgaJri2Fftc= root@Borg"
+        state: present
+        manage_dir: yes
+
+
+  ############################################################################################
+    - name: Test for raspberry pi /proc/cpuinfo
+      command: grep -E "Raspberry Pi|BCM2708|BCM2709|BCM2835|BCM2836" /proc/cpuinfo
+      register: grep_cpuinfo_raspberrypi
+      failed_when: false
+      changed_when: false
+
+    - name: Test for raspberry pi /proc/device-tree/model
+      command: grep -E "Raspberry Pi" /proc/device-tree/model
+      register: grep_device_tree_model_raspberrypi
+      failed_when: false
+      changed_when: false
+
+    - name: Set raspberry_pi fact to true
+      set_fact:
+        raspberry_pi: true
+      when:
+        grep_cpuinfo_raspberrypi.rc == 0 or grep_device_tree_model_raspberrypi.rc == 0
+  ############################################################################################
+
+    #check if running x86 or something and download different repo
+    - name: create repo source file for dnsdist when raspberry pi
+      copy:
+        dest: "/etc/apt/sources.list.d/pdns.list"
+        content: |
+            deb http://repo.powerdns.com/{{ hostvars[inventory_hostname]['ansible_distribution'] }} {{ hostvars[inventory_hostname]['ansible_lsb']['codename'] }}-dnsdist-master main
+
+    - name: create repo source file for dnsdist when not raspberry pi
+      copy:
+        dest: "/etc/apt/sources.list.d/pdns.list"
+        content: |
+            deb http://repo.powerdns.com/raspbian {{ hostvars[inventory_hostname]['ansible_lsb']['codename'] }}-dnsdist-master main
+      when: raspberry_pi|default(false) #when raspberry pi
+
+    - name: add apt key
+      apt_key:
+        url: https://repo.powerdns.com/CBC8B383-pub.asc
+        state: present
+
+    - name: Install needed packages
+      apt:
+        name: "{{ necessary_packages }}"
+        state: latest
+
+    - name: Update, Upgrade, & Clean
+      tags: always
+      apt:
+        upgrade: yes
+        update_cache: yes
+        #had to comment out this line in order to get it to update dnsdist
+        #since the cache time was very low from just running the provision script
+        # cache_valid_time: "86400"
+        autoremove: yes
+        autoclean: yes
+      ignore_errors: yes
+
+    - name: create dnsdist preferences
+      copy:
+        dest: "/etc/apt/preferences.d/dnsdist"
+        content: |
+          Package: dnsdist*
+          Pin: origin repo.powerdns.com
+          Pin-Priority: 600
+
+    #print current host's ip address
+    #- debug: msg="{{ hostvars[item]['ansible_eth0']['ipv4']['address'] }}"
+
+    #print alias that I set in the hosts file for the second entry in the dns_servers group
+    # - debug: msg="{{ hostvars[groups['dns_servers'][1]]['inventory_hostname_short'] }}"
+
+    #print the ip address I set in the hosts file for the second entry in the dns_servers group
+    # - debug: msg="{{ hostvars[groups['dns_servers'][1]]['ansible_host'] }}"
+
+    #print ip address of the host that the play is being run against
+    # - debug: msg="{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+
+
+    - name: create dnsdist preferences
+      copy:
+        dest: "/etc/dnsdist/dnsdist.conf"
+        content: |
+          webserver("{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:80", "nilok3", "nilok3", {}, "192.168.3.0/24")
+          setLocal("{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:53")
+          warnlog(string.format("Script starting %s", "up!"))
+          newServer({address="{{ hostvars[groups['dns_servers'][0]]['ansible_host'] | default(groups['dns_servers'][0]) }}", name="{{ hostvars[groups['dns_servers'][0]]['inventory_hostname_short'] }}"})
+          newServer({address="{{ hostvars[groups['dns_servers'][1]]['ansible_host'] | default(groups['dns_servers'][1]) }}", name="{{ hostvars[groups['dns_servers'][1]]['inventory_hostname_short'] }}"})
+          setServerPolicy(leastOutstanding)
+
+    # - debug: msg="{{ primary_load_balancer }}"
+
+    # - debug: msg="{{ keepalived_password }}"
+
+    #this config creates a VIP, sets a password, and sets the backend servers (for this it's dns loadbalancers using port 53)
+    - name: create keepalived config file for primary
+      copy:
+        dest: "/etc/keepalived/keepalived.conf"
+        content: |
+          vrrp_instance VIP_1 {
+            state MASTER
+            interface {{ hostvars[inventory_hostname]['ansible_default_ipv4']['interface'] }}
+            virtual_router_id 55
+            priority 150
+            advert_int 1
+            unicast_src_ip {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}
+            unicast_peer {
+              {{ secondary_load_balancer }}
+            }
+
+            authentication {
+              auth_type PASS
+              auth_pass {{ keepalived_password }}
+            }
+
+            virtual_ipaddress {
+              192.168.9.90/24
+            }
+          }
+          virtual_server {{ loadbalancer_vip_ip }} 53 {
+            delay_loop 6
+            lb_algo wlc
+            protocol UDP
+
+            real_server {{ primary_load_balancer }} 53 {
+              weight 100
+              MISC_CHECK {
+                connect_timeout 6
+              }
+            }
+
+            real_server {{ secondary_load_balancer }} 53 {
+              weight 100
+              MISC_CHECK {
+                connect_timeout 6
+              }
+            }
+          }
+
+      #run when node is primary load balancer
+      when: hostvars[inventory_hostname]['ansible_default_ipv4']['address'] == primary_load_balancer
+
+      #keepalived password has to be at max 8 characters
+    - name: create keepalived config file for secondary
+      copy:
+        dest: "/etc/keepalived/keepalived.conf"
+        content: |
+          vrrp_instance VIP_1 {
+            state BACKUP
+            interface {{ hostvars[inventory_hostname]['ansible_default_ipv4']['interface'] }}
+            virtual_router_id 55
+            priority 100
+            advert_int 1
+            unicast_src_ip {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}
+            unicast_peer {
+              {{ primary_load_balancer }}
+            }
+              authentication {
+                auth_type PASS
+                auth_pass {{ keepalived_password }}
+            }
+              virtual_ipaddress {
+                192.168.9.90/24
+            }
+          }
+          virtual_server {{ loadbalancer_vip_ip }} 53 {
+            delay_loop 6
+            lb_algo wlc
+            protocol UDP
+
+            real_server {{ primary_load_balancer }} 53 {
+              weight 100
+              MISC_CHECK {
+                connect_timeout 6
+              }
+            }
+
+            real_server {{ secondary_load_balancer }} 53 {
+              weight 100
+              MISC_CHECK {
+                connect_timeout 6
+              }
+            }
+          }
+      #run when node is primary load balancer
+      when: hostvars[inventory_hostname]['ansible_default_ipv4']['address'] == secondary_load_balancer
+
+    # - name: allow DNS(53) traffic incoming
+    #   firewalld:
+    #     zone: public
+    #     port: 53/udp
+    #     permanent: true
+    #     interface: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['interface'] }}"
+    #     state: enabled
+
+    #gave me the same glob patterns error
+    - name: enable and start dnsdist & keepalived
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      with_items:
+        - dnsdist
+        - keepalived
+
+    #   #systemd doesn't allow glob patterns(ie. enabling or starting multiple things in one commmand) so I had to do each one individually
+    # - name: enable dnsdist to run on boot
+    #   systemd:
+    #     name: dnsdist@dnsdist.service
+    #     enabled: yes
+    #
+    # - name: enable keepalived to run on boot
+    #   systemd:
+    #     name: keepalived.service
+    #     enabled: yes
+    #
+    # - name: start keepalived
+    #   systemd:
+    #     name: keepalived
+    #     state: restarted
+    #
+    # - name: restart dnsdist
+    #   systemd:
+    #     name: dnsdist
+    #     state: restarted

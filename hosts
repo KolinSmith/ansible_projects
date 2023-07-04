@@ -27,6 +27,13 @@ ansible_user=kolin
 ansible_password=r$eBQNgc5U&A2at8kDwpWo.KzLT5NvHd 
 ansible_winrm_server_cert_validation=ignore
 
+[dev_server]
+voyager ansible_host=192.168.3.8
+
+[dev_server:vars]
+ansible_user={{ default_username | lower}}
+ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_ecdsa
+
 [dns_servers]
 ds9 ansible_host=192.168.9.4
 defiant ansible_host=192.168.9.3
@@ -47,6 +54,7 @@ secondary_load_balancer=192.168.9.5
 loadbalancer_vip_ip=192.168.9.90
 
 [all_raspberry_pis:children]
+dev_server
 dns_servers
 load_balancers
 

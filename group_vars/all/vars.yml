@@ -33,3 +33,5 @@ pfsense_username: "{{ vault_pfsense_username }}"
 pfsense_password: "{{ vault_pfsense_password }}"
 
 default_username: "{{ vault_default_username }}"
+
+tailscale_auth_key: "{{ vault_tailscale_auth_key }}"
