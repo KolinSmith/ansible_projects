@@ -47,3 +47,4 @@ necessary_packages:
   - rsyslog
   - tldr
   - bat
+  - trash-cli

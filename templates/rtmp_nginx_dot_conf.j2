@@ -1,0 +1,21 @@
+ rtmp {
+        server {
+                listen 1935;
+                chunk_size 4096;
+                allow publish 127.0.0.1;
+                deny publish all;
+
+                application live {
+                        live on;
+
+                        hls on;
+                        hls_type live;
+                        hls_fragment 3s;
+                        hls_playlist_length 15s;
+                        hls_nested on;
+                        hls_path /var/www/stream;
+
+                        record off;
+                }
+        }
+}

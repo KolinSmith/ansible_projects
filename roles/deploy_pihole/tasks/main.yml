@@ -44,9 +44,8 @@
       cache_valid_time: "86400"
       autoremove: yes
       autoclean: yes
-    ignore_errors: yes
+    ignore_errors: true
 
   - name: install pihole
     command: curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
     become: true
----

@@ -1,0 +1,67 @@
+---
+- name: deploy rtmp server (star trek tv)
+  hosts: rtmp_servers
+  gather_facts: yes
+  become: yes
+  vars_files:
+    - vars/deploy_rtmp_server_vars.yml
+  roles:
+    - role: check_if_raspberry_pi
+  tasks:
+    - name: update repo cache (Debian)
+      tags: always
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: "86400"
+        autoremove: yes
+        autoclean: yes
+      ignore_errors: yes
+    
+    - name: add packages I want
+      apt:
+        name: "{{ necessary_packages }}"
+        state: latest
+
+    - name: open up firewall for rtmp
+      ufw:
+        rule: allow
+        port: "{{ item.key }}"
+        proto: tcp
+      with_items:
+        - 1935
+        - 80
+
+    - name: edit nginx config (/etc/nginx/nginx.conf)
+      lineinfile:
+        path: /etc/nginx/nginx.conf
+        insertafter: EOF
+        lines: |
+          rtmp {
+                  server {
+                          listen 1935;
+                          chunk_size 4096;
+                          allow publish 127.0.0.1;
+                          deny publish all;
+
+                          application live {
+                                  live on;
+
+                                  hls on;
+                                  hls_type live;
+                                  hls_fragment 3s;
+                                  hls_playlist_length 15s;
+                                  hls_nested on;
+                                  hls_path /var/www/stream;
+
+                                  record off;
+                          }
+                  }
+          }
+
+    - name: reload nginx
+      systemd:
+        name: nginx
+        state: restarted
+
+#ffmpeg -re -stream_loop -1 -i "Star Trek- The Next Generation - S01E03 - The Naked Now Bluray-1080p.mkv" -c:v copy -c:a aac -ar 44100 -ac 1 -f flv rtmp://localhost/live/stream

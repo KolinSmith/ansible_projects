@@ -1,0 +1,5 @@
+necessary_packages:
+  - libnginx-mod-rtmp
+  - ffmpeg
+  - nginx
+

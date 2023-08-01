@@ -416,3 +416,25 @@
           hour: "2"
           job: "ansible-playbook ~/code_base/ansible_projects/playbooks/reconnectUnifi/reconnectUnifi.yml && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/fde13bd7-10af-4762-b3d3-112c805b3e33"
         become_user: "{{ user }}"
+
+  - name: turn off swap
+    command: sudo dphys-swapfile swapoff
+    become: true
+    when: raspberry_pi == true
+
+  - name: increase size of swap file to 1GB
+    replace:
+      path: /etc/dphys-swapfile
+      regexp: 'CONF_SWAPSIZE=100'
+      replace: 'CONF_SWAPSIZE=1024' 
+    when: raspberry_pi == true
+
+  - name: turn on swap
+    command: sudo dphy-swapfile setup
+    become: true
+    when: raspberry_pi == true
+
+  # need to reboot machine to make sure processes use new swap space
+  - name: Reboot the machine (Wait for 60 sec)
+    reboot:
+      reboot_timeout: 60
