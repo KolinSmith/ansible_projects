@@ -1,29 +1,36 @@
 ---
-    - name: kill processes used by default user
-      shell: sudo pkill -u {{ hostvars[groups['provision_servers'][0]].ansible_user }}
+###  NEED TO PASS IN THE DEFAULT_USER PARAMETER, EXAMPLE:
+###    - role: remove_default_user
+###      default_user: "{{ dmz_username }}"
 
-    # - name: remove default user for raspberry pi
-    #   user:
-    #     name: "pi"
-    #     state: absent
-    #     remove: yes
-    #   when: raspberry_pi == true
 
-    # - name: remove default user for proxmox vms
-    #   user:
-    #     name: "serveradmin"
-    #     state: absent
-    #     remove: yes
-    #   when: raspberry_pi == false
 
-    - name: remove default user
-      user:
-        name: "{{ hostvars[groups['provision_servers'][0]].ansible_user }}"
-        state: absent
-        force: true
-        remove: true
+- name: kill processes used by default user
+  shell: sudo pkill -u "{{ default_user }}"
+  # shell: sudo pkill -u {{ hostvars[groups['provision_servers'][0]].ansible_user }}
 
-    - name: Reboot the machine (Wait for 5 min)
-      reboot:
-        reboot_timeout: 300
-      # become_user: "{{ user }}"
+# - name: remove default user for raspberry pi
+#   user:
+#     name: "pi"
+#     state: absent
+#     remove: yes
+#   when: raspberry_pi == true
+
+# - name: remove default user for proxmox vms
+#   user:
+#     name: "serveradmin"
+#     state: absent
+#     remove: yes
+#   when: raspberry_pi == false
+
+- name: remove default user
+  user:
+    name: "{{ default_user }}"  #"{{ hostvars[groups['provision_servers'][0]].ansible_user }}"
+    state: absent
+    force: true
+    remove: true
+
+- name: Reboot the machine (Wait for 5 min)
+  reboot:
+    reboot_timeout: 300
+  # become_user: "{{ user }}"

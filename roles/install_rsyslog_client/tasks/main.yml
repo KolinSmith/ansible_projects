@@ -4,9 +4,6 @@
 #https://www.makeuseof.com/set-up-linux-remote-logging-using-rsyslog/
 #
 
-- name: Configure syslog server
-  become: true
-  tasks:
   - name: Install rsyslog
     apt:
       name: rsyslog

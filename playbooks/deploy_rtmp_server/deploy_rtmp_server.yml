@@ -1,24 +1,24 @@
 ---
 - name: deploy rtmp server (star trek tv)
   hosts: rtmp_servers
-  gather_facts: yes
-  become: yes
+  gather_facts: true
+  become: true
   vars_files:
     - vars/deploy_rtmp_server_vars.yml
   roles:
     - role: check_if_raspberry_pi
   tasks:
-    - name: update repo cache (Debian)
+    - name: "update repo cache (Debian)"
       tags: always
       apt:
-        upgrade: yes
-        update_cache: yes
+        upgrade: true
+        update_cache: true
         cache_valid_time: "86400"
-        autoremove: yes
-        autoclean: yes
-      ignore_errors: yes
-    
-    - name: add packages I want
+        autoremove: true
+        autoclean: true
+      ignore_errors: true
+
+    - name: "add packages I want"
       apt:
         name: "{{ necessary_packages }}"
         state: latest
@@ -32,7 +32,7 @@
         - 1935
         - 80
 
-    - name: edit nginx config (/etc/nginx/nginx.conf)
+    - name: "edit nginx config (/etc/nginx/nginx.conf)"
       lineinfile:
         path: /etc/nginx/nginx.conf
         insertafter: EOF
@@ -59,9 +59,8 @@
                   }
           }
 
-    - name: reload nginx
+    - name: "reload nginx"
       systemd:
         name: nginx
         state: restarted
-
 #ffmpeg -re -stream_loop -1 -i "Star Trek- The Next Generation - S01E03 - The Naked Now Bluray-1080p.mkv" -c:v copy -c:a aac -ar 44100 -ac 1 -f flv rtmp://localhost/live/stream

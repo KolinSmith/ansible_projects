@@ -1,0 +1,22 @@
+---
+- name: dmz server pre provision
+  hosts: dmz_pre_provision
+  gather_facts: true
+  become: true
+  vars_files:
+    - vars/dmz_server_provision_vars.yml
+  roles:
+    - role: bootstrap_python
+    - role: check_if_raspberry_pi
+    - role: 
+
+- name: post server post provision
+  hosts: post_provision_servers
+  gather_facts: true
+  become: true
+  vars_files:
+    - vars/dev_server_provision_vars.yml
+  roles:
+    # - role: check_if_raspberry_pi
+    - role: remove_default_user
+      default_user: "{{ dmz_username }}"

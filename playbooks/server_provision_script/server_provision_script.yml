@@ -1,20 +1,24 @@
 ---
-  - name: server provision
-    hosts: provision_servers
-    gather_facts: yes
-    become: yes
-    vars_files:
-      - vars/server_provision_script_vars.yml
-    roles:
-      - role: bootstrap_python
-      - role: provision_server
+#sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/server_provision_script/server_provision_script.yml
+- name: server provision
+  hosts: provision_servers
+  gather_facts: true
+  become: true
+  vars_files:
+    - vars/server_provision_script_vars.yml
+  roles:
+    - role: bootstrap_python
+    - role: provision_server
 
-  - name: post server provision
-    hosts: post_provision_servers
-    gather_facts: yes
-    become: yes
-    vars_files:
-      - vars/server_provision_script_vars.yml
-    roles:
-      - role: check_if_raspberry_pi
-      - role: remove_default_user
+- name: post server provision
+  hosts: post_provision_servers
+  gather_facts: true
+  become: true
+  vars_files:
+    - vars/server_provision_script_vars.yml
+  roles:
+    - role: check_if_raspberry_pi
+    # - role: artis3n.tailscale #install tailscale
+    #   vars:
+    #     tailscale_authkey: "{{ tailscale_auth_key }}"
+    - role: remove_default_user

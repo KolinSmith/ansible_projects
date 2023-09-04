@@ -4,7 +4,8 @@ pfsense ansible_host=192.168.3.1
 [pfsense_router:vars]
 ansible_connection=ssh
 ansible_user={{ pfsense_username | lower }}
-ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_ecdsa
+ansible_ssh_private_key_file=/home/{{ default_username | lower }}/.ssh/id_ecdsa
+#ansible_python_interpreter=/usr/local/bin/python3.11 #make sure to check which python version is installed. regex wont work here
 
 [unifi_devices]
 ubntSW ansible_host=192.168.3.247
@@ -13,7 +14,7 @@ ubntAP ansible_host=192.168.3.248
 [unifi_devices:vars]
 ansible_connection=ssh
 ansible_user=admin
-ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_rsa
+ansible_ssh_private_key_file=/home/{{ default_username | lower }}/.ssh/id_rsa
 
 [windows_test]
 window_node_1 ansible_host=192.168.9.176
@@ -27,36 +28,58 @@ ansible_user=kolin
 ansible_password=r$eBQNgc5U&A2at8kDwpWo.KzLT5NvHd 
 ansible_winrm_server_cert_validation=ignore
 
+[dmz_pre_provision]
+dmz_pre_provision ansible_host=129.146.141.62
+
+[dmz_pre_provision:vars]
+ansible_user={{ dmz_username | lower }}
+ansible_connection=ssh
+ansible_ssh_pass=ubuntu
+ansible_password=ubuntu
+ansible_become=yes
+ansible_become_method=sudo
+ansible_become_password=ubuntu
+ansible_python_interpreter=/usr/bin/python3
+
+[dmz_post_provision]
+dmz_post_provision ansible_host=129.146.141.62
+
+[dmz_post_provision:vars]
+ansible_user={{ default_username | lower }}
+ansible_ssh_private_key_file=/home/{{ default_username | lower }}/.ssh/id_ecdsa
+
 [dev_server]
 voyager ansible_host=192.168.3.8
 
 [dev_server:vars]
-ansible_user={{ default_username | lower}}
-ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_ecdsa
+ansible_user={{ default_username | lower }}
+ansible_ssh_private_key_file=/home/{{ default_username | lower }}/.ssh/id_ecdsa
 
 [dns_servers]
 ds9 ansible_host=192.168.9.4
 defiant ansible_host=192.168.9.3
 
 [dns_servers:vars]
-ansible_user={{ default_username | lower}}
-ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_ecdsa
+ansible_user={{ default_username | lower }}
+ansible_ssh_private_key_file=/home/{{ default_username | lower }}/.ssh/id_ecdsa
 
 [load_balancers]
 stargazer ansible_host=192.168.9.6
 shenzhou ansible_host=192.168.9.5
 
 [load_balancers:vars]
-ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_ecdsa
-ansible_user={{ default_username | lower}}
+ansible_ssh_private_key_file=/home/{{ default_username | lower }}/.ssh/id_ecdsa
+ansible_user={{ default_username | lower }}
 primary_load_balancer=192.168.9.6
 secondary_load_balancer=192.168.9.5
 loadbalancer_vip_ip=192.168.9.90
 
 [all_raspberry_pis:children]
-dev_server
+#dev_server #can't ping itself
 dns_servers
 load_balancers
+provision_servers
+internetPi
 
 [ansible_target_servers]
 ansible-node-1 ansible_host=192.168.9.120
@@ -69,10 +92,19 @@ ansible_python_interpreter=/usr/bin/python2.7
 #ansible_user=serveradmin
 #ansible_become_pass=nilok3
 
+[internetPi]
+internetPi ansible_host=192.168.9.10
+
+[internetPi:vars]
+ansible_connection=ssh
+ansible_user={{ default_username | lower }}
+ansible_ssh_private_key_file=/home/{{ default_username | lower }}/.ssh/id_ecdsa
+ansible_python_interpreter=/usr/bin/python3
+
 [provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-testRPi ansible_host=192.168.9.131
+testRPi ansible_host=192.168.9.115
 
 [provision_servers:vars]
 #pre provisioning
@@ -96,20 +128,20 @@ ansible_python_interpreter=/usr/bin/python3
 [post_provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-post_test ansible_host=192.168.9.131
+post_test ansible_host=192.168.9.115
 
 [post_provision_servers:vars]
 #post provisioning
 #######################################################################
 ansible_connection=ssh
-ansible_user={{ default_username | lower}}
-ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_ecdsa
+ansible_user={{ default_username | lower }}
+ansible_ssh_private_key_file=/home/{{ default_username | lower }}/.ssh/id_ecdsa
 ansible_python_interpreter=/usr/bin/python3
 primary_load_balancer=192.168.9.6
 secondary_load_balancer=192.168.9.5
 loadbalancer_vip_ip=192.168.9.90
 ######################################################################
-default_user=raspberry
+default_user=pi
 # default_user=serveradmin
 
 [mysql_servers]
@@ -119,6 +151,6 @@ k3s-mysql-2 ansible_host=192.168.9.133
 
 [mysql_servers:vars]
 ansible_connection=ssh
-ansible_user={{ default_username | lower}}
-ansible_ssh_private_key_file=/home/{{ default_username | lower}}/.ssh/id_ecdsa
+ansible_user={{ default_username | lower }}
+ansible_ssh_private_key_file=/home/{{ default_username | lower }}/.ssh/id_ecdsa
 ansible_python_interpreter=/usr/bin/python3

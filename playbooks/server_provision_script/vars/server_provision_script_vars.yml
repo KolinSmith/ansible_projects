@@ -7,13 +7,16 @@ public_keys:
     key: "{{ lookup('file', 'voyager_pub_key.pub') }}"
 extra_path: '/usr/local/bin'
 dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
-# tailscale_auth_key: 'tskey-auth-k84EcW1CNTRL-SqwZv6pwP8S4gFQmstP6BSM8tju8SRLh'
 tailscale_release_stability: 'stable'
 distro:
   ubuntu: 'ubuntu'
+  debian: 'debian'
 tailscale_apt_deb: 'deb https://pkgs.tailscale.com/{{ tailscale_release_stability | lower }}/{{ distro[ansible_distribution | lower] }} {{ ansible_distribution_release | lower }} main'
 tailscale_apt_signkey: 'https://pkgs.tailscale.com/{{ tailscale_release_stability | lower }}/{{ distro[ansible_distribution | lower] }}/{{ ansible_distribution_release | lower }}.gpg'
 # raspbian_testing_deb: 'deb http://raspbian.raspberrypi.org/raspbian/ testing main'
+# if I want to use headscale:
+#https://github.com/artis3n/ansible-role-tailscale/tree/main
+#tailscale_args: "--login-server='http://localhost:8080'"
 necessary_packages:
   - wget
   - net-tools
@@ -39,8 +42,7 @@ necessary_packages:
   - vim
   - atop
   - python3-pip
-  - tailscale
+  # - tailscale
   - ansible
   - rsyslog
-  - bat
   - trash-cli

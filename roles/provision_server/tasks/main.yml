@@ -21,16 +21,17 @@
     ignore_errors: true
     # when: ansible_os_family == "Debian"
 
-  - name: Add Tailscale signing key
-    apt_key:
-      url: "{{ tailscale_apt_signkey }}"
-      state: present
+  # DOESNT WORK WITH RASPBERRY PI DEBIAN BECUASE IT NEEDS A .ASC. SUGGEST USING ROLE
+  # - name: Add Tailscale signing key
+  #   apt_key:
+  #     url: "{{ tailscale_apt_signkey }}"
+  #     state: present
 
-  - name: Add Tailscale repo to apt sources
-    apt_repository:
-      repo: "{{ tailscale_apt_deb }}"
-      state: present
-      filename: "tailscale-{{ ansible_lsb.id | lower }}"
+  # - name: Add Tailscale repo to apt sources
+  #   apt_repository:
+  #     repo: "{{ tailscale_apt_deb }}"
+  #     state: present
+  #     filename: "tailscale-{{ ansible_lsb.id | lower }}"
 
   - name: add packages I want
     apt:
@@ -207,9 +208,11 @@
       dest: /home/{{ user }}/.tmux/plugins/tpm
     when: tpm_installed.stat.exists == False
 
-  - name: Setup Tailscale
-    command: tailscale up --authkey={{ tailscale_auth_key }}
+  # - name: Setup Tailscale
+  #   command: tailscale up --authkey={{ tailscale_auth_key }}
 
+
+  # FAILED WHEN INSTALLING ON RPI ZERO. NEEDS TESTING
   - name: Setup Docker & Docker Compose
     import_role:
       name: install_docker

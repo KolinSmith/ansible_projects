@@ -16,7 +16,7 @@
       cache_valid_time: "86400"
       autoremove: yes
       autoclean: yes
-    ignore_errors: yes
+    ignore_errors: true
     # when: ansible_os_family == "Debian"
 
   - name: Add Tailscale signing key
@@ -139,11 +139,11 @@
   #they must run in the same task one after the other for it to work.
   - name: regenerate ssh keys
     shell: "{{ item }}"
-    ignore_errors: yes
+    ignore_errors: true
     with_items:
       - rm /etc/ssh/ssh_host_*
       - dpkg-reconfigure openssh-server
-    become: yes
+    become: true
     #handler gets triggered at the end of the playbook run
     notify: Reload ssh
 
