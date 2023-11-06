@@ -21,4 +21,8 @@
     # - role: artis3n.tailscale #install tailscale
     #   vars:
     #     tailscale_authkey: "{{ tailscale_auth_key }}"
+    # - role: geerlingguy.docker
+    - role: geerlingguy.pip
+    - role: geerlingguy.docker_arm
+    - role: install_bat #doesnt seem to be working
     - role: remove_default_user

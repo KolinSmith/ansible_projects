@@ -1,4 +1,4 @@
-user: "{ default_username }}"
+user: "{{ default_username }}"
 my_custom_path_var: '/home/{{ user }}/.local/bin'
 public_keys:
   - name: Enterprise Public Key File
@@ -9,6 +9,7 @@ extra_path: '/usr/local/bin'
 dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
 ansible_projects_repo: 'git@github.com:KolinSmith/ansible_projects.git'
 github_backup_repo: 'git@github.com:KolinSmith/GitHub-Backup.git'
+docker_projects_repo: 'git@github.com:KolinSmith/docker_projects.git'
 # tailscale_auth_key: 'tskey-auth-k84EcW1CNTRL-SqwZv6pwP8S4gFQmstP6BSM8tju8SRLh'
 tailscale_release_stability: 'stable'
 distro:

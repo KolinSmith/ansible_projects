@@ -97,7 +97,7 @@
 
   # no clue if this works
   #https://gist.github.com/carlessanagustin/af38e4585951dc32a320
-  - name: update PATH variable
+  - name: add {{extra_path}} variable to the path 
     lineinfile:
       dest: /etc/environment
       state: present

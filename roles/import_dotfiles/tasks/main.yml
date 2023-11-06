@@ -24,6 +24,8 @@
       - .wgetrc
       - .vimrc
 
+
+# also need to remove docker and other things if they aren't used (like bat!)
   - name: Remove ls aliases from .zshrc if exa isn't installed
     lineinfile:
       path: /home/dax/.zshrc

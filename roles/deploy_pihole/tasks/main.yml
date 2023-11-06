@@ -1,10 +1,26 @@
 ---
-  - name: add SSH public key for borg so it can login to make backups
-    authorized_key:
-        user: "{{ user }}"
-        key: "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOax0ZYUe5CpSHS+h4dPYEOpZs/aUbUol5b4ypwPV9jEdNsBUateQhzwtSXZJbosW4VpGIBtfQVhFgaJri2Fftc= root@Borg"
-        state: present
-        manage_dir: yes
+  # - name: add SSH public key for borg so it can login to make backups
+  #   authorized_key:
+  #       user: "{{ user }}"
+  #       key: "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOax0ZYUe5CpSHS+h4dPYEOpZs/aUbUol5b4ypwPV9jEdNsBUateQhzwtSXZJbosW4VpGIBtfQVhFgaJri2Fftc= root@Borg"
+  #       state: present
+  #       manage_dir: yes
+
+
+  # - name: add SSH public key for local user
+  #   # authorized_key:
+  #   #     user: "{{ user }}"
+  #   #     key: "{{ lookup('file', '/home/dax/.ssh/id_ecdsa.pub') }}"
+  #   #     state: present
+  #   #     manage_dir: yes
+  #   authorized_key:
+  #       user: "{{ user }}"
+  #       state: present
+  #       key: "{{ item.key }}"
+  #       manage_dir: yes
+  #   with_items:
+  #     - "{{ public_keys }}"
+
 
   - name: create pihole folder
     file:
@@ -17,9 +33,19 @@
     template:
       src: /home/dax/code_base/ansible_projects/templates/pihole_setup_vars.j2
       dest: /etc/pihole/setupVars.conf
-      owner: root
-      group: root
+      owner: pihole #replaced root with this so that the pihole user could access the database file
+      group: pihole
       mode: 0600
+
+  - name: install pihole
+    shell: curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
+    become: true
+
+  # - name: add "{{ user }}" to /etc/pihole so it has access to the database file
+  #   user: 
+  #     name: "{{ user }}"
+  #     groups: "pihole"
+  #     append: yes               # Set to 'yes' to append the user to the group (if the group exists), or 'no' to replace the user's group memberships
 
   - name: touch dnsmasq file to setup wildcard DNS
     file:
@@ -45,7 +71,3 @@
       autoremove: yes
       autoclean: yes
     ignore_errors: true
-
-  - name: install pihole
-    command: curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
-    become: true

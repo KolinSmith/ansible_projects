@@ -1,0 +1,184 @@
+---
+  - name: add admin group
+    group:
+      name: admin
+      state: present
+
+  - name: add {{ user }} group
+    group:
+        name: "{{ user }}"
+        state: present
+
+  - name: add local user {{ user }}
+    user:
+      name: "{{ user }}"
+      groups: admin
+      shell: /bin/zsh
+      home: /home/{{ user }}
+      create_home: yes
+      state: present
+      password: "{{ dax_password }}"
+
+  - name: Add local user {{ user }} to sudo
+    lineinfile:
+      path: /etc/sudoers.d/{{ user }}
+      line: '{{ user }} ALL=(ALL) NOPASSWD: ALL'
+      state: present
+      mode: 0440
+      create: yes
+      validate: 'visudo -cf %s'
+
+  - name: Create code_base directories
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: dax
+      group: admin
+    loop:
+      - /home/{{ user }}/code_base/
+      - /home/{{ user }}/code_base/ansible_projects
+      - /home/{{ user }}/code_base/github_backup
+
+  - name: add SSH public keys for local user
+    authorized_key:
+        user: "{{ user }}"
+        state: present
+        key: "{{ item.key }}"
+        manage_dir: yes
+    with_items:
+      - "{{ public_keys }}"
+
+#might end up using the one from the dotfiles
+  - name: add sshd config file
+    template:
+      src: /home/dax/code_base/ansible_projects/templates/sshd_config.j2
+      dest: /etc/ssh/sshd_config
+      owner: root
+      group: root
+      mode: 0600
+      validate: /usr/sbin/sshd -t -f %s
+      backup: yes
+    notify: Reload ssh
+
+  - name: make sure voyager ssh private key is installed
+    copy:
+      content: '{{ voyager_private_ssh_key }}'
+      dest: '/home/{{ user }}/.ssh/id_ecdsa'
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: 0600
+    no_log: true
+
+  - name: create ~/.zshrc file for local user
+    file:
+      path: /home/{{ user }}/.zshrc
+      state: touch
+      mode: 0600
+
+  - name: Check for Oh My ZSH Installation
+    stat:
+      path: ~/.oh-my-zsh
+    become_user: "{{ user }}"
+    register: omz_installed
+
+  - name: Install Oh My ZSH
+    git:
+      repo: 'https://github.com/ohmyzsh/ohmyzsh.git'
+      dest: ~/.oh-my-zsh
+    become_user: "{{ user }}"
+    when: omz_installed.stat.exists == False
+
+  - name: Checkout powerlevel10k repo and use refspec to fetch all pull requests
+    git:
+      repo: https://github.com/romkatv/powerlevel10k.git
+      dest: /home/{{ user }}/.oh-my-zsh/custom/themes/powerlevel10k
+      refspec: '+refs/pull/*:refs/heads/*'
+      depth: 1
+
+  - name: Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests
+    git:
+      repo: https://github.com/zsh-users/zsh-autosuggestions
+      dest: /home/{{ user }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+      refspec: '+refs/pull/*:refs/heads/*'
+
+  - name: create ~/.zshrc file for local user
+    file:
+      path: /home/{{ user }}/.zshrc
+      state: touch
+      mode: 0600
+
+  - name: Check for Oh My ZSH Installation
+    stat:
+      path: ~/.oh-my-zsh
+    become_user: "{{ user }}"
+    register: omz_installed
+
+  - name: Install Oh My ZSH
+    git:
+      repo: 'https://github.com/ohmyzsh/ohmyzsh.git'
+      dest: ~/.oh-my-zsh
+    become_user: "{{ user }}"
+    when: omz_installed.stat.exists == False
+
+  - name: Checkout powerlevel10k repo and use refspec to fetch all pull requests
+    git:
+      repo: https://github.com/romkatv/powerlevel10k.git
+      dest: /home/{{ user }}/.oh-my-zsh/custom/themes/powerlevel10k
+      refspec: '+refs/pull/*:refs/heads/*'
+      depth: 1
+
+  - name: Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests
+    git:
+      repo: https://github.com/zsh-users/zsh-autosuggestions
+      dest: /home/{{ user }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+      refspec: '+refs/pull/*:refs/heads/*'
+
+  - name: Check if tmuxinator plugin manager is installed.
+    stat:
+      path: /home/{{ user }}/.tmux/plugins/tpm
+    register: tpm_installed
+
+  - name: Create tmux plugin directory
+    file:
+      state: directory
+      path: /home/{{ user }}/.tmux/plugins
+
+  - name: Install tmux plugin manager
+    git:
+      repo: 'https://github.com/tmux-plugins/tpm'
+      dest: /home/{{ user }}/.tmux/plugins/tpm
+    when: tpm_installed.stat.exists == False
+
+  - name: Setup Tailscale
+    command: tailscale up --authkey={{ tailscale_auth_key }}
+
+  - name: Add docker directories
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: dax
+      group: admin
+    loop:
+      - /home/{{ user }}/docker/
+      - /home/{{ user }}/docker-data/
+
+  - name: clone docker repository to localhost
+    git:
+      repo: "{{ docker_projects_repo }}"
+      dest: /tmp/tmp-docker
+      accept_hostkey: yes
+      force: yes
+      recursive: no
+      key_file: /home/{{ user }}/.ssh/id_ecdsa
+    run_once: true
+
+  - name: move ansible_projects into ~/code_base/
+    copy:
+      src: /tmp/tmp-docker
+      dest: /home/{{ user }}/docker
+      owner: "{{ user }}"
+      group: admin
+      remote_src: true
+
+  
+

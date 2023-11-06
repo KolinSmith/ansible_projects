@@ -5,6 +5,8 @@ public_keys:
     key: "{{ lookup('file', 'enterprise_pub_key.pub') }}"
   - name: Voyager Public Key File
     key: "{{ lookup('file', 'voyager_pub_key.pub') }}"
+  - name: Borg Public Key File
+    key: "{{ lookup('file', 'borg_pub_key.pub') }}"
 extra_path: '/usr/local/bin'
 dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
 # tailscale_auth_key: 'tskey-auth-k84EcW1CNTRL-SqwZv6pwP8S4gFQmstP6BSM8tju8SRLh'
@@ -39,7 +41,7 @@ necessary_packages:
   - vim
   - atop
   - python3-pip
-  - tailscale
+  # - tailscale
   - ansible
   - rsyslog
   - bat

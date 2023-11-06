@@ -104,7 +104,7 @@ ansible_python_interpreter=/usr/bin/python3
 [provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-testRPi ansible_host=192.168.9.115
+testRPi ansible_host=192.168.9.3
 
 [provision_servers:vars]
 #pre provisioning
@@ -128,7 +128,7 @@ ansible_python_interpreter=/usr/bin/python3
 [post_provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-post_test ansible_host=192.168.9.115
+post_test ansible_host=192.168.9.3
 
 [post_provision_servers:vars]
 #post provisioning
@@ -147,7 +147,6 @@ default_user=pi
 [mysql_servers]
 k3s-mysql-1 ansible_host=192.168.9.129
 k3s-mysql-2 ansible_host=192.168.9.133
-
 
 [mysql_servers:vars]
 ansible_connection=ssh
