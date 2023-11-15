@@ -21,12 +21,23 @@
   #   with_items:
   #     - "{{ public_keys }}"
 
+  - name: create pihole group
+    group:
+      name: pihole
+      state: present
+
+  - name: create pihole user
+    user:
+      name: pihole
+      group: pihole
 
   - name: create pihole folder
     file:
       path: /etc/pihole
       state: directory
       mode: 0644
+      owner: pihole
+      group: pihole
 
   - name: add pihole config file setupVars.conf file to /etc/pihole
     #https://web.archive.org/web/20230102233129/https://www.tecmint.com/install-rsyslog-centralized-logging-in-centos-ubuntu/
@@ -58,9 +69,10 @@
       dest: /etc/dnsmasq.d/02-my-wildcard-dns.conf
       state: present
       mode: 0644
-      #should return the IP address of Voyager
       line: |
         address=/internal.homelab.gg/{{ hostvars[groups['dev_server'][0]].ansible_host }}
+        address=/pfsense.internal.homelab.gg/{{ hostvars[groups['pfsense_router'][0].ansible_host]}}
+        address=/borg.internal.homelab.gg/192.168.9.7
         
   - name: Update, Upgrade, & Clean
     tags: always

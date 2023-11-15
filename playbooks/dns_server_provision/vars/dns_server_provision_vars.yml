@@ -45,3 +45,4 @@ necessary_packages:
   - ansible
   - rsyslog
   - bat
+  - exa

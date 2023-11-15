@@ -10,6 +10,7 @@
     - role: check_if_raspberry_pi
     - role: install_docker
     - role: import_dotfiles
+    - role: install_rsyslog_client
     - role: setup_oracle_vps
 
 - name: post server post provision

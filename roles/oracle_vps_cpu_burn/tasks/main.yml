@@ -1,0 +1,14 @@
+---
+  - name: Install sysbench
+    apt: 
+      name: sysbench
+      state: present
+
+  - name: add a line to root's crontab to run sysbench 
+    become: true
+    cron: 
+      name: "every 2:00 AM, run for 4 hours"
+      minute: "0"
+      hour: "2"
+      job: "sysbench --test=cpu --time=14400"
+      user: root
