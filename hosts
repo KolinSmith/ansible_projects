@@ -104,7 +104,7 @@ ansible_python_interpreter=/usr/bin/python3
 [provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-testRPi ansible_host=192.168.9.103
+testRPi ansible_host=192.168.9.105
 
 [provision_servers:vars]
 #pre provisioning
@@ -113,8 +113,8 @@ ansible_connection=ssh
 # ansible_ssh_pass={{ proxmox_template_password }}
 ansible_ssh_pass=raspberry 
 ###need to login to ubuntu server first (login ubuntu:ubuntu) and change password to "raspberry"
-ansible_user=root #pi
-ansible_ssh_user=root
+ansible_user=pi
+ansible_ssh_user=pi
 # ansible_user=serveradmin
 # ansible_password={{ proxmox_template_password }}
 ansible_password=raspberry 
@@ -129,7 +129,7 @@ ansible_python_interpreter=/usr/bin/python3
 [post_provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-post_test ansible_host=192.168.9.103
+post_test ansible_host=192.168.9.105
 
 [post_provision_servers:vars]
 #post provisioning

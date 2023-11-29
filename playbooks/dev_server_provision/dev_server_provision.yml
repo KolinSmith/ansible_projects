@@ -1,19 +1,19 @@
 ---
   - name: dev server provision (voyager)
     hosts: provision_servers
-    gather_facts: yes
-    become: yes
+    gather_facts: true
+    become: true
     vars_files:
       - vars/dev_server_provision_vars.yml
     roles:
-      - role: bootstrap_python
+      # - role: bootstrap_python
       - role: check_if_raspberry_pi
       - role: provision_dev_server
 
   - name: post server provision
     hosts: post_provision_servers
-    gather_facts: yes
-    become: yes
+    gather_facts: true
+    become: true
     vars_files:
       - vars/dev_server_provision_vars.yml
     roles:
