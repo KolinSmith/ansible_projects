@@ -12,10 +12,19 @@
 
   - name: post server provision
     hosts: post_provision_servers
-    gather_facts: true
+    gather_facts: true 
     become: true
     vars_files:
       - vars/dev_server_provision_vars.yml
     roles:
       # - role: check_if_raspberry_pi
       - role: remove_default_user
+      # - role: import_dotfiles #use this role for everything but the main dev server
+      - role: IronicBadger.figurine
+      - role: artis3n.tailscale #tskey-auth-kUhD5p1CNTRL-DMcyZVEgiNj7zTZnjtHNUjykzaguEnvrL
+      - role: geerlingguy.pip
+      - role: geerlingguy.docker
+      - role: geerlingguy.docker_arm
+      - role: geerlingguy.ntp
+      # - role: geerlingguy.node_exporter
+      - role: geerlingguy.clamav

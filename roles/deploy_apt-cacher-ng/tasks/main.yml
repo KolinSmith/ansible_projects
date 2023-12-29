@@ -33,6 +33,17 @@
       line: 'PassThroughPattern: .* # this would allow CONNECT to everything'
     # backup: yes  # Create a backup of the original file
 
+  #https://kifarunix.com/install-and-configure-apt-caching-server-using-apt-cacher-ng-on-ubuntu-20-04/
+  - name: Create allowed hosts file
+    ansible.builtin.copy:
+      content: "apt-cacher-ng : 192.168.9.0/24"
+      dest: /etc/hosts.allow
+
+  - name: Create denied hosts file
+    ansible.builtin.copy:
+      content: "apt-cacher-ng : 192.168.3.0/24 192.168.2.0/24 10.10.10.0/24"
+      dest: /etc/hosts.allow
+
   - name: Restart apt-cacher-ng service
     ansible.builtin.service:
       name: apt-cacher-ng

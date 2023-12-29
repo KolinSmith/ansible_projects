@@ -1,0 +1,73 @@
+#!/usr/bin/expect
+
+set timeout 30
+
+# Target machine details
+set target_ip "192.168.9.149"
+set root_password "1234"
+set new_password "raspberry"
+set username "pi"
+set user_password "raspberry"
+
+# SSH into the target machine as root
+spawn ssh -o StrictHostKeyChecking=no root@$target_ip
+
+# # Expect the prompt
+# expect {
+#     "Are you sure you want to continue connecting (yes/no/*)?" {
+#         # Provide the response within braces to treat it as a single string
+#         send "yes\r"
+#         exp_continue
+#     }
+#     timeout {
+#         # Handle timeout, if needed
+#         send_user "Timed out while waiting for the prompt\n"
+#         exit 1
+#     }
+# }
+
+
+#    expect: This command is used in expect scripts to wait for specific patterns or strings in the output of the spawned process.
+#*: The asterisk (*) is a wildcard character in the pattern. In this context, it matches any sequence of characters. So, *?assword: means it will match any string that ends with "assword: ".
+#?: The question mark (?) is used as a non-greedy qualifier. It makes the preceding * match as few characters as possible. This ensures that if there are multiple occurrences of "assword: " in the output, the match will be the shortest possible sequence of characters.
+
+# Expect root password prompt
+expect "* password: "
+send "$root_password\r"
+
+# Change root password
+expect "Create root password: "
+send "$new_password\r"
+expect "Repeat root password: "
+send "$new_password\r"
+
+# Create a new user
+expect "Please provide a username (eg. your first name): "
+send "$username\r"
+expect "Create user ($username) password: "
+send "$user_password\r"
+expect "Repeat user ($username) password: "
+send "$user_password\r"
+expect "Please provide your real name: "
+send "\r"
+expect "Set user language based on your location? * "
+send "\r"
+expect "* Please enter your choice: "
+send "1 \r"
+
+# # Choose locale
+# expect "# "
+# send "dpkg-reconfigure locales\r"
+# expect "Spacebar selects, enter completes, and arrow keys navigate. Tab toggles the marked information."
+# send "\r"
+# expect "  [*] en_US.UTF-8\r"
+# send "1\r"
+
+# Wait for prompt and exit
+expect "# "
+send "exit\r"
+
+# End the script
+expect eof
+
+

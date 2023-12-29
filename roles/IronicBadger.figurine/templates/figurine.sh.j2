@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo ""
+/usr/local/bin/figurine -f "Larry 3D 2.flf" {{ figurine_name | default(ansible_hostname) }}
+echo ""

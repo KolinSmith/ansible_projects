@@ -6,8 +6,9 @@
 
 
 - name: kill processes used by default user
-  shell: sudo pkill -u "{{ default_user }}" #variable is defined in hosts file
+  shell: sudo pkill -u {{ default_user }} #variable is defined in hosts file
   # shell: sudo pkill -u {{ hostvars[groups['provision_servers'][0]].ansible_user }}
+  ignore_errors: true
 
 # - name: remove default user for raspberry pi
 #   user:
@@ -33,4 +34,7 @@
 - name: Reboot the machine (Wait for 5 min)
   reboot:
     reboot_timeout: 300
+  ignore_errors: true
+
   # become_user: "{{ user }}"
+  

@@ -8,11 +8,21 @@ public_keys:
 extra_path: '/usr/local/bin'
 dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
 ansible_projects_repo: 'git@github.com:KolinSmith/ansible_projects.git'
+docker_projects_repo: 'git@github.com:KolinSmith/docker_projects.git'
+terraform_projects_repo: 'git@github.com:KolinSmith/terraform_projects.git'
 github_backup_repo: 'git@github.com:KolinSmith/GitHub-Backup.git'
-# tailscale_auth_key: 'tskey-auth-k84EcW1CNTRL-SqwZv6pwP8S4gFQmstP6BSM8tju8SRLh'
+# tailscale_authkey: '{{ tailscale_auth_key }}' #expires March 26th 2024
 tailscale_release_stability: 'stable'
 distro:
   ubuntu: 'ubuntu'
+
+#geerlingguy.pip
+pip_package: python3-pip
+#geerlingguy.ntp
+ntp_timezone: America/Chicago
+#ironicbadger.figurine
+figurine_arch: arm64
+
 tailscale_apt_deb: 'deb https://pkgs.tailscale.com/{{ tailscale_release_stability | lower }}/{{ distro[ansible_distribution | lower] }} {{ ansible_distribution_release | lower }} main'
 tailscale_apt_signkey: 'https://pkgs.tailscale.com/{{ tailscale_release_stability | lower }}/{{ distro[ansible_distribution | lower] }}/{{ ansible_distribution_release | lower }}.gpg'
 # raspbian_testing_deb: 'deb http://raspbian.raspberrypi.org/raspbian/ testing main'
@@ -41,10 +51,14 @@ necessary_packages:
   - vim
   - atop
   - python3-pip
-  - tailscale
   - ansible
   - cups
   - rsyslog
   - tldr
   - bat
   - trash-cli
+  - exa
+  - golang-go
+
+
+

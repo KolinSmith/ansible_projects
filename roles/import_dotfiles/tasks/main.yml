@@ -23,6 +23,7 @@
       - .tmux.conf
       - .wgetrc
       - .vimrc
+      - .ansible_password
 
 
 # also need to remove docker and other things if they aren't used (like bat!)

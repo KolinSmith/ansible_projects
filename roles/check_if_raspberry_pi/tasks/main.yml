@@ -1,4 +1,8 @@
 ---
+  - name: Set raspberry_pi fact to false
+    set_fact:
+      raspberry_pi: false
+
   - name: Test for raspberry pi /proc/cpuinfo
     command: grep -E "Raspberry Pi|BCM2708|BCM2709|BCM2835|BCM2836" /proc/cpuinfo
     register: grep_cpuinfo_raspberrypi

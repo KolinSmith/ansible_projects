@@ -19,16 +19,17 @@
     ignore_errors: true
     # when: ansible_os_family == "Debian"
 
-  - name: Add Tailscale signing key
-    apt_key:
-      url: "{{ tailscale_apt_signkey }}"
-      state: present
+  # - name: Add Tailscale signing key
+  #   ansible.builtin.apt_key:
+  #     url: "{{ tailscale_apt_signkey }}"
+  #     state: present
+  #     keyring: /etc/apt/trusted.gpg.d/tailscale-keyring.gpg
 
-  - name: Add Tailscale repo to apt sources
-    apt_repository:
-      repo: "{{ tailscale_apt_deb }}"
-      state: present
-      filename: "tailscale-{{ ansible_lsb.id | lower }}"
+  # - name: Add Tailscale repo to apt sources
+  #   apt_repository:
+  #     repo: "{{ tailscale_apt_deb }}"
+  #     state: present
+  #     filename: "tailscale-{{ ansible_lsb.id | lower }}"
 
   - name: add packages I want
     apt:
@@ -51,7 +52,12 @@
       owner: root
       group: root
       mode: 0600
-    notify: Reload rsyslog
+    # notify: Reload rsyslog
+
+  - name: create /etc/logrotate.d/ directory
+    file:
+      path: /etc/logrotate.d/
+      state: directory
 
   - name: touch logrotate files
     file:
@@ -62,6 +68,8 @@
       - Voyager
       - pfsense
       - borg
+      - localhost
+      - 192.168.3.1
 
   - name: add logrotate config file
     template:
@@ -145,7 +153,7 @@
       - dpkg-reconfigure openssh-server
     become: true
     #handler gets triggered at the end of the playbook run
-    notify: Reload ssh
+    # notify: Reload ssh
 
   - name: add admin group
     group:
@@ -195,7 +203,7 @@
       mode: 0600
       validate: /usr/sbin/sshd -t -f %s
       backup: yes
-    notify: Reload ssh
+    # notify: Reload ssh
 
   - name: make sure voyager ssh private key is installed
     copy:
@@ -248,11 +256,12 @@
   - name: import the install_exa role
     import_role:
       name: install_exa
+    ignore_errors: true
     when:  (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
 
-  - name: import the import_dotfiles role
-    import_role:
-      name: import_dotfiles
+  # - name: import the import_dotfiles role
+  #   import_role:
+  #     name: import_dotfiles
 
   - name: Check if tmuxinator plugin manager is installed.
     stat:
@@ -270,12 +279,14 @@
       dest: /home/{{ user }}/.tmux/plugins/tpm
     when: tpm_installed.stat.exists == False
 
-  - name: Setup Tailscale
-    command: tailscale up --authkey={{ tailscale_auth_key }}
+  # have this happen after a restart
+  # - name: Setup Tailscale
+  #   command: tailscale up --authkey={{ tailscale_auth_key }}
 
-  - name: Setup Docker & Docker Compose
-    import_role:
-      name: install_docker
+  # have this happen after a restart
+  # - name: Setup Docker & Docker Compose
+  #   import_role:
+  #     name: install_docker
 
   - name: Create code_base directory
     file:
@@ -292,6 +303,14 @@
       - /home/{{ user }}/code_base/
       - /home/{{ user }}/code_base/ansible_projects
       - /home/{{ user }}/code_base/github_backup
+      - /home/{{ user }}/code_base/docker_projects
+      - /home/{{ user }}/code_base/terraform_projects
+      - /home/{{ user }}/code_base/dotfiles
+
+
+
+### Need to clone the rest of my repos and a few others
+
 
   - name: clone ansible_projects repository to {{ inventory_hostname }}
     git:
@@ -300,7 +319,7 @@
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: /home/dax/.ssh/id_ecdsa
+      key_file: /home/{{ user }}/.ssh/id_ecdsa
     delegate_to: "{{ inventory_hostname }}"
     run_once: true
 
@@ -344,14 +363,14 @@
     #   - hosts.yml.EXAMPLE
     #   - k3s_hosts
 
-  - name: clone github_backup_repo repository to {{ inventory_hostname }}
+  - name: clone github_backup repository to {{ inventory_hostname }}
     git:
       repo: "{{ github_backup_repo }}"
       dest: /tmp/tmp-github-backup
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: /home/dax/.ssh/id_ecdsa
+      key_file: /home/{{ user }}/.ssh/id_ecdsa
     delegate_to: "{{ inventory_hostname }}"
     run_once: true
 
@@ -370,6 +389,79 @@
       group: admin
       remote_src: true
 
+- name: clone dotfiles repository to {{ inventory_hostname }}
+    git:
+      repo: "{{ dotfiles_repo }}"
+      dest: /tmp/tmp-dotfiles
+      accept_hostkey: yes
+      force: yes
+      recursive: no
+      key_file: /home/{{ user }}/.ssh/id_ecdsa
+    delegate_to: "{{ inventory_hostname }}"
+    run_once: true
+
+  - name: move dotfiles into ~/code_base/
+    copy:
+      src: /tmp/tmp-dotfiles/
+      dest: /home/{{ user }}/code_base/dotfiles
+      owner: "{{ user }}"
+      group: admin
+      remote_src: true
+
+
+  - name: clone docker_projects repository to {{ inventory_hostname }}
+    git:
+      repo: "{{ docker_projects_repo }}"
+      dest: /tmp/tmp-docker_projects
+      accept_hostkey: yes
+      force: yes
+      recursive: no
+      key_file: /home/{{ user }}/.ssh/id_ecdsa
+    delegate_to: "{{ inventory_hostname }}"
+    run_once: true
+
+  - name: move docker_projects into ~/code_base/
+    # synchronize:
+    #   mode: pull
+    #   src: /tmp/tmp-github-backup
+    #   dest: /home/{{ user }}/code_base/
+    #   rsync_opts:
+    #   - "--remove-source-files"
+    # delegate_to: "{{ inventory_hostname }}"
+    copy:
+      src: /tmp/tmp-docker_projects/
+      dest: /home/{{ user }}/code_base/docker_projects
+      owner: "{{ user }}"
+      group: admin
+      remote_src: true  
+
+
+  - name: clone terraform_projects repository to {{ inventory_hostname }}
+    git:
+      repo: "{{ terraform_projects_repo }}"
+      dest: /tmp/tmp-terraform_projects
+      accept_hostkey: yes
+      force: yes
+      recursive: no
+      key_file: /home/{{ user }}/.ssh/id_ecdsa
+    delegate_to: "{{ inventory_hostname }}"
+    run_once: true
+
+  - name: move terraform_projects into ~/code_base/
+    # synchronize:
+    #   mode: pull
+    #   src: /tmp/tmp-github-backup
+    #   dest: /home/{{ user }}/code_base/
+    #   rsync_opts:
+    #   - "--remove-source-files"
+    # delegate_to: "{{ inventory_hostname }}"
+    copy:
+      src: /tmp/tmp-terraform_projects/
+      dest: /home/{{ user }}/code_base/terraform_projects
+      owner: "{{ user }}"
+      group: admin
+      remote_src: true  
+
   - name: Remove ls aliases from .zshrc if exa isn't installed
     lineinfile:
       path: /home/dax/.zshrc
@@ -387,9 +479,13 @@
   #     state: absent
   #     path: /tmp/tmp-ansible-projects
 
-  - name: import the import_dotfiles role
+  - name: import the install_rsyslog_server role
     import_role:
       name: install_rsyslog_server
+
+  # - name: import the figurine (login banner) role
+  #   import_role:
+  #     name: IronicBadger.figurine
 
   - name: create cron jobs
     block:
@@ -438,3 +534,4 @@
   - name: Reboot the machine (Wait for 60 sec)
     reboot:
       reboot_timeout: 60
+    ignore_errors: true
