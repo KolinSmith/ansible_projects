@@ -218,7 +218,8 @@
     file:
       path: /home/{{ user }}/.zshrc
       state: touch
-      mode: 0600
+      mode: 0644
+      owner: "{{ user }}"
 
   - name: Check for Oh My ZSH Installation
     stat:
@@ -302,7 +303,7 @@
     loop:
       - /home/{{ user }}/code_base/
       - /home/{{ user }}/code_base/ansible_projects
-      - /home/{{ user }}/code_base/github_backup
+      - /home/{{ user }}/code_base/github_backups
       - /home/{{ user }}/code_base/docker_projects
       - /home/{{ user }}/code_base/terraform_projects
       - /home/{{ user }}/code_base/dotfiles
@@ -363,7 +364,7 @@
     #   - hosts.yml.EXAMPLE
     #   - k3s_hosts
 
-  - name: clone github_backup repository to {{ inventory_hostname }}
+  - name: clone github-backup repository to {{ inventory_hostname }}
     git:
       repo: "{{ github_backup_repo }}"
       dest: /tmp/tmp-github-backup
@@ -374,7 +375,7 @@
     delegate_to: "{{ inventory_hostname }}"
     run_once: true
 
-  - name: move github_backup into ~/code_base/
+  - name: move github-backup into ~/code_base/
     # synchronize:
     #   mode: pull
     #   src: /tmp/tmp-github-backup
@@ -384,12 +385,12 @@
     # delegate_to: "{{ inventory_hostname }}"
     copy:
       src: /tmp/tmp-github-backup/
-      dest: /home/{{ user }}/code_base/github-backup
+      dest: /home/{{ user }}/github-backup-application
       owner: "{{ user }}"
       group: admin
       remote_src: true
 
-- name: clone dotfiles repository to {{ inventory_hostname }}
+  - name: clone dotfiles repository to {{ inventory_hostname }}
     git:
       repo: "{{ dotfiles_repo }}"
       dest: /tmp/tmp-dotfiles
@@ -494,7 +495,7 @@
           name: github_backup
           minute: "0"
           hour: "4"
-          job: "~/code_base/GitHub-Backup/github_backup/github_backup.py KolinSmith -p {{ github_personal_access_token }} ~/github_backups && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/0e28c1ba-2933-4981-96f3-5a8634c93f2c"
+          job: "/home/{{ user }}/github-backup-application/github_backup/github_backup.py KolinSmith -p {{ github_personal_access_token }} /home/{{ user }}/code_base/github_backups && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/0e28c1ba-2933-4981-96f3-5a8634c93f2c"
         become_user: "{{ user }}"
 
       # - name: create piHoleUpdate job
