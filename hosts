@@ -64,7 +64,7 @@ ansible_user={{ default_username | lower }}
 ansible_ssh_private_key_file=/home/{{ default_username | lower }}/.ssh/id_ecdsa
 
 [load_balancers]
-stargazer ansible_host=192.168.9.6
+; stargazer ansible_host=192.168.9.6
 shenzhou ansible_host=192.168.9.5
 
 [load_balancers:vars]
@@ -78,7 +78,7 @@ loadbalancer_vip_ip=192.168.9.90
 #dev_server #can't ping itself
 dns_servers
 load_balancers
-provision_servers
+post_provision_servers
 internetPi
 
 [ansible_target_servers]
@@ -93,7 +93,7 @@ ansible_python_interpreter=/usr/bin/python2.7
 #ansible_become_pass=nilok3
 
 [internetPi]
-internetPi ansible_host=192.168.9.10
+internetPi ansible_host=192.168.9.103
 
 [internetPi:vars]
 ansible_connection=ssh
@@ -104,7 +104,7 @@ ansible_python_interpreter=/usr/bin/python3
 [provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-Voyager ansible_host=192.168.9.143
+Shenzhou ansible_host=192.168.9.5
 
 [provision_servers:vars]
 #pre provisioning
@@ -113,8 +113,8 @@ ansible_connection=ssh
 # ansible_ssh_pass={{ proxmox_template_password }}
 ansible_ssh_pass=raspberry 
 ###need to login to ubuntu server first (login ubuntu:ubuntu) and change password to "raspberry"
-ansible_user=pi
-ansible_ssh_user=pi
+ansible_user=root
+ansible_ssh_user=root
 # ansible_user=serveradmin
 # ansible_password={{ proxmox_template_password }}
 ansible_password=raspberry 
@@ -129,7 +129,7 @@ ansible_python_interpreter=/usr/bin/python3
 [post_provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-post_test ansible_host=192.168.9.143
+post_test ansible_host=192.168.9.144
 
 [post_provision_servers:vars]
 #post provisioning

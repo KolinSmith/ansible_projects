@@ -28,7 +28,7 @@
 
   - name: Remove '#' from the line to allow serving of HTTPS repos with apt-cacher-ng
     lineinfile:
-      path: /path/to/your/file  # Specify the path to your file
+      path: /etc/apt-cacher-ng/acng.conf  # Specify the path to your file
       regexp: '^# PassThroughPattern: .* # this would allow CONNECT to everything'
       line: 'PassThroughPattern: .* # this would allow CONNECT to everything'
     # backup: yes  # Create a backup of the original file

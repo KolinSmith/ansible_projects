@@ -13,10 +13,13 @@
     hosts: load_balancers
     gather_facts: yes
     become: yes
-    vars:
-        necessary_packages:
-        - dnsdist
-        - keepalived
+    vars_files:
+      - vars/dns_load_balancer_provision_vars.yml
+        # necessary_packages:
+        # - dnsdist
+        # - keepalived
+        # tailscale_authkey: '{{ tailscale_auth_key }}'
     roles:
       - role: check_if_raspberry_pi
+      - role: artis3n.tailscale 
       - role: deploy_dnsdist

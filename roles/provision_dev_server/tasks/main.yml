@@ -39,7 +39,7 @@
   - name: add cups printers.conf file to /etc/cups
     template:
       src: /home/dax/code_base/ansible_projects/templates/cups_printers_dot_conf.j2
-      dest: /etc/cups/
+      dest: /etc/cups/printer.conf
       owner: root
       group: root
       mode: 0600
@@ -53,6 +53,15 @@
       group: root
       mode: 0600
     # notify: Reload rsyslog
+
+  - name: add samba smb.conf file to /etc/samba
+    #https://web.archive.org/web/20230102233129/https://www.tecmint.com/install-rsyslog-centralized-logging-in-centos-ubuntu/
+    template:
+      src: /home/dax/code_base/ansible_projects/templates/smb_dot_conf.j2
+      dest: /etc/smb.conf
+      owner: root
+      group: root
+      mode: 0600
 
   - name: create /etc/logrotate.d/ directory
     file:
@@ -303,7 +312,7 @@
     loop:
       - /home/{{ user }}/code_base/
       - /home/{{ user }}/code_base/ansible_projects
-      - /home/{{ user }}/code_base/github_backups
+      - /home/{{ user }}/github_backups
       - /home/{{ user }}/code_base/docker_projects
       - /home/{{ user }}/code_base/terraform_projects
       - /home/{{ user }}/code_base/dotfiles
@@ -364,31 +373,37 @@
     #   - hosts.yml.EXAMPLE
     #   - k3s_hosts
 
-  - name: clone github-backup repository to {{ inventory_hostname }}
-    git:
-      repo: "{{ github_backup_repo }}"
-      dest: /tmp/tmp-github-backup
-      accept_hostkey: yes
-      force: yes
-      recursive: no
-      key_file: /home/{{ user }}/.ssh/id_ecdsa
-    delegate_to: "{{ inventory_hostname }}"
-    run_once: true
+  # - name: clone github-backup repository to {{ inventory_hostname }}
+  #   git:
+  #     repo: "{{ github_backup_repo }}"
+  #     dest: /tmp/tmp-github-backup
+  #     accept_hostkey: yes
+  #     force: yes
+  #     recursive: no
+  #     key_file: /home/{{ user }}/.ssh/id_ecdsa
+  #   delegate_to: "{{ inventory_hostname }}"
+  #   run_once: true
 
-  - name: move github-backup into ~/code_base/
-    # synchronize:
-    #   mode: pull
-    #   src: /tmp/tmp-github-backup
-    #   dest: /home/{{ user }}/code_base/
-    #   rsync_opts:
-    #   - "--remove-source-files"
-    # delegate_to: "{{ inventory_hostname }}"
-    copy:
-      src: /tmp/tmp-github-backup/
-      dest: /home/{{ user }}/github-backup-application
-      owner: "{{ user }}"
-      group: admin
-      remote_src: true
+  # - name: move github-backup into ~/code_base/
+  #   # synchronize:
+  #   #   mode: pull
+  #   #   src: /tmp/tmp-github-backup
+  #   #   dest: /home/{{ user }}/code_base/
+  #   #   rsync_opts:
+  #   #   - "--remove-source-files"
+  #   # delegate_to: "{{ inventory_hostname }}"
+  #   copy:
+  #     src: /tmp/tmp-github-backup/
+  #     dest: /home/{{ user }}/github-backup-application
+  #     owner: "{{ user }}"
+  #     group: admin
+  #     remote_src: true
+  
+  # https://github.com/KolinSmith/GitHub-Backup#readme-ov-file
+  - name: Install github-backup python package
+    ansible.builtin.pip:
+      name: git+https://github.com/clockfort/GitHub-Backup
+
 
   - name: clone dotfiles repository to {{ inventory_hostname }}
     git:
@@ -490,12 +505,12 @@
 
   - name: create cron jobs
     block:
-      - name: create github_backup job
+      - name: create github-backup job
         cron:
           name: github_backup
           minute: "0"
           hour: "4"
-          job: "/home/{{ user }}/github-backup-application/github_backup/github_backup.py KolinSmith -p {{ github_personal_access_token }} /home/{{ user }}/code_base/github_backups && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/0e28c1ba-2933-4981-96f3-5a8634c93f2c"
+          job: "github-backup KolinSmith -p {{ github_personal_access_token }} /home/{{ user }}/github_backups && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/0e28c1ba-2933-4981-96f3-5a8634c93f2c"
         become_user: "{{ user }}"
 
       # - name: create piHoleUpdate job
