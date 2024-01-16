@@ -32,7 +32,7 @@ pfsense_username: "{{ vault_pfsense_username }}"
 
 pfsense_password: "{{ vault_pfsense_password }}"
 
-default_username: "{{ vault_default_username }}"
+username: "{{ vault_username }}"
 
 dmz_username: "{{ vault_dmz_username }}"
 

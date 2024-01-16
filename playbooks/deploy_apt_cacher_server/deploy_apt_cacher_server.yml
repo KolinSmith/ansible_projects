@@ -1,9 +1,0 @@
----
-  - name: deploy apt cacher server
-    hosts: provision_servers
-    gather_facts: yes
-    become: yes
-    # vars_files:
-    #   - vars/dns_load_balancer_provision_vars.yml
-    roles:
-      - role: deploy_apt_cacher-ng

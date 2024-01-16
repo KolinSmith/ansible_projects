@@ -1,0 +1,32 @@
+#!/usr/bin/expect
+
+set timeout 30
+
+# Target machine details
+set target_ip "192.168.9.159"
+set ubuntu_password "ubuntu"
+set new_password "raspberry"
+set username "ubuntu"
+set user_password "raspberry"
+
+# SSH into the target machine as root
+spawn ssh -o StrictHostKeyChecking=no $username@$target_ip
+
+# Login with default password
+expect "* password: "
+send "$ubuntu_password\r"
+
+# Change ubuntu password
+expect "Current password: "
+send "$ubuntu_password\r"
+expect "New password: "
+send "$new_password\r"
+expect "Retype new password: "
+send "$new_password\r"
+
+# # Wait for prompt and exit
+# expect "# "
+# send "exit\r"
+
+# End the script
+expect eof

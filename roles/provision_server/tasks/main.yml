@@ -78,25 +78,25 @@
       name: admin
       state: present
 
-  - name: add {{ user }} group
+  - name: add {{ username | lower}} group
     group:
-        name: "{{ user }}"
+        name: "{{ username | lower}}"
         state: present
 
-  - name: add local user {{ user }}
+  - name: add local user {{ username | lower}}
     user:
-      name: "{{ user }}"
+      name: "{{ username | lower}}"
       groups: admin
       shell: /bin/zsh
-      home: /home/{{ user }}
+      home: /home/{{ username | lower}}
       create_home: yes
       state: present
       password: "{{ dax_password }}"
 
-  - name: Add local user {{ user }} to sudo
+  - name: Add local user {{ username | lower}} to sudo
     lineinfile:
-      path: /etc/sudoers.d/{{ user }}
-      line: '{{ user }} ALL=(ALL) NOPASSWD: ALL'
+      path: /etc/sudoers.d/{{ username | lower}}
+      line: '{{ username | lower}} ALL=(ALL) NOPASSWD: ALL'
       state: present
       mode: 0440
       create: yes
@@ -120,12 +120,12 @@
 
   - name: add SSH public key for local user
     # authorized_key:
-    #     user: "{{ user }}"
+    #     user: "{{ username | lower}}"
     #     key: "{{ lookup('file', '/home/dax/.ssh/id_ecdsa.pub') }}"
     #     state: present
     #     manage_dir: yes
     authorized_key:
-        user: "{{ user }}"
+        user: "{{ username | lower}}"
         state: present
         key: "{{ item.key }}"
         manage_dir: yes
@@ -146,34 +146,34 @@
 
   - name: create ~/.zshrc file for local user
     file:
-      path: /home/{{ user }}/.zshrc
+      path: /home/{{ username | lower}}/.zshrc
       state: touch
       mode: 0600
 
   - name: Check for Oh My ZSH Installation
     stat:
-      path: ~/.oh-my-zsh
-    become_user: "{{ user }}"
+      path: /home/{{ username | lower}}/.oh-my-zsh
+    # become_user: "{{ username | lower}}"
     register: omz_installed
 
   - name: Install Oh My ZSH
     git:
       repo: 'https://github.com/ohmyzsh/ohmyzsh.git'
-      dest: ~/.oh-my-zsh
-    become_user: "{{ user }}"
+      dest: /home/{{ username | lower }}/.oh-my-zsh
+    # become_user: "{{ username | lower}}"
     when: omz_installed.stat.exists == False
 
   - name: Checkout powerlevel10k repo and use refspec to fetch all pull requests
     git:
       repo: https://github.com/romkatv/powerlevel10k.git
-      dest: /home/{{ user }}/.oh-my-zsh/custom/themes/powerlevel10k
+      dest: /home/{{ username | lower}}/.oh-my-zsh/custom/themes/powerlevel10k
       refspec: '+refs/pull/*:refs/heads/*'
       depth: 1
 
   - name: Checkout zsh-autosuggestions repo and use refspec to fetch all pull requests
     git:
       repo: https://github.com/zsh-users/zsh-autosuggestions
-      dest: /home/{{ user }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+      dest: /home/{{ username | lower}}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
       refspec: '+refs/pull/*:refs/heads/*'
 
   # not needed since it's in Ubuntu repos already. executable is "batcat". alias to "bat"
@@ -206,18 +206,18 @@
 
   - name: Check if tmuxinator plugin manager is installed.
     stat:
-      path: /home/{{ user }}/.tmux/plugins/tpm
+      path: /home/{{ username | lower}}/.tmux/plugins/tpm
     register: tpm_installed
 
   - name: Create tmux plugin directory
     file:
       state: directory
-      path: /home/{{ user }}/.tmux/plugins
+      path: /home/{{ username | lower}}/.tmux/plugins
 
   - name: Install tmux plugin manager
     git:
       repo: 'https://github.com/tmux-plugins/tpm'
-      dest: /home/{{ user }}/.tmux/plugins/tpm
+      dest: /home/{{ username | lower}}/.tmux/plugins/tpm
     when: tpm_installed.stat.exists == False
 
   # - name: Setup Tailscale
@@ -245,7 +245,7 @@
   #     state: absent
   #     remove: yes
   #   when: raspberry_pi == true
-  #   become_user: "{{ user }}"
+  #   become_user: "{{ username | lower}}"
   #
   # - name: remove default user for proxmox servers
   #   user:
@@ -253,7 +253,7 @@
   #     state: absent
   #     remove: yes
   #   when: raspberry_pi == false
-  #   become_user: "{{ user }}"
+  #   become_user: "{{ username | lower}}"
 
   - name: Reboot the machine (Wait for 60 sec)
     reboot:

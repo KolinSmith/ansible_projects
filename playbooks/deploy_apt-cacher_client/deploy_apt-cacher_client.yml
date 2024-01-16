@@ -1,0 +1,9 @@
+---
+  - name: deploy apt cacher client
+    hosts: localhost
+    gather_facts: yes
+    become: yes
+    # vars_files:
+    #   - vars/dns_load_balancer_provision_vars.yml
+    roles:
+      - role: deploy_apt-cacher_client

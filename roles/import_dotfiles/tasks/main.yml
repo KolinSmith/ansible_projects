@@ -13,8 +13,8 @@
   - name: copy dotfiles into ~/
     copy:
       src: /tmp/tmp-dotfiles/{{ item }}
-      dest: "/home/{{ user }}/{{ item }}"
-      owner: "{{ user }}"
+      dest: "/home/{{ username }}/{{ item }}"
+      owner: "{{ username }}"
       group: "admin"
       mode: '0644'
     with_items:
@@ -45,4 +45,4 @@
       path: /tmp/tmp-dotfiles
 
   - name: source new .zshrc file
-    shell: "/bin/zsh /home/{{ user }}/.zshrc"
+    shell: "/bin/zsh /home/{{ username }}/.zshrc"

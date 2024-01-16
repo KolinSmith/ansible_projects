@@ -23,9 +23,15 @@
 
   - name: Test for orange pi /proc/device-tree/model
     command: grep -E "Orange Pi" /proc/device-tree/model
-    register: grep_device_tree_model_raspberrypi
+    register: grep_device_tree_model_orangepi
     failed_when: false
     changed_when: false
+
+  - name: Set orange_pi fact to true
+    set_fact:
+      orange_pi: true
+    when:
+      grep_device_tree_model_orangepi.rc == 0
 
     #https://tech.borpin.co.uk/2019/12/17/install-a-package-from-the-testing-repository/
   # - name: Add Raspbian Testing signing key

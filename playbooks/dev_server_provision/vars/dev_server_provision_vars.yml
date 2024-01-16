@@ -60,6 +60,7 @@ necessary_packages:
   - exa
   - golang-go
   - samba
+  - kubectl
 
 
 
