@@ -22,7 +22,7 @@
   - name: Edit rsyslog.conf to send logs to rsyslog server
     lineinfile:
       path: /etc/rsyslog.conf
-      line: "*.* @{{ hostvars[groups['dev_server'][0]].ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}:514"
+      line: "*.* @{{ hostvars[groups['dev_server'][0]]['ansible_host'] }}:514"
 
   - name: Restart rsyslog to take new line in conf
     ansible.builtin.service:

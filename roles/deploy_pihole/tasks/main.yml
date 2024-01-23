@@ -1,20 +1,20 @@
 ---
   # - name: add SSH public key for borg so it can login to make backups
   #   authorized_key:
-  #       user: "{{ user }}"
+  #       username: "{{ username }}"
   #       key: "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOax0ZYUe5CpSHS+h4dPYEOpZs/aUbUol5b4ypwPV9jEdNsBUateQhzwtSXZJbosW4VpGIBtfQVhFgaJri2Fftc= root@Borg"
   #       state: present
   #       manage_dir: yes
 
 
-  # - name: add SSH public key for local user
+  # - name: add SSH public key for local username
   #   # authorized_key:
-  #   #     user: "{{ user }}"
+  #   #     username: "{{ username }}"
   #   #     key: "{{ lookup('file', '/home/dax/.ssh/id_ecdsa.pub') }}"
   #   #     state: present
   #   #     manage_dir: yes
   #   authorized_key:
-  #       user: "{{ user }}"
+  #       username: "{{ username }}"
   #       state: present
   #       key: "{{ item.key }}"
   #       manage_dir: yes
@@ -44,7 +44,7 @@
     template:
       src: /home/dax/code_base/ansible_projects/templates/pihole_setup_vars.j2
       dest: /etc/pihole/setupVars.conf
-      owner: pihole #replaced root with this so that the pihole user could access the database file
+      owner: pihole #replaced root with this so that the pihole username could access the database file
       group: pihole
       mode: 0600
 
@@ -52,31 +52,85 @@
     shell: curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
     become: true
 
-  # - name: add "{{ user }}" to /etc/pihole so it has access to the database file
-  #   user: 
-  #     name: "{{ user }}"
+  # - name: add "{{ username }}" to /etc/pihole so it has access to the database file
+  #   username: 
+  #     name: "{{ username }}"
   #     groups: "pihole"
-  #     append: yes               # Set to 'yes' to append the user to the group (if the group exists), or 'no' to replace the user's group memberships
+  #     append: yes               # Set to 'yes' to append the username to the group (if the group exists), or 'no' to replace the username's group memberships
 
   - name: touch dnsmasq file to setup wildcard DNS
     file:
-      path: /etc/dnsmasq.d/02-my-wildcard-dns.conf
+      path: /etc/dnsmasq.d/03-dns-overrides.conf
       state: touch
       mode: 0644
 
+#https://blog.ktz.me/fully-automated-dns-and-dhcp-with-pihole-and-dnsmasq/
   - name: add dnsmasq.d file
     lineinfile:
-      dest: /etc/dnsmasq.d/02-my-wildcard-dns.conf
+      dest: /etc/dnsmasq.d/03-dns-overrides.conf
       state: present
       mode: 0644
       line: |
-        address=/internal.homelab.gg/{{ hostvars[groups['dev_server'][0]]['ansible_host'] }} 
+        address=/internal.homelab.gg{{ hostvars[groups['dev_server'][0]]['ansible_host'] }} 
         address=/pfsense.internal.homelab.gg/{{ hostvars[groups['dev_server'][0]]['ansible_host'] }}
         address=/discovery.internal.homelab.gg/192.168.9.9
         address=/borg.internal.homelab.gg/192.168.9.7
 
-    #pihole -w dartsearch.net googleadservices.com www.dartsearch.net www.googleadservices.com clickserve.dartsearch.net ad.doubleclick.net
-        
+  - name: add whitelisted domains
+    command: "pihole -w {{ item }}"
+    with_items:
+      - dartsearch.net 
+      - googleadservices.com
+      - www.dartsearch.net
+      - www.googleadservices.com
+      - clickserve.dartsearch.net
+      - ad.doubleclick.net
+      - ally.com
+
+  - name: add blacklisted domains
+    command: "pihole -b {{ item }}"
+    with_items: 
+      - app-analytics-v2.snapchat.com
+      - metrics.icloud.com
+      - metrics.plex.tv
+      - analytics.plex.tv
+
+  - name: make sure dns server ssh private key is installed
+    copy:
+      content: '{{ dns_server_private_ssh_key }}'
+      dest: '/home/{{ username }}/.ssh/id_ecdsa'
+      owner: "{{ username }}"
+      group: "{{ username }}"
+      mode: 0600
+    no_log: false
+
+#https://github.com/vmstan/gravity-sync/wiki/Installing
+  - name: create gravity-sync folder
+    file:
+      path: /etc/gravity-sync
+      state: directory
+      mode: 0775
+      owner: "{{ username }}"
+      group: "{{ username }}"
+
+  - name: Set REMOTE_HOST based on current server
+    set_fact:
+     # remote_host: "{{ '192.168.9.4' if inventory_hostname == 'Ds9' else '192.168.9.3' }}"
+     remote_host: "{{ '192.168.9.4' if '192.168.9.3' in ansible_default_ipv4.address else '192.168.9.3' }}"
+    # when: "'Ds9' in inventory_hostname or 'Defiant' in inventory_hostname"
+
+  - name: add gravity-sync.conf file to /etc/gravity-sync/
+    template:
+      src: /home/dax/code_base/ansible_projects/templates/gravity_sync_dot_conf.j2
+      dest: /etc/gravity-sync/gravity-sync.conf
+      owner: "{{ username }}"
+      group: "{{ username }}"
+      mode: 0775
+
+  - name: install gravity-sync
+    shell: curl -sSL https://raw.githubusercontent.com/vmstan/gs-install/main/gs-install.sh | bash
+    become: true
+      
   - name: Update, Upgrade, & Clean
     tags: always
     apt:

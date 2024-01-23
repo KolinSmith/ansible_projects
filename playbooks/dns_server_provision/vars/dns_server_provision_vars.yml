@@ -55,6 +55,8 @@ public_keys:
     key: "{{ lookup('file', 'enterprise_pub_key.pub') }}"
   - name: Voyager Public Key File
     key: "{{ lookup('file', 'voyager_pub_key.pub') }}"
+  - name: DNS Server Public Key File
+    key: "{{ lookup('file', 'dns_server_pub_key.pub') }}"
 extra_path: '/usr/local/bin'
 dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
 necessary_packages:
@@ -70,4 +72,9 @@ necessary_packages:
     - dnsutils
     - unzip
     - pigz
+    - exa
 tailscale_auth_key: '{{ tailscale_auth_key }}'
+
+#ironicbadger.figurine
+figurine_arch: arm64
+figurine_font: 'Larry 3D 2.flf'

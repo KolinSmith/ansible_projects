@@ -28,6 +28,8 @@ prowl_api_key: "{{ vault_prowl_api_key }}"
 
 voyager_private_ssh_key: "{{ vault_voyager_private_ssh_key }}"
 
+dns_server_private_ssh_key: "{{ vault_dns_server_private_ssh_key }}"
+
 pfsense_username: "{{ vault_pfsense_username }}"
 
 pfsense_password: "{{ vault_pfsense_password }}"

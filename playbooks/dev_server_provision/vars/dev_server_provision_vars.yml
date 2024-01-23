@@ -22,6 +22,7 @@ pip_package: python3-pip
 ntp_timezone: America/Chicago
 #ironicbadger.figurine
 figurine_arch: arm64
+figurine_font: 'Larry 3D 2.flf'
 
 tailscale_apt_deb: 'deb https://pkgs.tailscale.com/{{ tailscale_release_stability | lower }}/{{ distro[ansible_distribution | lower] }} {{ ansible_distribution_release | lower }} main'
 tailscale_apt_signkey: 'https://pkgs.tailscale.com/{{ tailscale_release_stability | lower }}/{{ distro[ansible_distribution | lower] }}/{{ ansible_distribution_release | lower }}.gpg'
