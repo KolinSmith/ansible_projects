@@ -7,6 +7,7 @@
       - vars/dns_load_balancer_provision_vars.yml
     roles:
       - role: bootstrap_python
+      - role: deploy_apt-cacher_client
       - role: provision_server
 
   - name: dnsdist loadbalancer setup (stargazer & shenzhou)
@@ -23,3 +24,5 @@
       - role: check_if_raspberry_pi
       - role: artis3n.tailscale 
       - role: deploy_dnsdist
+      # - role: IronicBadger.figurine
+      - role: remove_default_user

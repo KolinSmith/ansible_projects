@@ -75,6 +75,6 @@ necessary_packages:
     - exa
 tailscale_auth_key: '{{ tailscale_auth_key }}'
 
-#ironicbadger.figurine
-figurine_arch: arm64
-figurine_font: 'Larry 3D 2.flf'
+# #ironicbadger.figurine
+# figurine_arch: arm64
+# figurine_font: 'Larry 3D 2.flf'

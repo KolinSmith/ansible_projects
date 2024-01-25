@@ -1,12 +1,12 @@
-user: 'dax'
-my_custom_path_var: '/home/{{ user }}/.local/bin'
-public_keys:
-  - name: Enterprise Public Key File
-    key: "{{ lookup('file', 'enterprise_pub_key.pub') }}"
-  - name: Voyager Public Key File
-    key: "{{ lookup('file', 'voyager_pub_key.pub') }}"
-extra_path: '/usr/local/bin'
-dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
+# user: 'dax'
+# my_custom_path_var: '/home/{{ user }}/.local/bin'
+# public_keys:
+#   - name: Enterprise Public Key File
+#     key: "{{ lookup('file', 'enterprise_pub_key.pub') }}"
+#   - name: Voyager Public Key File
+#     key: "{{ lookup('file', 'voyager_pub_key.pub') }}"
+# extra_path: '/usr/local/bin'
+# dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
 # # tailscale_auth_key: 'tskey-auth-k84EcW1CNTRL-SqwZv6pwP8S4gFQmstP6BSM8tju8SRLh'
 # tailscale_release_stability: 'stable'
 # distro:
@@ -46,6 +46,18 @@ dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
 #   - rsyslog
 #   - bat
 
+
+my_custom_path_var: '/home/{{ username }}/.local/bin'
+public_keys:
+  - name: Enterprise Public Key File
+    key: "{{ lookup('file', 'enterprise_pub_key.pub') }}"
+  - name: Voyager Public Key File
+    key: "{{ lookup('file', 'voyager_pub_key.pub') }}"
+  - name: DNS Server Public Key File
+    key: "{{ lookup('file', 'dns_server_pub_key.pub') }}"
+extra_path: '/usr/local/bin'
+dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
+
 necessary_packages:
     - dnsdist
     - keepalived
@@ -54,4 +66,15 @@ necessary_packages:
     - vim
     - fzf
     - bat
+    - net-tools
+    - wget
+    - curl
+    - dnsutils
+    - unzip
+    - pigz
+    - exa
 tailscale_auth_key: '{{ tailscale_auth_key }}'
+
+# #ironicbadger.figurine
+# figurine_arch: arm64
+# figurine_font: 'Larry 3D 2.flf'
