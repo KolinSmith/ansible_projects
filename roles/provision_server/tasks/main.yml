@@ -233,6 +233,21 @@
     import_role:
       name: install_rsyslog_client
 
+
+  #https://web.archive.org/web/20240205053108/https://forum.yunohost.org/t/armbian-zram-var-log-full-and-email-notifications-every-15-minutes/26295
+  - name: Disable armbian-ramlog on Orange Pis
+    lineinfile:
+      path: /etc/default/armbian-ramlog
+      regexp: '^Enabled='
+      line: 'Enabled=false'
+    when: orange_pi== true
+
+  - name: Disable armbian-zram-config on Orange Pis
+    lineinfile:
+      path: /etc/default/armbian-zram-config
+      regexp: '^Enabled='
+      line: 'Enabled=false'
+    when: orange_pi== true
     
 
   # - name: Set raspberry_pi fact
