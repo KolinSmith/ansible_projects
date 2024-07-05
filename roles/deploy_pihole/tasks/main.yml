@@ -72,7 +72,7 @@
       mode: 0644
       line: |
         address=/voyager.internal.homelab.gg/{{ hostvars[groups['dev_server'][0]]['ansible_host'] }} 
-        address=/pfsense.internal.homelab.gg/{{ hostvars[groups['dev_server'][0]]['ansible_host'] }}
+        address=/pfsense.internal.homelab.gg/{{ hostvars[groups['pfsense_router'][0]]['ansible_host'] }}
         address=/discovery.internal.homelab.gg/192.168.9.9
         address=/borg.internal.homelab.gg/192.168.9.7
 
