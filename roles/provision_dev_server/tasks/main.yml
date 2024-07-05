@@ -58,7 +58,7 @@
     #https://web.archive.org/web/20230102233129/https://www.tecmint.com/install-rsyslog-centralized-logging-in-centos-ubuntu/
     template:
       src: /home/dax/code_base/ansible_projects/templates/smb_dot_conf.j2
-      dest: /etc/smb.conf
+      dest: /etc/samba/smb.conf
       owner: root
       group: root
       mode: 0600
