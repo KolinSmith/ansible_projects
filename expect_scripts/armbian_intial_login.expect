@@ -3,7 +3,7 @@
 set timeout 30
 
 # Target machine details
-set target_ip "192.168.9.144"
+set target_ip "192.168.9.10"
 set root_password "1234"
 set new_password "raspberry"
 set username "pi"
@@ -41,6 +41,14 @@ send "$new_password\r"
 expect "Repeat root password: "
 send "$new_password\r"
 
+# Set shell
+expect {
+    "Choose default system command shell:" {
+        # Send the number 2 followed by a newline
+        send "2\r"
+    }
+}
+
 # Create a new user
 expect "Please provide a username (eg. your first name): "
 send "$username\r"
@@ -53,7 +61,7 @@ send "\r"
 expect "Set user language based on your location? * "
 send "\r"
 expect "* Please enter your choice: "
-send "1 \r"
+send "2 \r"
 
 # # Choose locale
 # expect "# "
@@ -70,4 +78,4 @@ send "exit\r"
 # End the script
 expect eof
 
-
+system "ansible-playbook /home/dax/code_base/ansible_projects/playbooks/server_provision_script/server_provision_script.yml"

@@ -62,6 +62,7 @@ necessary_packages:
   - golang-go
   - samba
   - kubectl
+  - sshpass # for ansible use
 
 
 

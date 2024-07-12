@@ -74,17 +74,17 @@ primary_load_balancer=192.168.9.6
 secondary_load_balancer=192.168.9.5
 loadbalancer_vip_ip=192.168.9.90
 
-[internetPi]
-internetPi ansible_host=192.168.9.10
+# [internetPi]
+# internetPi ansible_host=192.168.9.10
 
-[internetPi:vars]
-ansible_connection=ssh
-ansible_user={{ username | lower }}
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ecdsa
-ansible_python_interpreter=/usr/bin/python3
+# [internetPi:vars]
+# ansible_connection=ssh
+# ansible_user={{ username | lower }}
+# ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ecdsa
+# ansible_python_interpreter=/usr/bin/python3
 
 [apt_cache]
-newVoyager ansible_host=192.168.9.148
+newVoyager ansible_host=192.168.9.2
 
 [apt_cache:vars]
 ansible_connection=ssh
@@ -97,7 +97,7 @@ ansible_python_interpreter=/usr/bin/python3
 dns_servers
 load_balancers
 post_provision_servers
-internetPi
+#internetPi
 apt_cache
 
 [ansible_target_servers]
@@ -124,7 +124,7 @@ ansible_python_interpreter=/usr/bin/python3
 [provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-Defiant ansible_host=192.168.9.3
+internetPi ansible_host=192.168.9.10
 
 [provision_servers:vars]
 #pre provisioning
@@ -133,8 +133,8 @@ ansible_connection=ssh
 # ansible_ssh_pass={{ proxmox_template_password }}
 ansible_ssh_pass=raspberry 
 ###need to login to ubuntu server first (login ubuntu:ubuntu) and change password to "raspberry"
-ansible_user=ubuntu
-ansible_ssh_user=ubuntu
+ansible_user=pi
+ansible_ssh_user=pi
 # ansible_user=serveradmin
 # ansible_password={{ proxmox_template_password }}
 ansible_password=raspberry 

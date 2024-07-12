@@ -75,6 +75,7 @@
         address=/pfsense.internal.homelab.gg/{{ hostvars[groups['pfsense_router'][0]]['ansible_host'] }}
         address=/discovery.internal.homelab.gg/192.168.9.9
         address=/borg.internal.homelab.gg/192.168.9.7
+        address=/k3s-cluster.local/192.168.9.124   
 
   - name: add whitelisted domains
     command: "pihole -w {{ item }}"

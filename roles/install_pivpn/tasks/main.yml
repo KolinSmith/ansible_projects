@@ -1,7 +1,7 @@
 ---
   - name: download pivpn install.sh
     get_url:
-      url: https://install.pivpn.io
+      url: voyager
       dest: /tmp/install.sh
       mode: 0755
 
