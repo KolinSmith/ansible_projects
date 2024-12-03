@@ -1,4 +1,5 @@
 ---
+  #sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/dns_load_balancer_provision/dns_load_balancer_provision.yml
   - name: initial setup (stargazer & shenzhou)
     hosts: provision_servers
     gather_facts: yes
@@ -21,8 +22,8 @@
         # - keepalived
         # tailscale_authkey: '{{ tailscale_auth_key }}'
     roles:
-      - role: check_if_raspberry_pi
-      - role: artis3n.tailscale 
-      - role: deploy_dnsdist
-      # - role: IronicBadger.figurine
+      - role: check_if_pi
       - role: remove_default_user
+      - role: deploy_dnsdist
+      - role: artis3n.tailscale 
+      # - role: IronicBadger.figurine

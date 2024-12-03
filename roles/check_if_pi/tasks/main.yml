@@ -37,6 +37,14 @@
     when:
       grep_device_tree_model_orangepi.rc == 0
 
+  - name: Print the value of raspberry_pi fact
+    debug:
+      msg: "The value of raspberry_pi fact is {{ raspberry_pi }}"
+
+  - name: Print the value of orange_pi fact
+    debug:
+      msg: "The value of orange_pi fact is {{ orange_pi }}"
+
     #https://tech.borpin.co.uk/2019/12/17/install-a-package-from-the-testing-repository/
   # - name: Add Raspbian Testing signing key
   #   apt_key:

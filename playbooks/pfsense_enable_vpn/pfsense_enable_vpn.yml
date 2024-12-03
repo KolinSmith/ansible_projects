@@ -7,10 +7,23 @@
     collections:
       - pfsensible.core.pfsense_alias
     tasks:
-      - name: Add my IP to pia_redirect_group alias
-        pfsense_alias:
-          name: pia_redirect_group
-          address: 192.168.3.3
-          type: host
+      # - name: Add my IP to pia_redirect_group alias
+      #   pfsense_alias:
+      #     name: pia_redirect_group
+      #     address: 192.168.3.3
+      #     type: host
+      #     state: present
+      #     descr: "List of IPs that will be sent through PIA VPN"
+
+      - name: remove firewall rule for pia
+        pfsense_rule:
+          name: 'Send PIA alias over VPN'
+          action: pass
+          interface: lan
+          ipprotocol: inet
+          protocol: any
+          source: pia_redirect_group
+          destination: any
+          gateway: 'PIA_VPN_VPNV4'
+          before: 'Default allow LAN to any rule'
           state: present
-          descr: "List of IPs that will be sent through PIA VPN"

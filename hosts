@@ -48,8 +48,11 @@ dmz_post_provision ansible_host=129.146.141.62
 ansible_user={{ username | lower }}
 ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ecdsa
 
+[printer]
+printer ansible_host=192.168.3.8
+
 [dev_server]
-voyager ansible_host=192.168.3.8
+voyager ansible_host=192.168.9.2
 
 [dev_server:vars]
 ansible_user={{ username | lower }}
@@ -124,7 +127,7 @@ ansible_python_interpreter=/usr/bin/python3
 [provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-internetPi ansible_host=192.168.9.10
+tor_node ansible_host=192.168.9.103
 
 [provision_servers:vars]
 #pre provisioning
@@ -149,7 +152,7 @@ ansible_python_interpreter=/usr/bin/python3
 [post_provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-post_test ansible_host=192.168.9.3
+post_test ansible_host=192.168.9.103
 
 [post_provision_servers:vars]
 #post provisioning

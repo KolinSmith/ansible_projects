@@ -45,4 +45,8 @@ necessary_packages:
   # - tailscale
   - ansible
   - rsyslog
-  - trash-cli
+  # - trash-cli
+  # - exa
+
+#  add way to install ansible via pip on orange pi instead of apt
+  

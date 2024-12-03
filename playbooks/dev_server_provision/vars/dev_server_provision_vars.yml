@@ -63,6 +63,7 @@ necessary_packages:
   - samba
   - kubectl
   - sshpass # for ansible use
+  - ansible-lint
 
 
 

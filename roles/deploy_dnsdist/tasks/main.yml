@@ -50,6 +50,14 @@
     #     url: https://repo.powerdns.com/CBC8B383-pub.asc
     #     state: present
 
+    - name: create repo source file for dnsdist when not raspberry pi
+      copy:
+        dest: "/etc/apt/sources.list.d/pdns.list"
+        content: |
+             deb [signed-by=/etc/apt/keyrings/auth-master-pub.asc] http://repo.powerdns.com/ubuntu jammy-auth-master main
+      when: orange_pi|default(false) #when orange pi with ubuntu
+  
+
     - name: Install needed packages
       apt:
         name: "{{ necessary_packages }}"

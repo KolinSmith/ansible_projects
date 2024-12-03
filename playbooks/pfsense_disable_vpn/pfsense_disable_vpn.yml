@@ -7,9 +7,22 @@
     collections:
       - pfsensible.core.pfsense_alias
     tasks:
-      - name: Remove my IP from the pia_redirect_group alias
-        pfsense_alias:
-          name: pia_redirect_group
-          address: 192.168.3.3
-          type: host
+      # - name: Remove my IP from the pia_redirect_group alias
+      #   pfsense_alias:
+      #     name: pia_redirect_group
+      #     address: 192.168.3.333 #had to do this since it was deleting the whole alias when i did alias: absent
+      #     type: host
+      #     state: present
+
+      - name: remove firewall rule for pia
+        pfsense_rule:
+          name: 'Send PIA alias over VPN'
+          action: pass
+          interface: lan
+          ipprotocol: inet
+          protocol: any
+          source: pia_redirect_group
+          destination: any
+          gateway: 'PIA_VPN_VPNV4'
+          before: 'Default allow LAN to any rule'
           state: absent

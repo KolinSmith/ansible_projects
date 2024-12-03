@@ -146,22 +146,32 @@
 
   - name: create ~/.zshrc file for local user
     file:
-      path: /home/{{ username | lower}}/.zshrc
+      path: /home/{{ username | lower }}/.zshrc
       state: touch
       mode: 0600
 
+  # - name: Print the value of orange_pi fact
+  #   debug:
+  #     msg: "The value of orange_pi fact is {{ orange_pi }}"
+
   - name: Check for Oh My ZSH Installation
     stat:
-      path: /home/{{ username | lower}}/.oh-my-zsh
+      path: /home/{{ username | lower }}/.oh-my-zsh
     # become_user: "{{ username | lower}}"
     register: omz_installed
+
+  - name: Remove .oh-my-zsh folder that exists for new users in Armbian
+    file:
+      path: /home/{{ username | lower }}/.oh-my-zsh
+      state: absent
+    when: orange_pi == true
 
   - name: Install Oh My ZSH
     git:
       repo: 'https://github.com/ohmyzsh/ohmyzsh.git'
       dest: /home/{{ username | lower }}/.oh-my-zsh
     # become_user: "{{ username | lower}}"
-    when: omz_installed.stat.exists == False
+    when: omz_installed.stat.exists == False or orange_pi == true
 
   - name: Checkout powerlevel10k repo and use refspec to fetch all pull requests
     git:
@@ -240,14 +250,14 @@
       path: /etc/default/armbian-ramlog
       regexp: '^Enabled='
       line: 'Enabled=false'
-    when: orange_pi== true
+    when: orange_pi == true
 
   - name: Disable armbian-zram-config on Orange Pis
     lineinfile:
       path: /etc/default/armbian-zram-config
       regexp: '^Enabled='
       line: 'Enabled=false'
-    when: orange_pi== true
+    when: orange_pi == true
     
 
   # - name: Set raspberry_pi fact

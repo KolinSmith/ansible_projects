@@ -9,6 +9,7 @@
     roles: 
       - role: bootstrap_python
       - role: deploy_apt-cacher_client
+      - role: check_if_pi
       - role: provision_server
 
   - name: pihole and DNS setup (defiant & ds9)
@@ -18,8 +19,8 @@
     vars_files:
       - vars/dns_server_provision_vars.yml
     roles:
-      - role: check_if_raspberry_pi
+      - role: check_if_pi
+      - role: remove_default_user
       - role: deploy_pihole
       - role: artis3n.tailscale 
       # - role: IronicBadger.figurine
-      - role: remove_default_user
