@@ -5,10 +5,10 @@
 
 
 
-- name: kill processes used by default user
-  shell: sudo pkill -u {{ default_user }} #variable is defined in hosts file
-  # shell: sudo pkill -u {{ hostvars[groups['provision_servers'][0]].ansible_user }}
-  ignore_errors: true
+# - name: kill processes used by default user
+#   shell: sudo pkill -u {{ default_user }} #variable is defined in hosts file
+#   # shell: sudo pkill -u {{ hostvars[groups['provision_servers'][0]].ansible_user }}
+#   ignore_errors: true
 
 # - name: remove default user for raspberry pi
 #   user:

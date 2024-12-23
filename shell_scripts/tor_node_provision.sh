@@ -9,7 +9,7 @@ fi
 PWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # update software
-echo "===== Updating software"
+echo "===== Updating software ====="
 apt update -y
 apt upgrade -y
 apt dist-upgrade -y

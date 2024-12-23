@@ -37,13 +37,40 @@
     when:
       grep_device_tree_model_orangepi.rc == 0
 
-  - name: Print the value of raspberry_pi fact
-    debug:
-      msg: "The value of raspberry_pi fact is {{ raspberry_pi }}"
+  - name: Set OS facts
+    set_fact:
+      is_raspbian: false
+      is_ubuntu: false
 
-  - name: Print the value of orange_pi fact
+  - name: Check for Raspbian
+    command: grep -E "ID=raspbian" /etc/os-release
+    register: grep_raspbian
+    failed_when: false
+    changed_when: false
+
+  - name: Set Raspbian fact
+    set_fact:
+      is_raspbian: true
+    when: grep_raspbian.rc == 0
+
+  - name: Check for Ubuntu
+    command: grep -E "ID=ubuntu" /etc/os-release
+    register: grep_ubuntu
+    failed_when: false
+    changed_when: false
+
+  - name: Set Ubuntu fact
+    set_fact:
+      is_ubuntu: true
+    when: grep_ubuntu.rc == 0
+    
+  - name: Print OS facts
     debug:
-      msg: "The value of orange_pi fact is {{ orange_pi }}"
+      msg: 
+        - "Running Raspbian: {{ is_raspbian }}"
+        - "Running Ubuntu: {{ is_ubuntu }}"
+        - "Running on Raspberry Pi: {{ raspberry_pi }}"
+        - "Running on Orange Pi: {{ orange_pi }}"
 
     #https://tech.borpin.co.uk/2019/12/17/install-a-package-from-the-testing-repository/
   # - name: Add Raspbian Testing signing key

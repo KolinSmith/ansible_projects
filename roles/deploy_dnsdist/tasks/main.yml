@@ -2,32 +2,12 @@
     #learned the hard way that when installing dnsdist on the raspberry pi that you need to make sure your distro is supported
     #I had installed raspbian bullseye on the pi zeroes, but dndist only had a build for raspbian buster so I had to reinstall with buster
 
-    - name: add SSH public key for borg so it can login to make backups
-      authorized_key:
-          user: "{{ user }}"
-          key: "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOax0ZYUe5CpSHS+h4dPYEOpZs/aUbUol5b4ypwPV9jEdNsBUateQhzwtSXZJbosW4VpGIBtfQVhFgaJri2Fftc= root@Borg"
-          state: present
-          manage_dir: yes
-        
-  ############################################################################################
-    - name: Test for raspberry pi /proc/cpuinfo
-      command: grep -E "Raspberry Pi|BCM2708|BCM2709|BCM2835|BCM2836" /proc/cpuinfo
-      register: grep_cpuinfo_raspberrypi
-      failed_when: false
-      changed_when: false
-
-    - name: Test for raspberry pi /proc/device-tree/model
-      command: grep -E "Raspberry Pi" /proc/device-tree/model
-      register: grep_device_tree_model_raspberrypi
-      failed_when: false
-      changed_when: false
-
-    - name: Set raspberry_pi fact to true
-      set_fact:
-        raspberry_pi: true
-      when:
-        grep_cpuinfo_raspberrypi.rc == 0 or grep_device_tree_model_raspberrypi.rc == 0
-  ############################################################################################
+    # - name: add SSH public key for borg so it can login to make backups
+    #   authorized_key:
+    #       user: "{{ user }}"
+    #       key: "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOax0ZYUe5CpSHS+h4dPYEOpZs/aUbUol5b4ypwPV9jEdNsBUateQhzwtSXZJbosW4VpGIBtfQVhFgaJri2Fftc= root@Borg"
+    #       state: present
+    #       manage_dir: yes
 
   # so on Raspbian, dnsdist only supports Buster, but on Debian & Ubuntu it supports latest so I'm commenting this out unless I start using Raspbian again
 
@@ -50,11 +30,70 @@
     #     url: https://repo.powerdns.com/CBC8B383-pub.asc
     #     state: present
 
+
+###################################################
+# Install DNSDIST from Source if Raspbian
+###################################################
+    - name: Install build dependencies
+      apt:
+        name:
+          - git
+          - g++
+          - make
+          - automake
+          - autoconf
+          - ragel
+          - libboost-all-dev
+          - libluajit-5.1-dev
+          - libsodium-dev
+          - libedit-dev
+          - pkg-config
+        update_cache: yes
+      when: is_raspbian|default(false) #when OS is Raspbian
+
+
+    - name: Clone PowerDNS repository
+      git:
+        repo: https://github.com/PowerDNS/pdns.git
+        dest: /tmp/pdns
+        depth: 1
+      when: is_raspbian|default(false) #when OS is Raspbian
+
+
+    - name: Run autoreconf
+      command:
+        cmd: autoreconf -i
+        chdir: /tmp/pdns/pdns/dnsdistdist
+        creates: /tmp/pdns/pdns/dnsdistdist/configure
+      when: is_raspbian|default(false) #when OS is Raspbian
+
+    - name: Configure build
+      command:
+        cmd: ./configure
+        chdir: /tmp/pdns/pdns/dnsdistdist
+      when: is_raspbian|default(false) #when OS is Raspbian
+
+    - name: Build dnsdist
+      command:
+        cmd: make -j1
+        chdir: /tmp/pdns/pdns/dnsdistdist
+      when: is_raspbian|default(false) #when OS is Raspbian
+
+    - name: Install dnsdist
+      command:
+        cmd: make install
+        chdir: /tmp/pdns/pdns/dnsdistdist
+      when: is_raspbian|default(false) #when OS is Raspbian
+
+###################################################
+###################################################
+###################################################
+
     - name: create repo source file for dnsdist when not raspberry pi
       copy:
         dest: "/etc/apt/sources.list.d/pdns.list"
         content: |
-             deb [signed-by=/etc/apt/keyrings/auth-master-pub.asc] http://repo.powerdns.com/ubuntu jammy-auth-master main
+          deb [signed-by=/usr/share/keyrings/powerdns.gpg] http://repo.powerdns.com/ubuntu jammy-auth-master main
       when: orange_pi|default(false) #when orange pi with ubuntu
   
 

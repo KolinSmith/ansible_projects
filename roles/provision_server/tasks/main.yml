@@ -132,6 +132,13 @@
     with_items:
       - "{{ public_keys }}"
 
+  # - name: add SSH public key for borg so it can login to make backups
+  #   authorized_key:
+  #       user: "{{ user }}"
+  #       key: "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOax0ZYUe5CpSHS+h4dPYEOpZs/aUbUol5b4ypwPV9jEdNsBUateQhzwtSXZJbosW4VpGIBtfQVhFgaJri2Fftc= root@Borg"
+  #       state: present
+  #       manage_dir: yes
+
 #might end up using the one from the dotfiles
   - name: add sshd config file
     template:

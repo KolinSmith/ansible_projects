@@ -1,16 +1,16 @@
 ---
 #sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/server_provision_script/server_provision_script.yml
-- name: server provision
-  hosts: provision_servers
-  gather_facts: true
-  become: true
-  vars_files:
-    - vars/server_provision_script_vars.yml
-  roles:
-    - role: bootstrap_python
-    - role: check_if_pi
-    - role: deploy_apt-cacher_client
-    - role: provision_server
+# - name: server provision
+#   hosts: provision_servers
+#   gather_facts: true
+#   become: true
+#   vars_files:
+#     - vars/server_provision_script_vars.yml
+#   roles:
+#     - role: bootstrap_python
+#     - role: check_if_pi
+#     - role: deploy_apt-cacher_client
+#     - role: provision_server
 
 - name: post server provision
   hosts: post_provision_servers
@@ -24,7 +24,7 @@
     #   vars:
     #     tailscale_authkey: "{{ tailscale_auth_key }}"
     - role: geerlingguy.pip
-    - role: geerlingguy.docker
-    - role: geerlingguy.docker_arm
+    # - role: geerlingguy.docker
+    # - role: geerlingguy.docker_arm
     - role: install_bat #doesnt seem to be working
     - role: remove_default_user
