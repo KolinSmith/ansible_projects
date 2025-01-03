@@ -89,17 +89,37 @@
 ###################################################
 ###################################################
 
-    - name: create repo source file for dnsdist when not raspberry pi
-      copy:
-        dest: "/etc/apt/sources.list.d/pdns.list"
-        content: |
-          deb [signed-by=/usr/share/keyrings/powerdns.gpg] http://repo.powerdns.com/ubuntu jammy-auth-master main
-      when: orange_pi|default(false) #when orange pi with ubuntu
-  
+    - name: Create keyrings directory
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+      when: is_ubuntu|default(false)
 
-    - name: Install needed packages
+    - name: Download PowerDNS GPG key
+      get_url:
+        url: https://repo.powerdns.com/FD380FBB-pub.asc
+        dest: /etc/apt/keyrings/dnsdist-19-pub.asc
+      when: is_ubuntu|default(false)
+
+    - name: Create dnsdist repository file
+      copy:
+        dest: "/etc/apt/sources.list.d/dnsdist.list"
+        content: |
+          deb [signed-by=/etc/apt/keyrings/dnsdist-19-pub.asc] http://repo.powerdns.com/ubuntu {{ ansible_distribution_release }}-dnsdist-19 main
+      when: is_ubuntu|default(false)
+
+    - name: Create dnsdist preferences file
+      copy:
+        dest: "/etc/apt/preferences.d/dnsdist-19"
+        content: |
+          Package: dnsdist*
+          Pin: origin repo.powerdns.com
+          Pin-Priority: 600
+      when: is_ubuntu|default(false)   
+  
+    - name: Install dnsdist packages
       apt:
-        name: "{{ necessary_packages }}"
+        name: dnsdist
         state: latest
 
     - name: Update, Upgrade, & Clean
@@ -114,14 +134,6 @@
         autoclean: yes
       ignore_errors: yes
 
-    - name: create dnsdist preferences
-      copy:
-        dest: /etc/apt/preferences.d/dnsdist
-        content: |
-          Package: dnsdist*
-          Pin: origin repo.powerdns.com
-          Pin-Priority: 600
-
     #print current host's ip address
     #- debug: msg="{{ hostvars[item]['ansible_eth0']['ipv4']['address'] }}"
 
@@ -133,18 +145,55 @@
 
     #print ip address of the host that the play is being run against
     # - debug: msg="{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+###################################################
+###################################################
+###################################################
 
+
+    - name: Create dnsdist user group
+      group:
+        name: dnsdist
+        state: present
+
+    - name: Create dnsdist user
+      user:
+        name: dnsdist
+        group: dnsdist
+        shell: /sbin/nologin
+        system: yes
+
+    - name: Set dnsdist ownership and permissions
+      file:
+        path: /etc/dnsdist
+        owner: dnsdist
+        group: dnsdist
+        recurse: yes
+  
+###################################################
+###################################################
+###################################################
 
     - name: create dnsdist preferences
       copy:
         dest: /etc/dnsdist/dnsdist.conf
         content: |
-          webserver("{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:80", "nilok3", "nilok3", {}, "192.168.3.0/24")
+          addLocal("0.0.0.0:53") 
+          setACL({"192.168.0.0/16"}) 
+          webserver("{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:80")
+          setWebserverConfig({
+            password="nilok3",
+            acl="192.168.3.0/24",
+            dashboardRequiresAuthentication=true,
+            apiRequiresAuthentication=true
+          })
           setLocal("{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:53")
           warnlog(string.format("Script starting %s", "up!"))
           newServer({address="{{ hostvars[groups['dns_servers'][0]]['ansible_host'] | default(groups['dns_servers'][0]) }}", name="{{ hostvars[groups['dns_servers'][0]]['inventory_hostname_short'] }}"})
           newServer({address="{{ hostvars[groups['dns_servers'][1]]['ansible_host'] | default(groups['dns_servers'][1]) }}", name="{{ hostvars[groups['dns_servers'][1]]['inventory_hostname_short'] }}"})
           setServerPolicy(leastOutstanding)
+        owner: dnsdist
+        group: dnsdist
+        mode: '0644'
 
     # - debug: msg="{{ primary_load_balancer }}"
 
@@ -252,15 +301,17 @@
     #     state: enabled
 
     #gave me the same glob patterns error
-    - name: enable and start dnsdist & keepalived
+    - name: enable and start services
       service:
         name: "{{ item }}"
         state: restarted
         enabled: yes
-      with_items:
-        - dnsdist
+      loop:
         - keepalived
-
+        - dnsdist
+      register: service_result
+      failed_when: false
+      
     #   #systemd doesn't allow glob patterns(ie. enabling or starting multiple things in one commmand) so I had to do each one individually
     # - name: enable dnsdist to run on boot
     #   systemd:

@@ -561,6 +561,65 @@
       line: 'Enabled=false'
     when: orange_pi== true
 
+  - name: Create scripts folder
+    file: 
+      path: ~/.scripts
+      state: directory
+      mode: '0755'
+      owner: '{{ user }}'
+      group: admin
+
+  - name: Copy git cleanup script
+    copy:
+      content: |
+        #!/bin/bash
+
+        # Check if we're in a git repository
+        if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+            echo "Error: Not in a git repository"
+            exit 1
+        fi
+
+        # Get current branch name
+        current_branch=$(git branch --show-current)
+
+        # Check if main or master exists and switch to it
+        if git show-ref --verify --quiet refs/heads/main; then
+            target_branch="main"
+        elif git show-ref --verify --quiet refs/heads/master; then
+            target_branch="master"
+        else
+            echo "Error: Neither main nor master branch found"
+            exit 1
+        fi
+
+        # Switch to target branch if not already on it
+        if [ "$current_branch" != "$target_branch" ]; then
+            echo "Switching to $target_branch branch..."
+            git checkout "$target_branch" || exit 1
+        fi
+
+        # Pull latest changes
+        echo "Pulling latest changes..."
+        git pull || exit 1
+
+        # Delete merged branches
+        echo "Deleting merged branches..."
+        git branch --merged "$target_branch" | grep -v "^\*" | grep -v "$target_branch" | xargs -r git branch -d
+
+        # Prune remote references
+        echo "Pruning remote references..."
+        git remote prune origin
+
+        # Final pull to ensure everything is up to date
+        echo "Final pull..."
+        git pull
+
+        echo "Cleanup complete!"
+      dest: /usr/local/bin/cleanup-merged-branches.sh
+      mode: '0755'
+
+
   # need to reboot machine to make sure processes use new swap space
   - name: Reboot the machine (Wait for 60 sec)
     reboot:

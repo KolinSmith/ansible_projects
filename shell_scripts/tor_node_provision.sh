@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Added error handling
+set -euo pipefail
+trap 'echo "Error on line $LINENO"' ERR
+
 # check for root
 if [[ $EUID -ne 0 ]]; then
     echo "This script must be run as root" 1>&2
@@ -7,6 +11,12 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 PWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Added check for minimum memory
+total_memory=$(free -m | awk '/^Mem:/{print $2}')
+if [ "$total_memory" -lt 512 ]; then
+    echo "Warning: Less than 512MB RAM detected" 1>&2
+fi
 
 # update software
 echo "===== Updating software ====="
@@ -33,12 +43,34 @@ apt autoremove -y
 #another way to add the key
 #wget -q https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc -O- | sudo apt-key add -
 
+# Install dependencies - added python3 explicitly
+echo "===== Installing dependencies ====="
+apt install -y python3 curl bc miniupnpc
+
 # install tor and related packages
 echo "===== Installing Tor and related packages"
 #apt-key adv --recv-keys --keyserver keys.gnupg.net 74A941BA219EC810
 curl -sSL https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --import -
 apt install -y tor tor-arm tor-geoipdb bc
 service tor stop
+
+# NEW: Create and configure debian-tor user
+echo "===== Setting up debian-tor user ====="
+adduser --system --group --disabled-password --shell /bin/false debian-tor
+usermod -d /var/lib/tor debian-tor
+
+# Create necessary directories with proper permissions
+mkdir -p /var/lib/tor /var/log/tor /usr/local/etc/tor
+chown -R debian-tor:debian-tor /var/lib/tor
+chown -R debian-tor:debian-tor /var/log/tor
+chmod 700 /var/lib/tor
+chmod 700 /var/log/tor
+
+# NEW: Set up security limits for debian-tor
+cat <<EOF >/etc/security/limits.d/debian-tor.conf
+debian-tor soft nofile 32768
+debian-tor hard nofile 32768
+EOF
 
 #prompt user for tor node name
 read -p "===== Enter in a name for the tor node (this name will be publicly visible): " tor_node_name
@@ -61,7 +93,7 @@ tor_node_name=${tor_node_name:-"ididntchangethename"}
 
 #run speedtest and pull the speed values from it to use in torrc
 echo "===== Beginning speedtest"
-result=$(curl https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -)
+result=$(curl https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python3 -)
 if [[ $result =~ 'Download: '([[:digit:].]+)' Mbit' ]]; then
     actual_download_speed=${BASH_REMATCH[1]}
 fi
@@ -89,7 +121,7 @@ dirport=${dirport:-8444}
 
 #create torrc file
 echo '===== Creating torrc file'
-cat <<EOF >/etc/tor/torrc
+cat <<EOF >/usr/local/etc/tor/torrc
 ## Configuration file for a typical Tor user
 ## Last updated 28 February 2019 for Tor 0.3.5.1-alpha.
 ## (may or may not work for much older or much newer versions of Tor.)
@@ -264,7 +296,7 @@ DirPort $dirport # what port to advertise for directory connections
 ## If you are running multiple relays, you MUST set this option.
 ##
 ## Note: do not use MyFamily on bridge relays.
-#MyFamily $keyid,$keyid,...
+#MyFamily
 
 ## Uncomment this if you want your relay to be an exit, with the default
 ## exit policy (or whatever exit policy you set below).
@@ -344,6 +376,9 @@ ExitPolicy reject *:* # no exits allowed
 EOF
 ############################################################################################################
 
+chown debian-tor:debian-tor /usr/local/etc/tor/torrc
+chmod 644 /usr/local/etc/tor/torrc
+
 # configure automatic updates
 echo "===== Configuring unattended upgrades"
 apt install -y unattended-upgrades apt-listchanges
@@ -369,6 +404,20 @@ echo "===== Control Port: " $control_port
 echo "===== ORPort: " $orport
 echo "===== DirPort: " $dirport
 echo "===== IP address to forward to: " $local_ip
+
+# create systemd service override
+mkdir -p /etc/systemd/system/tor.service.d/
+cat <<EOF >/etc/systemd/system/tor.service.d/override.conf
+    [Service]
+    User=debian-tor
+    Group=debian-tor
+    RuntimeDirectory=tor
+    RuntimeDirectoryMode=0700
+    MemoryMax=256M
+    CPUQuota=80%
+    PrivateTmp=yes
+EOF
+
 
 cat <<EOF >/etc/systemd/system/upnp-forward-ports.service
 [Unit]

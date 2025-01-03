@@ -1,16 +1,16 @@
 ---
   #sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/dns_load_balancer_provision/dns_load_balancer_provision.yml
-  # - name: initial setup (stargazer & shenzhou)
-  #   hosts: provision_servers
-  #   gather_facts: yes
-  #   become: yes
-  #   vars_files:
-  #     - vars/dns_load_balancer_provision_vars.yml
-  #   roles:
-  #     - role: bootstrap_python
-  #     # - role: deploy_apt-cacher_client
-  #     - role: check_if_pi
-  #     - role: provision_server
+  - name: initial setup (stargazer & shenzhou)
+    hosts: provision_servers
+    gather_facts: yes
+    become: yes
+    vars_files:
+      - vars/dns_load_balancer_provision_vars.yml
+    roles:
+      - role: bootstrap_python
+      # - role: deploy_apt-cacher_client
+      - role: check_if_pi
+      - role: provision_server
 
   - name: dnsdist loadbalancer setup (stargazer & shenzhou)
     hosts: post_provision_servers
@@ -26,5 +26,5 @@
       - role: check_if_pi
       - role: remove_default_user
       - role: deploy_dnsdist
-      - role: artis3n.tailscale 
+      # - role: artis3n.tailscale 
       # - role: IronicBadger.figurine
