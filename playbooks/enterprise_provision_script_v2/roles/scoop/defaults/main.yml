@@ -1,0 +1,9 @@
+---
+# Scoop configuration defaults
+scoop_apps: []
+scoop_extras: []
+scoop_buckets:
+  - extras
+  - versions
+  - nerd-fonts
+  - java

@@ -1,0 +1,127 @@
+---
+# WSL installation and configuration
+- name: Check if WSL is installed
+  win_shell: |
+    if ((Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux).State -eq 'Enabled') {
+      Write-Output "WSL feature is already enabled"
+      exit 0
+    } else {
+      Write-Output "WSL feature is not enabled"
+      exit 1
+    }
+  register: wsl_check
+  failed_when: false
+  changed_when: false
+  tags: wsl
+
+- name: Enable WSL feature
+  win_shell: |
+    Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -NoRestart
+  args:
+    executable: powershell
+  when: wsl_check.rc != 0 and wsl_enabled | bool
+  register: wsl_enable_result
+  tags: wsl
+  notify: reboot_required
+
+- name: Check if Virtual Machine Platform is enabled
+  win_shell: |
+    if ((Get-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform).State -eq 'Enabled') {
+      Write-Output "Virtual Machine Platform feature is already enabled"
+      exit 0
+    } else {
+      Write-Output "Virtual Machine Platform feature is not enabled"
+      exit 1
+    }
+  register: vm_platform_check
+  failed_when: false
+  changed_when: false
+  tags: wsl
+
+- name: Enable Virtual Machine Platform for WSL 2
+  win_shell: |
+    Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -NoRestart
+  args:
+    executable: powershell
+  when: vm_platform_check.rc != 0 and wsl_version == 2 and wsl_enabled | bool
+  register: vm_enable_result
+  tags: wsl
+  notify: reboot_required
+
+- name: Download WSL2 Kernel Update
+  win_get_url:
+    url: https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi
+    dest: '{{ home_dir }}\Downloads\wsl_update_x64.msi'
+  when: wsl_version == 2 and wsl_update_kernel | bool
+  tags: wsl
+
+- name: Install WSL2 Kernel Update
+  win_package:
+    path: '{{ home_dir }}\Downloads\wsl_update_x64.msi'
+    state: present
+  when: wsl_version == 2 and wsl_update_kernel | bool
+  tags: wsl
+
+- name: Set WSL default version
+  win_shell: wsl --set-default-version {{ wsl_version }}
+  args:
+    executable: powershell
+  when: wsl_version == 2 and wsl_enabled | bool
+  register: wsl_version_result
+  failed_when: false
+  tags: wsl
+
+- name: Check if WSL distro is installed
+  win_shell: |
+    if ((wsl -l).Contains("{{ wsl_distro }}")) {
+      Write-Output "WSL distro {{ wsl_distro }} is already installed"
+      exit 0
+    } else {
+      Write-Output "WSL distro {{ wsl_distro }} is not installed"
+      exit 1
+    }
+  register: wsl_distro_check
+  failed_when: false
+  changed_when: false
+  tags: wsl
+
+- name: Install WSL Ubuntu using winget (if available)
+  win_shell: |
+    winget install -e --id Canonical.Ubuntu.2004
+  args:
+    executable: powershell
+  when: wsl_distro_check.rc != 0 and wsl_enabled | bool
+  register: wsl_install_result
+  failed_when: false
+  tags: wsl
+
+- name: Alternative - Use direct download for Ubuntu WSL
+  win_shell: |
+    Invoke-WebRequest -Uri https://aka.ms/wslubuntu2004 -OutFile {{ home_dir }}\Ubuntu.appx -UseBasicParsing
+    Add-AppxPackage {{ home_dir }}\Ubuntu.appx
+  args:
+    executable: powershell
+  when: wsl_distro_check.rc != 0 and wsl_install_result.rc != 0 and wsl_enabled | bool
+  register: wsl_download_result
+  failed_when: false
+  tags: wsl
+
+- name: Set default WSL distro
+  win_shell: wsl --set-default {{ wsl_distro }}
+  args:
+    executable: powershell
+  when: wsl_default_distro | bool and wsl_enabled | bool
+  tags: wsl
+  notify: wsl_config_changed
+
+- name: Create .wslconfig file
+  win_template:
+    content: |
+      [wsl2]
+      memory={{ wsl_memory_limit }}
+      processors={{ wsl_processors }}
+      swap=0
+      localhostForwarding=true
+    dest: '{{ home_dir }}\.wslconfig'
+  tags: wsl
+  notify: wsl_config_changed

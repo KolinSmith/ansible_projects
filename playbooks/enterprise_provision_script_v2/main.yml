@@ -1,0 +1,20 @@
+---
+# main.yml - Main playbook for Windows 10 LTSC Configuration
+- name: Configure Windows 10 LTSC
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  
+  pre_tasks:
+    - name: Ensure Windows PowerShell is available
+      win_shell: |
+        Write-Output "PowerShell is available"
+      register: powershell_check
+      changed_when: false
+      tags: always
+  
+  roles:
+    - windows_config
+    - scoop
+    - vscode
+    - wsl

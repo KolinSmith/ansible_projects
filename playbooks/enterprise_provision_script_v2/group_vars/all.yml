@@ -1,0 +1,34 @@
+---
+# Common variables
+username: "{{ lookup('env', 'USERNAME') }}"
+home_dir: "{{ lookup('env', 'USERPROFILE') }}"
+
+# WSL configuration
+wsl_distro: "Ubuntu-20.04"
+wsl_version: 2
+
+# Application lists
+scoop_apps:
+  - 7zip
+  - git
+  - curl
+  - wget
+  - sudo
+  - ripgrep
+  - fzf
+  - neovim
+
+scoop_extras:
+  - firefox
+  - vlc
+  - notepadplusplus
+  - vscode
+
+vscode_extensions:
+  - ms-vscode.powershell
+  - ms-python.python
+  - ms-vscode-remote.remote-wsl
+  - vscodevim.vim
+  - eamodio.gitlens
+  - ms-azuretools.vscode-docker
+  - ms-vscode.cpptools

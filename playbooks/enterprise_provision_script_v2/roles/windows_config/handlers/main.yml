@@ -1,0 +1,6 @@
+---
+# Windows config handlers
+- name: restart_windows
+  win_reboot:
+    reboot_timeout: 600
+  listen: reboot_required

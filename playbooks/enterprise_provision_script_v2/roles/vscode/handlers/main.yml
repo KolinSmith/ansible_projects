@@ -1,0 +1,9 @@
+---
+# VSCode handlers
+- name: restart_vscode
+  win_shell: |
+    Get-Process code -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+  args:
+    executable: powershell
+  ignore_errors: yes
+  listen: vscode_config_changed

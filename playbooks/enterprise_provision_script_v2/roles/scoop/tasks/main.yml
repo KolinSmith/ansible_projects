@@ -1,0 +1,69 @@
+---
+# Scoop installation and configuration
+- name: Check if Scoop is installed
+  win_shell: |
+    if (Get-Command scoop -ErrorAction SilentlyContinue) { 
+      Write-Output "Scoop is already installed"
+      exit 0
+    } else {
+      Write-Output "Scoop is not installed"
+      exit 1
+    }
+  register: scoop_check
+  failed_when: false
+  changed_when: false
+  tags: software
+
+- name: Install Scoop
+  win_shell: |
+    Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+  args:
+    executable: powershell
+  when: scoop_check.rc != 0
+  tags: software
+  notify: scoop_changed
+
+- name: Add Scoop buckets
+  win_shell: scoop bucket add {{ item }}
+  args:
+    executable: powershell
+  loop: "{{ scoop_buckets }}"
+  register: bucket_result
+  failed_when: 
+    - bucket_result.rc != 0 
+    - "'already exists' not in bucket_result.stderr"
+  changed_when: bucket_result.rc == 0
+  tags: software
+  
+- name: Install core applications with Scoop
+  win_shell: scoop install {{ item }}
+  args:
+    executable: powershell
+  loop: "{{ scoop_apps }}"
+  register: install_result
+  failed_when: 
+    - install_result.rc != 0 
+    - "'already installed' not in install_result.stderr"
+  changed_when: "'already installed' not in install_result.stderr"
+  tags: software
+
+- name: Install extra applications with Scoop
+  win_shell: scoop install {{ item }}
+  args:
+    executable: powershell
+  loop: "{{ scoop_extras }}"
+  register: install_extras_result
+  failed_when: 
+    - install_extras_result.rc != 0 
+    - "'already installed' not in install_extras_result.stderr"
+  changed_when: "'already installed' not in install_extras_result.stderr"
+  tags: software
+
+- name: Run Scoop update
+  win_shell: scoop update
+  args:
+    executable: powershell
+  tags: software
+  notify: scoop_changed

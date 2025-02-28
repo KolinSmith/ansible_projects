@@ -172,12 +172,15 @@
 ###################################################
 ###################################################
 ###################################################
+#https://dnsdist.org/reference/config.html
+#https://web.archive.org/web/2/https://chriskirby.net/load-balanced-and-highly-avaialble-local-dns-with-dnsdist-and-keepalived/
 
     - name: create dnsdist preferences
       copy:
         dest: /etc/dnsdist/dnsdist.conf
         content: |
           addLocal("0.0.0.0:53") 
+          addLocal("[::]:53")
           setACL({"192.168.0.0/16"}) 
           webserver("{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:80")
           setWebserverConfig({

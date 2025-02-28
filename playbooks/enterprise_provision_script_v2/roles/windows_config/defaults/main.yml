@@ -1,0 +1,21 @@
+---
+# Windows configuration defaults
+enable_performance_tweaks: true
+disable_telemetry: true
+optimize_power_plan: true
+disable_unnecessary_services:
+  - DiagTrack  # Connected User Experiences and Telemetry
+  - dmwappushservice  # WAP Push Message Routing Service
+  - SysMain  # Superfetch
+  - WSearch  # Windows Search
+
+registry_performance_tweaks:
+  - { path: 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', name: 'LargeSystemCache', data: '1', type: 'dword' }
+  - { path: 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', name: 'IoPageLockLimit', data: '16000000', type: 'dword' }
+  - { path: 'HKCU:\Control Panel\Desktop', name: 'MenuShowDelay', data: '0', type: 'string' }
+  - { path: 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Folder\HideFileExt', name: 'CheckedValue', data: '0', type: 'dword' }
+
+disable_scheduled_tasks:
+  - '\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser'
+  - '\Microsoft\Windows\Application Experience\ProgramDataUpdater'
+  - '\Microsoft\Windows\Customer Experience Improvement Program\Consolidator'

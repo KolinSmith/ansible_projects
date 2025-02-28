@@ -1,0 +1,8 @@
+---
+# WSL handlers
+- name: restart_wsl
+  win_shell: wsl --shutdown
+  args:
+    executable: powershell
+  ignore_errors: yes
+  listen: wsl_config_changed

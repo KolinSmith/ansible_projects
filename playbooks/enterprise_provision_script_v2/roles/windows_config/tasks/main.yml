@@ -1,0 +1,65 @@
+---
+# Windows configuration tasks
+- name: Disable unnecessary services
+  win_service:
+    name: "{{ item }}"
+    start_mode: disabled
+    state: stopped
+  loop: "{{ disable_unnecessary_services }}"
+  when: disable_telemetry | bool
+  tags: services
+  register: service_result
+  failed_when: false  # Some services might not exist in LTSC
+
+- name: Configure performance registry settings
+  win_regedit:
+    path: "{{ item.path }}"
+    name: "{{ item.name }}"
+    data: "{{ item.data }}"
+    type: "{{ item.type }}"
+  loop: "{{ registry_performance_tweaks }}"
+  when: enable_performance_tweaks | bool
+  tags: registry
+  notify: reboot_required
+
+- name: Disable unnecessary scheduled tasks
+  win_scheduled_task:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ disable_scheduled_tasks }}"
+  register: task_result
+  failed_when: false  # Some tasks might not exist in LTSC
+  tags: tasks
+
+- name: Configure power settings
+  win_shell: |
+    powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c  # High performance
+  args:
+    executable: powershell
+  when: optimize_power_plan | bool
+  tags: power
+
+- name: Show file extensions
+  win_regedit:
+    path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+    name: HideFileExt
+    data: 0
+    type: dword
+  tags: explorer
+
+- name: Show hidden files
+  win_regedit:
+    path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+    name: Hidden
+    data: 1
+    type: dword
+  tags: explorer
+  
+- name: Restart Explorer to apply changes
+  win_shell: |
+    Stop-Process -Name explorer -Force
+    Start-Process explorer
+  args:
+    executable: powershell
+  when: enable_performance_tweaks | bool
+  tags: explorer

@@ -1,0 +1,22 @@
+---
+# WSL configuration defaults
+wsl_enabled: true
+wsl_version: 2
+wsl_distro: "Ubuntu-20.04"
+wsl_default_distro: true
+wsl_update_kernel: true
+wsl_memory_limit: 8GB
+wsl_processors: 4
+
+# WSL config parameters
+wsl_conf:
+  automount:
+    enabled: true
+    mountFsTab: true
+    root: /mnt/
+  network:
+    generateHosts: true
+    generateResolvConf: true
+  interop:
+    enabled: true
+    appendWindowsPath: true

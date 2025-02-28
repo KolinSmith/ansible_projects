@@ -1,0 +1,7 @@
+---
+# Scoop handlers
+- name: update_scoop
+  win_shell: scoop update
+  args:
+    executable: powershell
+  listen: scoop_changed
