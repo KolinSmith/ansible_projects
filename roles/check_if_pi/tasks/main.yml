@@ -41,6 +41,7 @@
     set_fact:
       is_raspbian: false
       is_ubuntu: false
+      is_armbian: false
 
   - name: Check for Raspbian
     command: grep -E "ID=raspbian" /etc/os-release
@@ -64,11 +65,28 @@
       is_ubuntu: true
     when: grep_ubuntu.rc == 0
     
+  - name: Check for Armbian
+    command: grep -E "ID=armbian" /etc/os-release
+    register: grep_armbian
+    failed_when: false
+    changed_when: false
+
+  - name: Check for Armbian (alternative method)
+    stat:
+      path: /etc/armbian-release
+    register: armbian_release_file
+    
+  - name: Set Armbian fact
+    set_fact:
+      is_armbian: true
+    when: grep_armbian.rc == 0 or armbian_release_file.stat.exists
+
   - name: Print OS facts
     debug:
       msg: 
         - "Running Raspbian: {{ is_raspbian }}"
         - "Running Ubuntu: {{ is_ubuntu }}"
+        - "Running Armbian: {{ is_armbian }}"
         - "Running on Raspberry Pi: {{ raspberry_pi }}"
         - "Running on Orange Pi: {{ orange_pi }}"
 

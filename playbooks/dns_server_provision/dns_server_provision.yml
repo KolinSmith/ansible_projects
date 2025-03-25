@@ -8,7 +8,7 @@
       - vars/dns_server_provision_vars.yml
     roles: 
       - role: bootstrap_python
-      - role: deploy_apt-cacher_client
+      # - role: deploy_apt-cacher_client
       - role: check_if_pi
       - role: provision_server
 
@@ -22,5 +22,5 @@
       - role: check_if_pi
       - role: remove_default_user
       - role: deploy_pihole
-      - role: artis3n.tailscale 
+      # - role: artis3n.tailscale  #not working currently
       # - role: IronicBadger.figurine
