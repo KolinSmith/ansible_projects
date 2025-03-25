@@ -49,7 +49,7 @@
       mode: 0600
 
   - name: install pihole
-    shell: curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
+    shell: curl -sSL https://install.pi-hole.net | sudo PIHOLE_SKIP_OS_CHECK=true bash
     become: true
 
   # - name: add "{{ username }}" to /etc/pihole so it has access to the database file

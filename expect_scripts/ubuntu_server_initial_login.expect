@@ -3,7 +3,7 @@
 set timeout 30
 
 # Target machine details
-set target_ip "192.168.9.159"
+set target_ip "192.168.9.102"
 set ubuntu_password "ubuntu"
 set new_password "raspberry"
 set username "ubuntu"
