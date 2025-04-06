@@ -1,11 +1,11 @@
-# Windows Machine Setup Script - Prepares system for Ansible using Scoop
+# Windows Machine Setup Script - Prepares Ansible via Cygwin
 # Run as Administrator
 
 # Enable script execution
 Set-ExecutionPolicy Bypass -Scope Process -Force
 
 Write-Host "-----------------------------------------" -ForegroundColor Cyan
-Write-Host "Windows Machine Setup for Ansible" -ForegroundColor Cyan
+Write-Host "Windows Machine Setup for Ansible via Cygwin" -ForegroundColor Cyan
 Write-Host "-----------------------------------------" -ForegroundColor Cyan
 
 # 1. Install Scoop if not already installed
@@ -27,45 +27,64 @@ if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
     Write-Host "Scoop already installed" -ForegroundColor Green
 }
 
-# 2. Add necessary buckets
-Write-Host "Adding required Scoop buckets..." -ForegroundColor Yellow
-scoop bucket add extras
-scoop bucket add versions
+# 2. Install Cygwin via Scoop
+Write-Host "Installing Cygwin..." -ForegroundColor Yellow
+scoop install cygwin
 
-# 3. Install Python and Ansible with Scoop
-Write-Host "Installing Python and Ansible..." -ForegroundColor Yellow
+# 3. Install Ansible within Cygwin
+Write-Host "Installing Ansible within Cygwin..." -ForegroundColor Yellow
+$cygwinSetup = "$env:USERPROFILE\scoop\apps\cygwin\current\cygwin-setup.exe"
 
-# Python
-if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
-    scoop install python
+# Using -qnBP for quiet install with Ansible package
+& $cygwinSetup -qnBP ansible
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "Ansible installed successfully in Cygwin!" -ForegroundColor Green
 } else {
-    Write-Host "Python already installed" -ForegroundColor Green
-}
-
-# Ansible
-scoop install ansible
-
-# Verify installations
-if (Get-Command ansible -ErrorAction SilentlyContinue) {
-    $ansibleVersion = (ansible --version) | Select-Object -First 1
-    Write-Host "Ansible installed successfully: $ansibleVersion" -ForegroundColor Green
-} else {
-    Write-Host "Ansible installation failed" -ForegroundColor Red
+    Write-Host "Error installing Ansible in Cygwin (exit code: $LASTEXITCODE)" -ForegroundColor Red
     exit 1
 }
 
-# 4. Install pywinrm separately for Windows support
-Write-Host "Installing pywinrm for Windows support..." -ForegroundColor Yellow
-pip install pywinrm
+# 4. Create a batch file wrapper to run Ansible from Windows
+$batchWrapper = @"
+@echo off
+REM Ansible Playbook Wrapper
+REM Usage: ansible-playbook-cygwin.bat playbook.yml [options]
 
-# 5. Run the Ansible playbook
+if "%~1"=="" (
+    echo Error: No playbook specified
+    echo Usage: ansible-playbook-cygwin.bat playbook.yml [options]
+    exit /b 1
+)
+
+REM Get the full path to the playbook
+set PLAYBOOK=%~f1
+shift
+
+REM Prepare the arguments string
+set ARGS=
+:arg_loop
+if "%~1"=="" goto arg_done
+set ARGS=%ARGS% %1
+shift
+goto arg_loop
+:arg_done
+
+REM Run ansible-playbook in Cygwin
+"%USERPROFILE%\scoop\apps\cygwin\current\bin\bash.exe" --login -c "cd `$(cygpath '%CD%') && ansible-playbook `$(cygpath '%PLAYBOOK%')%ARGS%"
+exit /b %ERRORLEVEL%
+"@
+
+$wrapperPath = Join-Path $PWD "ansible-playbook-cygwin.bat"
+$batchWrapper | Out-File -FilePath $wrapperPath -Encoding ascii
+
+# 5. Run the Ansible playbook via Cygwin
 $playbookPath = Join-Path $PWD "main.yml"
 if (Test-Path $playbookPath) {
-    Write-Host "Starting Ansible playbook execution..." -ForegroundColor Cyan
+    Write-Host "Starting Ansible playbook execution via Cygwin..." -ForegroundColor Cyan
     Write-Host "-----------------------------------------" -ForegroundColor Cyan
     
     try {
-        ansible-playbook $playbookPath -v
+        & $wrapperPath $playbookPath -v
         
         if ($LASTEXITCODE -eq 0) {
             Write-Host "-----------------------------------------" -ForegroundColor Cyan
@@ -84,4 +103,4 @@ if (Test-Path $playbookPath) {
 }
 
 Write-Host ""
-Write-Host "Setup complete!" -ForegroundColor Green
+Write-Host "Setup complete! You can now run Ansible using the ansible-playbook-cygwin.bat wrapper." -ForegroundColor Green
