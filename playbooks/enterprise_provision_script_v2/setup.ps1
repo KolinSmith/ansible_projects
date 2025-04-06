@@ -8,7 +8,7 @@ Write-Host "-----------------------------------------" -ForegroundColor Cyan
 Write-Host "Windows Machine Setup for Ansible" -ForegroundColor Cyan
 Write-Host "-----------------------------------------" -ForegroundColor Cyan
 
-# 1. Check and install Python
+# 1. Check for Python - script will use existing Python 3.11.4
 $pythonInstalled = Get-Command python -ErrorAction SilentlyContinue
 if (-not $pythonInstalled) {
     Write-Host "Installing Python 3.10..." -ForegroundColor Yellow
@@ -56,7 +56,8 @@ pip.main(['install', 'ansible'])
 
 Write-Host "Applying compatibility fix and installing Ansible..." -ForegroundColor Yellow
 $tempFile = "$env:TEMP\install_ansible.py"
-$tempScript | Out-File -FilePath $tempFile
+# FIX: Use UTF-8 encoding
+[System.IO.File]::WriteAllText($tempFile, $tempScript, [System.Text.Encoding]::UTF8)
 python $tempFile
 Remove-Item $tempFile
 
@@ -138,7 +139,8 @@ if __name__ == '__main__':
 "@
 
     $wrapperPath = "$env:TEMP\ansible_wrapper.py"
-    $wrapperScript | Out-File -FilePath $wrapperPath
+    # FIX: Use UTF-8 encoding
+    [System.IO.File]::WriteAllText($wrapperPath, $wrapperScript, [System.Text.Encoding]::UTF8)
 
     # 6. Run the playbook through our wrapper
     Write-Host "Found ansible-playbook at: $ansiblePlaybookPath" -ForegroundColor Green
@@ -195,7 +197,8 @@ if __name__ == '__main__':
 "@
 
     $runnerPath = "$env:TEMP\run_ansible.py"
-    $patchedRunner | Out-File -FilePath $runnerPath
+    # FIX: Use UTF-8 encoding
+    [System.IO.File]::WriteAllText($runnerPath, $patchedRunner, [System.Text.Encoding]::UTF8)
     
     # Try to run via our patched Python script
     try {
