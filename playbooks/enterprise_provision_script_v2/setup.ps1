@@ -11,8 +11,9 @@ Write-Host "-----------------------------------------" -ForegroundColor Cyan
 # 1. Check and install Python
 $pythonInstalled = Get-Command python -ErrorAction SilentlyContinue
 if (-not $pythonInstalled) {
-    Write-Host "Installing Python 3.11..." -ForegroundColor Yellow
-    $pythonUrl = "https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe"
+    Write-Host "Installing Python 3.10..." -ForegroundColor Yellow
+    # Using Python 3.10 instead of 3.11 to avoid compatibility issues
+    $pythonUrl = "https://www.python.org/ftp/python/3.10.11/python-3.10.11-amd64.exe"
     $pythonInstaller = "$env:TEMP\python-installer.exe"
     Invoke-WebRequest -Uri $pythonUrl -OutFile $pythonInstaller
     Start-Process -FilePath $pythonInstaller -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=1", "Include_pip=1" -Wait
@@ -29,18 +30,41 @@ if (-not $pythonInstalled) {
         exit 1
     }
 } else {
-    Write-Host "Python already installed" -ForegroundColor Green
+    $pythonVersion = python --version
+    Write-Host "Python already installed: $pythonVersion" -ForegroundColor Green
 }
 
-# 2. Install Ansible and dependencies
+# 2. Install Ansible and dependencies with compatibility fix
 Write-Host "Installing Ansible and dependencies..." -ForegroundColor Yellow
 python -m pip install --upgrade pip
-python -m pip install ansible pywinrm
+
+# Install required packages
+python -m pip install pywinrm
+
+# Install Ansible with temporary fix for os.get_blocking issue
+$tempScript = @"
+import os
+
+# Add the missing function if it doesn't exist
+if not hasattr(os, 'get_blocking'):
+    os.get_blocking = lambda fd: False
+
+# Continue with normal execution
+import pip
+pip.main(['install', 'ansible'])
+"@
+
+Write-Host "Applying compatibility fix and installing Ansible..." -ForegroundColor Yellow
+$tempFile = "$env:TEMP\install_ansible.py"
+$tempScript | Out-File -FilePath $tempFile
+python $tempFile
+Remove-Item $tempFile
 
 # 3. Verify ansible installation
 $ansibleVersion = python -m pip show ansible
 if ($?) {
-    Write-Host "Ansible installed successfully" -ForegroundColor Green
+    $version = ($ansibleVersion | Select-String "Version:").ToString().Split(":")[1].Trim()
+    Write-Host "Ansible installed successfully (version $version)" -ForegroundColor Green
 } else {
     Write-Host "Ansible installation failed" -ForegroundColor Red
     exit 1
@@ -93,8 +117,30 @@ if (-not $ansiblePlaybookPath) {
     }
 }
 
-# 5. Add ansible-playbook to path if found and run playbook
+# 5. Create patched playbook wrapper if needed
 if ($ansiblePlaybookPath) {
+    # Create a patched wrapper script for ansible-playbook
+    $wrapperScript = @"
+import os
+
+# Add the missing function if it doesn't exist
+if not hasattr(os, 'get_blocking'):
+    os.get_blocking = lambda fd: False
+
+# Continue with normal execution
+import sys
+from ansible.cli.playbook import PlaybookCLI
+
+if __name__ == '__main__':
+    cli = PlaybookCLI(sys.argv)
+    exit_code = cli.run()
+    sys.exit(exit_code)
+"@
+
+    $wrapperPath = "$env:TEMP\ansible_wrapper.py"
+    $wrapperScript | Out-File -FilePath $wrapperPath
+
+    # 6. Run the playbook through our wrapper
     Write-Host "Found ansible-playbook at: $ansiblePlaybookPath" -ForegroundColor Green
     
     # Add to PATH for this session
@@ -104,12 +150,12 @@ if ($ansiblePlaybookPath) {
     # Verify the playbook file exists
     $playbookPath = Join-Path $PWD "main.yml"
     if (Test-Path $playbookPath) {
-        Write-Host "Starting Ansible playbook execution..." -ForegroundColor Cyan
+        Write-Host "Starting Ansible playbook execution (with compatibility fix)..." -ForegroundColor Cyan
         Write-Host "-----------------------------------------" -ForegroundColor Cyan
         
-        # Run the playbook
+        # Run the playbook through our wrapper
         try {
-            & $ansiblePlaybookPath $playbookPath -v
+            python $wrapperPath $playbookPath -v
             if ($?) {
                 Write-Host "-----------------------------------------" -ForegroundColor Cyan
                 Write-Host "Ansible playbook completed successfully!" -ForegroundColor Green
@@ -129,11 +175,33 @@ if ($ansiblePlaybookPath) {
     Write-Host "Could not find ansible-playbook executable." -ForegroundColor Red
     Write-Host "Trying alternative method via Python module..." -ForegroundColor Yellow
     
-    # Try to run via Python module directly
+    # Create a patched version of the main runner
+    $patchedRunner = @"
+import os
+
+# Add the missing function if it doesn't exist
+if not hasattr(os, 'get_blocking'):
+    os.get_blocking = lambda fd: False
+
+# Continue with normal execution
+import sys
+from ansible.cli.playbook import PlaybookCLI
+
+if __name__ == '__main__':
+    args = ['ansible-playbook'] + sys.argv[1:]
+    cli = PlaybookCLI(args)
+    exit_code = cli.run()
+    sys.exit(exit_code)
+"@
+
+    $runnerPath = "$env:TEMP\run_ansible.py"
+    $patchedRunner | Out-File -FilePath $runnerPath
+    
+    # Try to run via our patched Python script
     try {
-        $playbookPath = Join-Path $PWD "main.yml"
+        $playbookPath = Join-Path $PWD "main.yml" 
         if (Test-Path $playbookPath) {
-            python -m ansible.cli.playbook $playbookPath -v
+            python $runnerPath $playbookPath -v
             if ($?) {
                 Write-Host "Ansible playbook completed successfully!" -ForegroundColor Green
             } else {
@@ -146,6 +214,10 @@ if ($ansiblePlaybookPath) {
         Write-Host "Error running Ansible via Python module: $_" -ForegroundColor Red
     }
 }
+
+# Clean up temp files
+Remove-Item "$env:TEMP\ansible_wrapper.py" -ErrorAction SilentlyContinue
+Remove-Item "$env:TEMP\run_ansible.py" -ErrorAction SilentlyContinue
 
 Write-Host ""
 Write-Host "Setup complete! You may need to restart your terminal if any changes were made to PATH." -ForegroundColor Green
