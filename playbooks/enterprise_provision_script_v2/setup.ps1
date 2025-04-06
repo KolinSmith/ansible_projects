@@ -1,4 +1,4 @@
-# Windows Machine Setup Script - Prepares system for Ansible playbook
+# Windows Machine Setup Script - Prepares system for Ansible using Scoop
 # Run as Administrator
 
 # Enable script execution
@@ -8,219 +8,80 @@ Write-Host "-----------------------------------------" -ForegroundColor Cyan
 Write-Host "Windows Machine Setup for Ansible" -ForegroundColor Cyan
 Write-Host "-----------------------------------------" -ForegroundColor Cyan
 
-# 1. Check for Python - script will use existing Python 3.11.4
-$pythonInstalled = Get-Command python -ErrorAction SilentlyContinue
-if (-not $pythonInstalled) {
-    Write-Host "Installing Python 3.10..." -ForegroundColor Yellow
-    # Using Python 3.10 instead of 3.11 to avoid compatibility issues
-    $pythonUrl = "https://www.python.org/ftp/python/3.10.11/python-3.10.11-amd64.exe"
-    $pythonInstaller = "$env:TEMP\python-installer.exe"
-    Invoke-WebRequest -Uri $pythonUrl -OutFile $pythonInstaller
-    Start-Process -FilePath $pythonInstaller -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=1", "Include_pip=1" -Wait
+# 1. Install Scoop if not already installed
+if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+    Write-Host "Installing Scoop package manager..." -ForegroundColor Yellow
     
-    # Force refresh path
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-    
-    # Verify installation
-    $pythonInstalled = Get-Command python -ErrorAction SilentlyContinue
-    if ($pythonInstalled) {
-        Write-Host "Python installed successfully!" -ForegroundColor Green
-    } else {
-        Write-Host "Python installation failed. Please install manually." -ForegroundColor Red
+    try {
+        Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+        
+        # Refresh environment variables
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        
+        Write-Host "Scoop installed successfully!" -ForegroundColor Green
+    } catch {
+        Write-Host "Error installing Scoop: $_" -ForegroundColor Red
         exit 1
     }
 } else {
-    $pythonVersion = python --version
-    Write-Host "Python already installed: $pythonVersion" -ForegroundColor Green
+    Write-Host "Scoop already installed" -ForegroundColor Green
 }
 
-# 2. Install Ansible and dependencies with compatibility fix
-Write-Host "Installing Ansible and dependencies..." -ForegroundColor Yellow
-python -m pip install --upgrade pip
+# 2. Add necessary buckets
+Write-Host "Adding required Scoop buckets..." -ForegroundColor Yellow
+scoop bucket add extras
+scoop bucket add versions
 
-# Install required packages
-python -m pip install pywinrm
+# 3. Install Python and Ansible with Scoop
+Write-Host "Installing Python and Ansible..." -ForegroundColor Yellow
 
-# Install Ansible with temporary fix for os.get_blocking issue
-$tempScript = @"
-import os
+# Python
+if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
+    scoop install python
+} else {
+    Write-Host "Python already installed" -ForegroundColor Green
+}
 
-# Add the missing function if it doesn't exist
-if not hasattr(os, 'get_blocking'):
-    os.get_blocking = lambda fd: False
+# Ansible
+scoop install ansible
 
-# Continue with normal execution
-import pip
-pip.main(['install', 'ansible'])
-"@
-
-Write-Host "Applying compatibility fix and installing Ansible..." -ForegroundColor Yellow
-$tempFile = "$env:TEMP\install_ansible.py"
-# FIX: Use UTF-8 encoding
-[System.IO.File]::WriteAllText($tempFile, $tempScript, [System.Text.Encoding]::UTF8)
-python $tempFile
-Remove-Item $tempFile
-
-# 3. Verify ansible installation
-$ansibleVersion = python -m pip show ansible
-if ($?) {
-    $version = ($ansibleVersion | Select-String "Version:").ToString().Split(":")[1].Trim()
-    Write-Host "Ansible installed successfully (version $version)" -ForegroundColor Green
+# Verify installations
+if (Get-Command ansible -ErrorAction SilentlyContinue) {
+    $ansibleVersion = (ansible --version) | Select-Object -First 1
+    Write-Host "Ansible installed successfully: $ansibleVersion" -ForegroundColor Green
 } else {
     Write-Host "Ansible installation failed" -ForegroundColor Red
     exit 1
 }
 
-# 4. Find ansible-playbook executable (looking in multiple locations)
-Write-Host "Locating ansible-playbook executable..." -ForegroundColor Yellow
+# 4. Install pywinrm separately for Windows support
+Write-Host "Installing pywinrm for Windows support..." -ForegroundColor Yellow
+pip install pywinrm
 
-$ansiblePlaybookPath = $null
-
-# Method 1: Use Python to find it (most reliable)
-$findAnsibleScript = @"
-import os, sys, ansible
-try:
-    ansible_path = os.path.dirname(ansible.__file__)
-    scripts_path = os.path.join(os.path.dirname(os.path.dirname(ansible_path)), 'Scripts')
-    playbook_path = os.path.join(scripts_path, 'ansible-playbook.exe')
-    if os.path.exists(playbook_path):
-        print(playbook_path)
-except Exception as e:
-    print("")
-"@
-
-$pythonResult = python -c $findAnsibleScript
-# FIX: Only test path if result is not empty
-if ($? -and -not [string]::IsNullOrWhiteSpace($pythonResult) -and (Test-Path $pythonResult)) {
-    $ansiblePlaybookPath = $pythonResult
-}
-
-# Method 2: Check common locations if Method 1 failed
-if (-not $ansiblePlaybookPath) {
-    $possibleLocations = @(
-        (Join-Path ([System.IO.Path]::GetDirectoryName((Get-Command python).Source)) "Scripts\ansible-playbook.exe"),
-        (Join-Path $env:USERPROFILE "AppData\Roaming\Python\Python*\Scripts\ansible-playbook.exe"),
-        (Join-Path $env:LOCALAPPDATA "Programs\Python\Python*\Scripts\ansible-playbook.exe"),
-        (Join-Path $env:ProgramFiles "Python*\Scripts\ansible-playbook.exe")
-    )
-
-    foreach ($location in $possibleLocations) {
-        try {
-            $resolved = Resolve-Path $location -ErrorAction SilentlyContinue
-            if ($resolved) {
-                $ansiblePlaybookPath = $resolved[0].Path
-                break
-            }
-        } catch {
-            # Continue to next location if error
-            continue
-        }
-    }
-}
-
-# 5. Create patched playbook wrapper if needed
-if ($ansiblePlaybookPath) {
-    # Create a patched wrapper script for ansible-playbook
-    $wrapperScript = @"
-import os
-
-# Add the missing function if it doesn't exist
-if not hasattr(os, 'get_blocking'):
-    os.get_blocking = lambda fd: False
-
-# Continue with normal execution
-import sys
-from ansible.cli.playbook import PlaybookCLI
-
-if __name__ == '__main__':
-    cli = PlaybookCLI(sys.argv)
-    exit_code = cli.run()
-    sys.exit(exit_code)
-"@
-
-    $wrapperPath = "$env:TEMP\ansible_wrapper.py"
-    # FIX: Use UTF-8 encoding
-    [System.IO.File]::WriteAllText($wrapperPath, $wrapperScript, [System.Text.Encoding]::UTF8)
-
-    # 6. Run the playbook through our wrapper
-    Write-Host "Found ansible-playbook at: $ansiblePlaybookPath" -ForegroundColor Green
+# 5. Run the Ansible playbook
+$playbookPath = Join-Path $PWD "main.yml"
+if (Test-Path $playbookPath) {
+    Write-Host "Starting Ansible playbook execution..." -ForegroundColor Cyan
+    Write-Host "-----------------------------------------" -ForegroundColor Cyan
     
-    # Add to PATH for this session
-    $ansibleDir = [System.IO.Path]::GetDirectoryName($ansiblePlaybookPath)
-    $env:Path = "$ansibleDir;$env:Path"
-    
-    # Verify the playbook file exists
-    $playbookPath = Join-Path $PWD "main.yml"
-    if (Test-Path $playbookPath) {
-        Write-Host "Starting Ansible playbook execution (with compatibility fix)..." -ForegroundColor Cyan
-        Write-Host "-----------------------------------------" -ForegroundColor Cyan
-        
-        # Run the playbook through our wrapper
-        try {
-            python $wrapperPath $playbookPath -v
-            if ($?) {
-                Write-Host "-----------------------------------------" -ForegroundColor Cyan
-                Write-Host "Ansible playbook completed successfully!" -ForegroundColor Green
-            } else {
-                Write-Host "-----------------------------------------" -ForegroundColor Cyan
-                Write-Host "Ansible playbook encountered errors." -ForegroundColor Red
-            }
-        } catch {
-            Write-Host "-----------------------------------------" -ForegroundColor Cyan
-            Write-Host "Error running Ansible playbook: $_" -ForegroundColor Red
-        }
-    } else {
-        Write-Host "Cannot find main.yml playbook in the current directory." -ForegroundColor Red
-        Write-Host "Playbook should be located at: $playbookPath" -ForegroundColor Yellow
-    }
-} else {
-    Write-Host "Could not find ansible-playbook executable." -ForegroundColor Red
-    Write-Host "Trying alternative method via Python module..." -ForegroundColor Yellow
-    
-    # Create a patched version of the main runner
-    $patchedRunner = @"
-import os
-
-# Add the missing function if it doesn't exist
-if not hasattr(os, 'get_blocking'):
-    os.get_blocking = lambda fd: False
-
-# Continue with normal execution
-import sys
-from ansible.cli.playbook import PlaybookCLI
-
-if __name__ == '__main__':
-    args = ['ansible-playbook'] + sys.argv[1:]
-    cli = PlaybookCLI(args)
-    exit_code = cli.run()
-    sys.exit(exit_code)
-"@
-
-    $runnerPath = "$env:TEMP\run_ansible.py"
-    # FIX: Use UTF-8 encoding
-    [System.IO.File]::WriteAllText($runnerPath, $patchedRunner, [System.Text.Encoding]::UTF8)
-    
-    # Try to run via our patched Python script
     try {
-        $playbookPath = Join-Path $PWD "main.yml" 
-        if (Test-Path $playbookPath) {
-            python $runnerPath $playbookPath -v
-            if ($?) {
-                Write-Host "Ansible playbook completed successfully!" -ForegroundColor Green
-            } else {
-                Write-Host "Ansible playbook encountered errors." -ForegroundColor Red
-            }
+        ansible-playbook $playbookPath -v
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "-----------------------------------------" -ForegroundColor Cyan
+            Write-Host "Ansible playbook completed successfully!" -ForegroundColor Green
         } else {
-            Write-Host "Cannot find main.yml playbook in the current directory." -ForegroundColor Red
+            Write-Host "-----------------------------------------" -ForegroundColor Cyan
+            Write-Host "Ansible playbook encountered errors (exit code: $LASTEXITCODE)" -ForegroundColor Red
         }
     } catch {
-        Write-Host "Error running Ansible via Python module: $_" -ForegroundColor Red
+        Write-Host "-----------------------------------------" -ForegroundColor Cyan
+        Write-Host "Error running Ansible playbook: $_" -ForegroundColor Red
     }
+} else {
+    Write-Host "Cannot find main.yml playbook in the current directory." -ForegroundColor Red
+    Write-Host "Playbook should be located at: $playbookPath" -ForegroundColor Yellow
 }
 
-# Clean up temp files
-Remove-Item "$env:TEMP\ansible_wrapper.py" -ErrorAction SilentlyContinue
-Remove-Item "$env:TEMP\run_ansible.py" -ErrorAction SilentlyContinue
-
 Write-Host ""
-Write-Host "Setup complete! You may need to restart your terminal if any changes were made to PATH." -ForegroundColor Green
+Write-Host "Setup complete!" -ForegroundColor Green
