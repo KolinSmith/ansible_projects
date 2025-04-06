@@ -93,7 +93,7 @@ if (-not $ansiblePlaybookPath) {
     }
 }
 
-# 5. Add ansible-playbook to path if found
+# 5. Add ansible-playbook to path if found and run playbook
 if ($ansiblePlaybookPath) {
     Write-Host "Found ansible-playbook at: $ansiblePlaybookPath" -ForegroundColor Green
     
@@ -101,15 +101,51 @@ if ($ansiblePlaybookPath) {
     $ansibleDir = [System.IO.Path]::GetDirectoryName($ansiblePlaybookPath)
     $env:Path = "$ansibleDir;$env:Path"
     
-    Write-Host "Ready to run Ansible playbook!" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "To run the playbook, close this window and run:" -ForegroundColor White
-    Write-Host "ansible-playbook main.yml -v" -ForegroundColor Yellow
+    # Verify the playbook file exists
+    $playbookPath = Join-Path $PWD "main.yml"
+    if (Test-Path $playbookPath) {
+        Write-Host "Starting Ansible playbook execution..." -ForegroundColor Cyan
+        Write-Host "-----------------------------------------" -ForegroundColor Cyan
+        
+        # Run the playbook
+        try {
+            & $ansiblePlaybookPath $playbookPath -v
+            if ($?) {
+                Write-Host "-----------------------------------------" -ForegroundColor Cyan
+                Write-Host "Ansible playbook completed successfully!" -ForegroundColor Green
+            } else {
+                Write-Host "-----------------------------------------" -ForegroundColor Cyan
+                Write-Host "Ansible playbook encountered errors." -ForegroundColor Red
+            }
+        } catch {
+            Write-Host "-----------------------------------------" -ForegroundColor Cyan
+            Write-Host "Error running Ansible playbook: $_" -ForegroundColor Red
+        }
+    } else {
+        Write-Host "Cannot find main.yml playbook in the current directory." -ForegroundColor Red
+        Write-Host "Playbook should be located at: $playbookPath" -ForegroundColor Yellow
+    }
 } else {
     Write-Host "Could not find ansible-playbook executable." -ForegroundColor Red
-    Write-Host "Please try restarting your PowerShell session and running:" -ForegroundColor Yellow
-    Write-Host "python -m ansible.cli.playbook main.yml -v" -ForegroundColor Yellow
+    Write-Host "Trying alternative method via Python module..." -ForegroundColor Yellow
+    
+    # Try to run via Python module directly
+    try {
+        $playbookPath = Join-Path $PWD "main.yml"
+        if (Test-Path $playbookPath) {
+            python -m ansible.cli.playbook $playbookPath -v
+            if ($?) {
+                Write-Host "Ansible playbook completed successfully!" -ForegroundColor Green
+            } else {
+                Write-Host "Ansible playbook encountered errors." -ForegroundColor Red
+            }
+        } else {
+            Write-Host "Cannot find main.yml playbook in the current directory." -ForegroundColor Red
+        }
+    } catch {
+        Write-Host "Error running Ansible via Python module: $_" -ForegroundColor Red
+    }
 }
 
 Write-Host ""
-Write-Host "Setup complete! You may need to restart your terminal or computer for all changes to take effect." -ForegroundColor Green
+Write-Host "Setup complete! You may need to restart your terminal if any changes were made to PATH." -ForegroundColor Green
