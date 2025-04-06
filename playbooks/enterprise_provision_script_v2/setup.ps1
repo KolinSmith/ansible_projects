@@ -4,14 +4,14 @@
 # Enable script execution
 Set-ExecutionPolicy Bypass -Scope Process -Force
 
-Write-Host "┌─────────────────────────────────────────┐" -ForegroundColor Cyan
-Write-Host "│ Windows Machine Setup for Ansible       │" -ForegroundColor Cyan
-Write-Host "└─────────────────────────────────────────┘" -ForegroundColor Cyan
+Write-Host "-----------------------------------------" -ForegroundColor Cyan
+Write-Host "Windows Machine Setup for Ansible" -ForegroundColor Cyan
+Write-Host "-----------------------------------------" -ForegroundColor Cyan
 
 # 1. Check and install Python
 $pythonInstalled = Get-Command python -ErrorAction SilentlyContinue
 if (-not $pythonInstalled) {
-    Write-Host "➤ Installing Python 3.11..." -ForegroundColor Yellow
+    Write-Host "Installing Python 3.11..." -ForegroundColor Yellow
     $pythonUrl = "https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe"
     $pythonInstaller = "$env:TEMP\python-installer.exe"
     Invoke-WebRequest -Uri $pythonUrl -OutFile $pythonInstaller
@@ -23,31 +23,31 @@ if (-not $pythonInstalled) {
     # Verify installation
     $pythonInstalled = Get-Command python -ErrorAction SilentlyContinue
     if ($pythonInstalled) {
-        Write-Host "✓ Python installed successfully!" -ForegroundColor Green
+        Write-Host "Python installed successfully!" -ForegroundColor Green
     } else {
-        Write-Host "✗ Python installation failed. Please install manually." -ForegroundColor Red
+        Write-Host "Python installation failed. Please install manually." -ForegroundColor Red
         exit 1
     }
 } else {
-    Write-Host "✓ Python already installed" -ForegroundColor Green
+    Write-Host "Python already installed" -ForegroundColor Green
 }
 
 # 2. Install Ansible and dependencies
-Write-Host "➤ Installing Ansible and dependencies..." -ForegroundColor Yellow
+Write-Host "Installing Ansible and dependencies..." -ForegroundColor Yellow
 python -m pip install --upgrade pip
 python -m pip install ansible pywinrm
 
 # 3. Verify ansible installation
 $ansibleVersion = python -m pip show ansible
 if ($?) {
-    Write-Host "✓ Ansible installed successfully" -ForegroundColor Green
+    Write-Host "Ansible installed successfully" -ForegroundColor Green
 } else {
-    Write-Host "✗ Ansible installation failed" -ForegroundColor Red
+    Write-Host "Ansible installation failed" -ForegroundColor Red
     exit 1
 }
 
 # 4. Find ansible-playbook executable (looking in multiple locations)
-Write-Host "➤ Locating ansible-playbook executable..." -ForegroundColor Yellow
+Write-Host "Locating ansible-playbook executable..." -ForegroundColor Yellow
 
 $ansiblePlaybookPath = $null
 
@@ -84,15 +84,20 @@ if (-not $ansiblePlaybookPath) {
     }
 }
 
-# 5. Run the playbook if ansible-playbook was found
+# 5. Add ansible-playbook to path if found
 if ($ansiblePlaybookPath) {
-    Write-Host "✓ Found ansible-playbook at: $ansiblePlaybookPath" -ForegroundColor Green
-    Write-Host "➤ Ready to run Ansible playbook!" -ForegroundColor Cyan
+    Write-Host "Found ansible-playbook at: $ansiblePlaybookPath" -ForegroundColor Green
+    
+    # Add to PATH for this session
+    $ansibleDir = [System.IO.Path]::GetDirectoryName($ansiblePlaybookPath)
+    $env:Path = "$ansibleDir;$env:Path"
+    
+    Write-Host "Ready to run Ansible playbook!" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "To run the playbook, close this window and run:" -ForegroundColor White
     Write-Host "ansible-playbook main.yml -v" -ForegroundColor Yellow
 } else {
-    Write-Host "✗ Could not find ansible-playbook executable." -ForegroundColor Red
+    Write-Host "Could not find ansible-playbook executable." -ForegroundColor Red
     Write-Host "Please try restarting your PowerShell session and running:" -ForegroundColor Yellow
     Write-Host "ansible-playbook main.yml -v" -ForegroundColor Yellow
 }
