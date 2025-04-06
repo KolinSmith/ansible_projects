@@ -54,17 +54,21 @@ $ansiblePlaybookPath = $null
 # Method 1: Use Python to find it (most reliable)
 $findAnsibleScript = @"
 import os, sys, ansible
-ansible_path = os.path.dirname(ansible.__file__)
-scripts_path = os.path.join(os.path.dirname(os.path.dirname(ansible_path)), 'Scripts')
-playbook_path = os.path.join(scripts_path, 'ansible-playbook.exe')
-if os.path.exists(playbook_path):
-    print(playbook_path)
+try:
+    ansible_path = os.path.dirname(ansible.__file__)
+    scripts_path = os.path.join(os.path.dirname(os.path.dirname(ansible_path)), 'Scripts')
+    playbook_path = os.path.join(scripts_path, 'ansible-playbook.exe')
+    if os.path.exists(playbook_path):
+        print(playbook_path)
+except Exception as e:
+    print("")
 "@
 
 $pythonResult = python -c $findAnsibleScript
-if ($? -and (Test-Path $pythonResult)) {
+# FIX: Only test path if result is not empty
+if ($? -and -not [string]::IsNullOrWhiteSpace($pythonResult) -and (Test-Path $pythonResult)) {
     $ansiblePlaybookPath = $pythonResult
-} 
+}
 
 # Method 2: Check common locations if Method 1 failed
 if (-not $ansiblePlaybookPath) {
@@ -76,10 +80,15 @@ if (-not $ansiblePlaybookPath) {
     )
 
     foreach ($location in $possibleLocations) {
-        $resolved = Resolve-Path $location -ErrorAction SilentlyContinue
-        if ($resolved) {
-            $ansiblePlaybookPath = $resolved[0].Path
-            break
+        try {
+            $resolved = Resolve-Path $location -ErrorAction SilentlyContinue
+            if ($resolved) {
+                $ansiblePlaybookPath = $resolved[0].Path
+                break
+            }
+        } catch {
+            # Continue to next location if error
+            continue
         }
     }
 }
@@ -99,7 +108,7 @@ if ($ansiblePlaybookPath) {
 } else {
     Write-Host "Could not find ansible-playbook executable." -ForegroundColor Red
     Write-Host "Please try restarting your PowerShell session and running:" -ForegroundColor Yellow
-    Write-Host "ansible-playbook main.yml -v" -ForegroundColor Yellow
+    Write-Host "python -m ansible.cli.playbook main.yml -v" -ForegroundColor Yellow
 }
 
 Write-Host ""
