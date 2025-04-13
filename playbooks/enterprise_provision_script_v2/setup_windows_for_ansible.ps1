@@ -2,14 +2,6 @@
 # This script configures a Windows machine to be managed by Ansible via SSH
 # Run as Administrator
 
-# Setup-WindowsForAnsible.ps1
-# This script configures a Windows machine to be managed by Ansible via SSH
-# Run as Administrator
-
-# Setup-WindowsForAnsible.ps1
-# This script configures a Windows machine to be managed by Ansible via SSH
-# Run as Administrator
-
 param (
     [Parameter()]
     [switch]$SetPowershellAsDefault = $true
@@ -77,8 +69,8 @@ if ($SetPowershellAsDefault) {
     Write-Host "PowerShell is now the default SSH shell." -ForegroundColor Green
 }
 
-# 6. Configure passwordless authentication
-Write-Status "Setting up passwordless authentication..."
+# 6. Configure passwordless authentication for Administrator
+Write-Status "Setting up passwordless authentication for Administrator..."
 
 # Configure SSH server for public key authentication
 $sshdConfigPath = "$env:ProgramData\ssh\sshd_config"
@@ -99,22 +91,23 @@ $sshdConfig = $sshdConfig -replace '^\s*AuthorizedKeysFile __PROGRAMDATA__/ssh/a
 # Save updated configuration
 $sshdConfig | Set-Content $sshdConfigPath
 
-# Get current user and set up SSH directory
-$currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name.Split('\')[1]
-$userProfile = "C:\Users\$currentUser"
-
-# Create .ssh directory if it doesn't exist
-$sshFolder = Join-Path $userProfile ".ssh"
+# Set up SSH directory for Administrator
+$adminProfile = "C:\Users\Administrator"
+$sshFolder = Join-Path $adminProfile ".ssh"
 if (-not (Test-Path $sshFolder)) {
     New-Item -Path $sshFolder -ItemType Directory | Out-Null
 }
 
-# Create authorized_keys file
+# Create authorized_keys file for Administrator
 $authorizedKeysPath = Join-Path $sshFolder "authorized_keys"
 
 # Add public key from string
 $PublicKeyString | Out-File -FilePath $authorizedKeysPath -Encoding utf8 -Force
-Write-Host "Added public key to $authorizedKeysPath" -ForegroundColor Green
+Write-Host "Added public key to $authorizedKeysPath for Administrator" -ForegroundColor Green
+
+# Set permissions for the .ssh folder and authorized_keys file
+icacls $sshFolder /inheritance:r /grant:r "Administrator:(F)" /grant:r "SYSTEM:(F)"
+icacls $authorizedKeysPath /inheritance:r /grant:r "Administrator:(F)" /grant:r "SYSTEM:(F)"
 
 # 7. Restart the SSH service to apply changes
 Write-Status "Restarting SSH service to apply changes..."
@@ -130,7 +123,7 @@ try {
 } catch {
     Write-Host "  IP Address: [Could not determine - check ipconfig]"
 }
-Write-Host "  Username: $($env:USERNAME)"
+Write-Host "  Username: Administrator"
 Write-Host "  Hostname: $($env:COMPUTERNAME)"
 Write-Host ""
 Write-Host "NEXT STEPS:" -ForegroundColor Yellow
@@ -143,7 +136,7 @@ try {
 }
 Write-Host ""
 Write-Host "     [win:vars]"
-Write-Host "     ansible_user=$($env:USERNAME)"
+Write-Host "     ansible_user=Administrator"
 Write-Host "     ansible_connection=ssh"
 Write-Host "     ansible_shell_type=powershell"
 Write-Host "     ansible_ssh_common_args=-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
