@@ -16,7 +16,7 @@ param (
 )
 
 # ====== PASTE YOUR PUBLIC KEY BELOW THIS LINE ======
-$PublicKeyString = "ssh-rsa AAAAB3NzaC1yc2EAAA... PASTE YOUR ENTIRE PUBLIC KEY HERE ..."
+$PublicKeyString = "ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAGkgiD7guFU6pc7GwchfPknc+r2UuvQcL7mA7TzWRX8v1EaozCabWkuQY3rbW1uIWXZqil9BImRED5G6pCnREuY1ADZm/Nd4BnsA0FOsZv00NkKTAO6ide2Hljm5uQek+wCE6WqwJwgusfdmsidNF9yZRFVsiwP9bf3hgUcamx6B1hbkg== dax@Voyager"
 # ====== PASTE YOUR PUBLIC KEY ABOVE THIS LINE ======
 
 function Write-Status {
