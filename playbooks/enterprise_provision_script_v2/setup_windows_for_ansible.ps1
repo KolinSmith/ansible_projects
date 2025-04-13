@@ -94,20 +94,31 @@ $sshdConfig | Set-Content $sshdConfigPath
 # Set up SSH directory for Administrator
 $adminProfile = "C:\Users\Administrator"
 $sshFolder = Join-Path $adminProfile ".ssh"
+
+# Ensure the .ssh folder exists
 if (-not (Test-Path $sshFolder)) {
-    New-Item -Path $sshFolder -ItemType Directory | Out-Null
+    Write-Status "Creating .ssh directory for Administrator..."
+    New-Item -Path $sshFolder -ItemType Directory -Force | Out-Null
 }
 
-# Create authorized_keys file for Administrator
+# Take ownership of the .ssh folder
+Write-Status "Taking ownership of .ssh directory..."
+takeown.exe /F $sshFolder /R /D Y | Out-Null
+
+# Grant full permissions to Administrator
+Write-Status "Granting full permissions to Administrator for .ssh directory..."
+icacls $sshFolder /inheritance:r /grant:r "Administrator:(F)" /grant:r "SYSTEM:(F)" /T | Out-Null
+
+# Create the authorized_keys file
+Write-Status "Creating authorized_keys file for Administrator..."
 $authorizedKeysPath = Join-Path $sshFolder "authorized_keys"
-
-# Add public key from string
 $PublicKeyString | Out-File -FilePath $authorizedKeysPath -Encoding utf8 -Force
-Write-Host "Added public key to $authorizedKeysPath for Administrator" -ForegroundColor Green
 
-# Set permissions for the .ssh folder and authorized_keys file
-icacls $sshFolder /inheritance:r /grant:r "Administrator:(F)" /grant:r "SYSTEM:(F)"
-icacls $authorizedKeysPath /inheritance:r /grant:r "Administrator:(F)" /grant:r "SYSTEM:(F)"
+# Grant full permissions to the authorized_keys file
+Write-Status "Granting full permissions to Administrator for authorized_keys file..."
+icacls $authorizedKeysPath /inheritance:r /grant:r "Administrator:(F)" /grant:r "SYSTEM:(F)" | Out-Null
+
+Write-Host "Added public key to $authorizedKeysPath for Administrator" -ForegroundColor Green
 
 # 7. Restart the SSH service to apply changes
 Write-Status "Restarting SSH service to apply changes..."
