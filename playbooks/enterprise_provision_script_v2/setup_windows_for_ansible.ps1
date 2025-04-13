@@ -109,14 +109,17 @@ takeown.exe /F $sshFolder /R /D Y | Out-Null
 Write-Status "Granting full permissions to Administrator for .ssh directory..."
 icacls $sshFolder /inheritance:r /grant:r "Administrator:(F)" /grant:r "SYSTEM:(F)" /T | Out-Null
 
-# Create the authorized_keys file
+# Create an empty authorized_keys file with proper permissions
 Write-Status "Creating authorized_keys file for Administrator..."
 $authorizedKeysPath = Join-Path $sshFolder "authorized_keys"
-$PublicKeyString | Out-File -FilePath $authorizedKeysPath -Encoding utf8 -Force
+if (-not (Test-Path $authorizedKeysPath)) {
+    New-Item -Path $authorizedKeysPath -ItemType File -Force | Out-Null
+    icacls $authorizedKeysPath /inheritance:r /grant:r "Administrator:(F)" /grant:r "SYSTEM:(F)" | Out-Null
+}
 
-# Grant full permissions to the authorized_keys file
-Write-Status "Granting full permissions to Administrator for authorized_keys file..."
-icacls $authorizedKeysPath /inheritance:r /grant:r "Administrator:(F)" /grant:r "SYSTEM:(F)" | Out-Null
+# Write the public key to the authorized_keys file
+Write-Status "Adding public key to authorized_keys file..."
+$PublicKeyString | Out-File -FilePath $authorizedKeysPath -Encoding utf8 -Append
 
 Write-Host "Added public key to $authorizedKeysPath for Administrator" -ForegroundColor Green
 
