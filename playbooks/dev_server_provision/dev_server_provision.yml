@@ -10,6 +10,10 @@
       - role: check_if_raspberry_pi
       - role: provision_dev_server
 
+#add in adding ansible collections (pfsense)
+#also create and populate /etc/ansible/hosts
+#add ansible.cfg file at /etc/ansible/ansible.cfg
+
   - name: post server provision
     hosts: post_provision_servers
     gather_facts: true 

@@ -552,14 +552,14 @@
       path: /etc/default/armbian-ramlog
       regexp: '^Enabled='
       line: 'Enabled=false'
-    when: orange_pi== true
+    when: orange_pi == true
 
   - name: Disable armbian-zram-config on Orange Pis
     lineinfile:
       path: /etc/default/armbian-zram-config
       regexp: '^Enabled='
       line: 'Enabled=false'
-    when: orange_pi== true
+    when: orange_pi == true
 
   # need to reboot machine to make sure processes use new swap space
   - name: Reboot the machine (Wait for 60 sec)
