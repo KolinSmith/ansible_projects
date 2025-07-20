@@ -26,7 +26,7 @@
       grep_cpuinfo_raspberrypi.rc == 0 or grep_device_tree_model_raspberrypi.rc == 0
 
   - name: Test for orange pi /proc/device-tree/model
-    command: grep -E "Orange Pi" /proc/device-tree/model
+    command: grep -E "Orange Pi|OPi" /proc/device-tree/model
     register: grep_device_tree_model_orangepi
     failed_when: false
     changed_when: false

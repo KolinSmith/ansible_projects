@@ -7,7 +7,7 @@
       - vars/dev_server_provision_vars.yml
     roles:
       - role: bootstrap_python
-      - role: check_if_raspberry_pi
+      - role: check_if_pi
       - role: provision_dev_server
 
 #add in adding ansible collections (pfsense)
@@ -21,7 +21,7 @@
     vars_files:
       - vars/dev_server_provision_vars.yml
     roles:
-      - role: check_if_raspberry_pi
+      - role: check_if_pi
       - role: remove_default_user
       - role: import_dotfiles 
       - role: IronicBadger.figurine
