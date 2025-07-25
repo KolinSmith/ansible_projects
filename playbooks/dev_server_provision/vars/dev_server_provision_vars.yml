@@ -63,6 +63,8 @@ necessary_packages:
   - samba
   - sshpass # for ansible use
   - ansible-lint
+  - expect
+  
 
 
 

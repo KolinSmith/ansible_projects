@@ -348,6 +348,23 @@
       group: admin
       remote_src: true
 
+  - name: Create /etc/ansible directory if it doesn't exist
+    file:
+      path: /etc/ansible
+      state: directory
+      mode: '0755'
+      owner: {{ user }}
+      group: admin
+    become: yes
+
+  - name: Create symbolic link to ansible.cfg
+    file:
+      src: "/home/{{ user }}/code_base/ansible_projects/ansible.cfg"
+      dest: /etc/ansible/ansible.cfg
+      state: link
+      force: yes
+    become: yes
+
 
   # #copy the files from localhost to the remote machine
   # - name: copy ansible_projects into ~/code_base/ansible_projects
