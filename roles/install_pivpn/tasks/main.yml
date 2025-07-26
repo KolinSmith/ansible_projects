@@ -1,22 +1,130 @@
 ---
-  - name: download pivpn install.sh
-    get_url:
-      url: voyager
-      dest: /tmp/install.sh
-      mode: 0755
+# tasks/main.yml - PiVPN Installation and Configuration Role
 
-  - name: add options.conf file for unattended install
-    template:
-      src: /home/dax/code_base/ansible_projects/templates/pivpn_options.j2
-      dest: /tmp/options.conf
+- name: Update package cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: yes
+  tags: ['packages', 'pivpn']
 
-  - name: run install script with unattended
-    shell: /tmp/install.sh --unattended /tmp/options.conf
+- name: Install required packages for PiVPN
+  apt:
+    name:
+      - curl
+      - wget
+      - git
+      - systemd
+      - iptables-persistent
+    state: present
+  become: yes
+  tags: ['packages', 'pivpn']
 
-  - name: remove files used for install
-    file:
-      path: "{{ item }}"
-      state: absent
-    with_items:
-      - /tmp/install.sh
-      - /tmp/options.conf
+- name: Check if PiVPN is already installed
+  stat:
+    path: /usr/local/bin/pivpn
+  register: pivpn_binary
+  tags: ['pivpn', 'check']
+
+- name: Display PiVPN installation status
+  debug:
+    msg: "PiVPN is already installed, skipping installation steps"
+  when: pivpn_binary.stat.exists
+  tags: ['pivpn', 'check']
+
+- name: Create PiVPN configuration directory
+  file:
+    path: /etc/pivpn
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  become: yes
+  when: not pivpn_binary.stat.exists
+  tags: ['pivpn', 'config']
+
+- name: Copy PiVPN setupVars configuration file
+  template:
+    src: "{{ pivpn_config_template | default('pivpn_options.j2') }}"
+    dest: /etc/pivpn/setupVars.conf
+    mode: '0644'
+    owner: root
+    group: root
+    backup: yes
+  become: yes
+  when: not pivpn_binary.stat.exists
+  tags: ['pivpn', 'config']
+
+- name: Create log directory
+  file:
+    path: "{{ pivpn_log_dir | default('/var/log') }}"
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  become: yes
+  tags: ['pivpn', 'logging']
+
+- name: Download PiVPN installer
+  get_url:
+    url: https://install.pivpn.io
+    dest: /tmp/pivpn_install.sh
+    mode: '0755'
+    timeout: 30
+    force: yes
+  when: not pivpn_binary.stat.exists
+  tags: ['pivpn', 'install']
+
+- name: Run PiVPN installer (unattended mode)
+  shell: |
+    /tmp/pivpn_install.sh --unattended /etc/pivpn/setupVars.conf
+  become: yes
+  register: pivpn_install_result
+  when: not pivpn_binary.stat.exists
+  notify: 
+    - reboot system
+    - wait for system
+  tags: ['pivpn', 'install']
+
+- name: Clean up installer script
+  file:
+    path: /tmp/pivpn_install.sh
+    state: absent
+  tags: ['pivpn', 'cleanup']
+
+- name: Flush handlers to ensure reboot completes before verification
+  meta: flush_handlers
+  tags: ['pivpn', 'install']
+
+- name: Verify PiVPN installation
+  command: /usr/local/bin/pivpn -h
+  register: pivpn_help
+  changed_when: false
+  failed_when: pivpn_help.rc != 0
+  become: yes
+  tags: ['pivpn', 'verify']
+
+- name: Display PiVPN installation success
+  debug:
+    msg: 
+      - "PiVPN installed successfully!"
+      - "Use 'sudo pivpn add <clientname>' to create VPN clients"
+      - "Use 'sudo pivpn list' to see existing clients"
+      - "Use 'sudo pivpn qr <clientname>' to display QR code"
+  when: pivpn_help.rc == 0
+  tags: ['pivpn', 'verify']
+
+- name: Display post-installation information
+  debug:
+    msg:
+      - "=== PiVPN Setup Complete ==="
+      - "VPN Type: {{ pivpn_vpn_type | default('wireguard') }}"
+      - "Server Port: {{ pivpn_port | default('51820') }}"
+      - "VPN Network: {{ pivpn_network | default('10.6.0.0/24') }}"
+      - "Public Host: {{ pivpn_host | default('your-domain.com') }}"
+      - ""
+      - "Next steps:"
+      - "1. Create a client: sudo pivpn add myclient"
+      - "2. Generate QR code: sudo pivpn qr myclient"
+      - "3. Check status: sudo pivpn clients"
+  tags: ['pivpn', 'info']

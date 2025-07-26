@@ -497,7 +497,7 @@
 
   - name: Remove ls aliases from .zshrc if exa isn't installed
     lineinfile:
-      path: /home/dax/.zshrc
+      path: /home/{{ user }}/.zshrc
       regexp: "{{ item }}"
       state: absent
       backup: yes
@@ -512,9 +512,9 @@
   #     state: absent
   #     path: /tmp/tmp-ansible-projects
 
-  - name: import the install_rsyslog_server role
-    import_role:
-      name: install_rsyslog_server
+  # - name: import the install_rsyslog_server role
+  #   import_role:
+  #     name: install_rsyslog_server
 
   # - name: import the figurine (login banner) role
   #   import_role:
@@ -538,13 +538,13 @@
       #     day: "3"
       #     job: "ansible-playbook /home/dax/code_base/ansible_projects/playbooks/piHoleUpdate/piHoleUpdate.yml -i /home/dax/code_base/ansible_projects/hosts"
 
-      - name: create reconnectUnifi job
-        cron:
-          name: reconnectUnifi
-          minute: "0"
-          hour: "2"
-          job: "ansible-playbook ~/code_base/ansible_projects/playbooks/reconnectUnifi/reconnectUnifi.yml && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/fde13bd7-10af-4762-b3d3-112c805b3e33"
-        become_user: "{{ user }}"
+  - name: create reconnectUnifi job
+    cron:
+      name: reconnectUnifi
+      minute: "0"
+      hour: "2"
+      job: "ansible-playbook ~/code_base/ansible_projects/playbooks/reconnectUnifi/reconnectUnifi.yml && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/fde13bd7-10af-4762-b3d3-112c805b3e33"
+    become_user: "{{ user }}"
 
   - name: turn off swap
     command: sudo dphys-swapfile swapoff
@@ -633,7 +633,7 @@
         git pull
 
         echo "Cleanup complete!"
-      dest: /usr/local/bin/cleanup-merged-branches.sh
+      dest: /home/{{ user }}/.scripts/cleanup-merged-branches.sh
       mode: '0755'
 
 
