@@ -353,7 +353,7 @@
       path: /etc/ansible
       state: directory
       mode: '0755'
-      owner: {{ user }}
+      owner: "{{ user }}"
       group: admin
     become: yes
 
@@ -417,9 +417,21 @@
   #     remote_src: true
   
   # https://github.com/KolinSmith/GitHub-Backup#readme-ov-file
-  - name: Install github-backup python package
-    ansible.builtin.pip:
-      name: git+https://github.com/clockfort/GitHub-Backup
+  # - name: Install github-backup python package
+  #   ansible.builtin.pip:
+  #     name: git+https://github.com/clockfort/GitHub-Backup
+  - name: Install pipx if not present
+    apt:
+      name: pipx
+      state: present
+    become: yes
+
+  - name: Install github-backup using pipx
+    command: pipx install git+https://github.com/clockfort/GitHub-Backup
+    become_user: "{{ user }}"
+    become: yes
+
+    
 
 
   - name: clone dotfiles repository to {{ inventory_hostname }}

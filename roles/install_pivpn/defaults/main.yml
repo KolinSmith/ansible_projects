@@ -35,5 +35,3 @@ pivpn_log_dir: "/var/log"
 
 # Template file for setupVars.conf
 pivpn_config_template: "pivpn_options.j2"
-
----
