@@ -1,0 +1,31 @@
+---
+# Obsidian Installation Role Defaults
+
+# User configuration
+obsidian_user: "{{ ansible_user }}"
+
+# Version (don't specify download URL - it's built dynamically)
+obsidian_version: "1.8.10"
+
+# Installation options
+obsidian_force_download: false
+
+# Vault configuration
+obsidian_create_vault: true
+obsidian_vault_path: "/home/{{ obsidian_user }}/wiki/"
+
+# Config options
+obsidian_create_config: true
+obsidian_create_vault_config: true
+obsidian_create_default_workspace: true
+obsidian_create_welcome_note: true
+
+# Vault settings
+obsidian_theme: "obsidian"
+obsidian_show_line_numbers: true
+obsidian_vim_mode: false
+
+# Git sync options (configure for GitHub sync)
+# obsidian_vault_git_repo: "https://github.com/yourusername/obsidian-vault.git"
+# obsidian_vault_git_branch: "main"
+# obsidian_vault_git_force: false

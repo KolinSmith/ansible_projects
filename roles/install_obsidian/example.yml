@@ -1,0 +1,44 @@
+---
+# Install Obsidian and sync vault from your GitHub repo
+- hosts: workstations
+  become: yes
+  vars:
+    obsidian_user: "dax"
+    obsidian_vault_path: "/home/dax/Notes"
+    obsidian_version: "1.8.10"
+    
+    # GitHub vault sync
+    obsidian_vault_git_repo: "https://github.com/dax/obsidian-vault.git"
+    obsidian_vault_git_branch: "main"
+    
+  roles:
+    - obsidian
+
+  post_tasks:
+    - name: Set up git config for future commits
+      git_config:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        scope: local
+        repo: "{{ obsidian_vault_path }}"
+      become_user: "{{ obsidian_user }}"
+      become: yes
+      loop:
+        - name: "user.name"
+          value: "{{ git_user_name | default('Dax') }}"
+        - name: "user.email" 
+          value: "{{ git_user_email | default('dax@example.com') }}"
+      tags: ['git', 'config']
+
+    - name: Display vault sync information
+      debug:
+        msg: 
+          - "=== Obsidian Vault Synced Successfully ==="
+          - "Vault location: {{ obsidian_vault_path }}"
+          - "GitHub repo: {{ obsidian_vault_git_repo }}"
+          - ""
+          - "To commit changes:"
+          - "  cd {{ obsidian_vault_path }}"
+          - "  git add ."
+          - "  git commit -m 'Update notes'"
+          - "  git push origin main"

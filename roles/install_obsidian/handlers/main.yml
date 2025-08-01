@@ -1,0 +1,6 @@
+---
+# Obsidian installation handlers
+
+- name: update desktop database
+  command: update-desktop-database
+  become: yes
