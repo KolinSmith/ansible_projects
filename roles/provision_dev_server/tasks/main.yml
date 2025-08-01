@@ -590,125 +590,125 @@
       line: 'Enabled=false'
     when: orange_pi == true
 
-  # - name: Create scripts folder
-  #   file: 
-  #     path: ~/.scripts
-  #     state: directory
-  #     mode: '0755'
-  #     owner: '{{ user }}'
-  #     group: admin
+  - name: Create scripts folder
+    file: 
+      path: ~/.scripts
+      state: directory
+      mode: '0755'
+      owner: '{{ user }}'
+      group: admin
 
-  # - name: Copy git cleanup script
-  #   copy:
-  #     content: |
-  #       #!/bin/bash
+  - name: Copy git cleanup script
+    copy:
+      content: |
+        #!/bin/bash
 
-  #       # Check if we're in a git repository
-  #       if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-  #           echo "Error: Not in a git repository"
-  #           exit 1
-  #       fi
+        # Check if we're in a git repository
+        if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+            echo "Error: Not in a git repository"
+            exit 1
+        fi
 
-  #       # Get current branch name
-  #       current_branch=$(git branch --show-current)
+        # Get current branch name
+        current_branch=$(git branch --show-current)
 
-  #       # Check if main or master exists and switch to it
-  #       if git show-ref --verify --quiet refs/heads/main; then
-  #           target_branch="main"
-  #       elif git show-ref --verify --quiet refs/heads/master; then
-  #           target_branch="master"
-  #       else
-  #           echo "Error: Neither main nor master branch found"
-  #           exit 1
-  #       fi
+        # Check if main or master exists and switch to it
+        if git show-ref --verify --quiet refs/heads/main; then
+            target_branch="main"
+        elif git show-ref --verify --quiet refs/heads/master; then
+            target_branch="master"
+        else
+            echo "Error: Neither main nor master branch found"
+            exit 1
+        fi
 
-  #       # Switch to target branch if not already on it
-  #       if [ "$current_branch" != "$target_branch" ]; then
-  #           echo "Switching to $target_branch branch..."
-  #           git checkout "$target_branch" || exit 1
-  #       fi
+        # Switch to target branch if not already on it
+        if [ "$current_branch" != "$target_branch" ]; then
+            echo "Switching to $target_branch branch..."
+            git checkout "$target_branch" || exit 1
+        fi
 
-  #       # Pull latest changes
-  #       echo "Pulling latest changes..."
-  #       git pull || exit 1
+        # Pull latest changes
+        echo "Pulling latest changes..."
+        git pull || exit 1
 
-  #       # Delete merged branches
-  #       echo "Deleting merged branches..."
-  #       git branch --merged "$target_branch" | grep -v "^\*" | grep -v "$target_branch" | xargs -r git branch -d
+        # Delete merged branches
+        echo "Deleting merged branches..."
+        git branch --merged "$target_branch" | grep -v "^\*" | grep -v "$target_branch" | xargs -r git branch -d
 
-  #       # Prune remote references
-  #       echo "Pruning remote references..."
-  #       git remote prune origin
+        # Prune remote references
+        echo "Pruning remote references..."
+        git remote prune origin
 
-  #       # Final pull to ensure everything is up to date
-  #       echo "Final pull..."
-  #       git pull
+        # Final pull to ensure everything is up to date
+        echo "Final pull..."
+        git pull
 
-  #       echo "Cleanup complete!"
-  #     dest: /home/{{ user }}/.scripts/cleanup-merged-branches.sh
-  #     mode: '0755'
+        echo "Cleanup complete!"
+      dest: /home/{{ user }}/.scripts/cleanup-merged-branches.sh
+      mode: '0755'
 
-  # Install gh poi extension and update git aliases
+  Install gh poi extension and update git aliases
 
-  - name: Check if GitHub CLI is installed
-    command: gh --version
-    register: gh_version_check
-    failed_when: false
-    changed_when: false
-    tags: ['gh', 'check']
+  # - name: Check if GitHub CLI is installed
+  #   command: gh --version
+  #   register: gh_version_check
+  #   failed_when: false
+  #   changed_when: false
+  #   tags: ['gh', 'check']
 
-  - name: Install GitHub CLI if not present
-    apt:
-      name: gh
-      state: present
-      update_cache: yes
-    become: yes
-    when: gh_version_check.rc != 0
-    tags: ['gh', 'install']
+  # - name: Install GitHub CLI if not present
+  #   apt:
+  #     name: gh
+  #     state: present
+  #     update_cache: yes
+  #   become: yes
+  #   when: gh_version_check.rc != 0
+  #   tags: ['gh', 'install']
 
-  - name: Check if gh poi extension is already installed
-    shell: gh extension list | grep -q "seachicken/gh-poi"
-    register: gh_poi_check
-    failed_when: false
-    changed_when: false
-    become_user: "{{ user }}"
-    become: yes
-    tags: ['gh', 'poi', 'check']
+  # - name: Check if gh poi extension is already installed
+  #   shell: gh extension list | grep -q "seachicken/gh-poi"
+  #   register: gh_poi_check
+  #   failed_when: false
+  #   changed_when: false
+  #   become_user: "{{ user }}"
+  #   become: yes
+  #   tags: ['gh', 'poi', 'check']
 
-  - name: Install gh poi extension
-    command: gh extension install seachicken/gh-poi
-    become_user: "{{ user }}"
-    become: yes
-    when: gh_poi_check.rc != 0
-    tags: ['gh', 'poi', 'install']
+  # - name: Install gh poi extension
+  #   command: gh extension install seachicken/gh-poi
+  #   become_user: "{{ user }}"
+  #   become: yes
+  #   when: gh_poi_check.rc != 0
+  #   tags: ['gh', 'poi', 'install']
 
-  - name: Verify gh poi installation
-    command: gh poi --help
-    register: gh_poi_help
-    changed_when: false
-    become_user: "{{ user }}"
-    become: yes
-    when: gh_poi_check.rc != 0
-    tags: ['gh', 'poi', 'verify']
+  # - name: Verify gh poi installation
+  #   command: gh poi --help
+  #   register: gh_poi_help
+  #   changed_when: false
+  #   become_user: "{{ user }}"
+  #   become: yes
+  #   when: gh_poi_check.rc != 0
+  #   tags: ['gh', 'poi', 'verify']
 
-  - name: Update git pull alias to include gh poi cleanup
-    lineinfile:
-      path: /home/{{ user }}/.zshrc
-      regexp: "^gpl='git pull'.*"
-      line: "gpl='gh poi; git pull'"
-      backup: yes
-      create: yes
-    tags: ['zsh', 'alias', 'git']
+  # - name: Update git pull alias to include gh poi cleanup
+  #   lineinfile:
+  #     path: /home/{{ user }}/.zshrc
+  #     regexp: "^gpl='git pull'.*"
+  #     line: "gpl='gh poi; git pull'"
+  #     backup: yes
+  #     create: yes
+  #   tags: ['zsh', 'alias', 'git']
 
-  - name: Display gh poi installation status
-    debug:
-      msg: 
-        - "gh poi extension installed successfully!"
-        - "Updated gpl alias to: gpl='gh poi; git pull'"
-        - "This will clean up merged branches before pulling"
-        - "Use 'gh poi --help' for more options"
-    when: gh_poi_check.rc != 0 or gh_poi_help is defined
-    tags: ['gh', 'poi', 'info']
+  # - name: Display gh poi installation status
+  #   debug:
+  #     msg: 
+  #       - "gh poi extension installed successfully!"
+  #       - "Updated gpl alias to: gpl='gh poi; git pull'"
+  #       - "This will clean up merged branches before pulling"
+  #       - "Use 'gh poi --help' for more options"
+  #   when: gh_poi_check.rc != 0 or gh_poi_help is defined
+  #   tags: ['gh', 'poi', 'info']
 
 
   # need to reboot machine to make sure processes use new swap space
