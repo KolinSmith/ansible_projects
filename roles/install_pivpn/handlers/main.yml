@@ -1,2 +1,12 @@
 ---
-# handlers file for install_pivpn
+- name: reboot system
+  reboot:
+    reboot_timeout: 300
+    post_reboot_delay: 30
+  become: yes
+
+- name: wait for system
+  wait_for_connection:
+    delay: 10
+    timeout: 300
+

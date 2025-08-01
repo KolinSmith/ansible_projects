@@ -24,6 +24,8 @@
       - role: check_if_pi
       - role: remove_default_user
       - role: import_dotfiles 
+      - role: install_pivpn
+      - role: install_rsyslog_server
       - role: IronicBadger.figurine
       - role: artis3n.tailscale 
       - role: geerlingguy.pip

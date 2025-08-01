@@ -1,0 +1,9 @@
+{
+  "vaults": {
+    "{{ obsidian_vault_path | hash('md5') }}": {
+      "path": "{{ obsidian_vault_path }}",
+      "ts": {{ ansible_date_time.epoch | int * 1000 }}
+    }
+  },
+  "open": "{{ obsidian_vault_path | hash('md5') }}"
+}

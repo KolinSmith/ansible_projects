@@ -1,2 +1,37 @@
 ---
-# defaults file for install_pivpn
+# PiVPN Role Default Variables
+
+# VPN Configuration
+pivpn_vpn_type: wireguard
+pivpn_interface: wg0
+pivpn_port: 51820
+pivpn_protocol: udp
+pivpn_network: "10.6.0.0"
+pivpn_subnet_class: 24
+pivpn_mtu: 1420
+pivpn_keepalive: 25
+pivpn_allowed_ips: "0.0.0.0/0, ::0/0"
+
+# DNS Settings
+pivpn_dns1: "1.1.1.1"
+pivpn_dns2: "8.8.8.8"
+
+# Server Settings
+pivpn_host: "your-server.example.com"
+pivpn_device: eth0
+
+# User Settings
+pivpn_user: "{{ ansible_user }}"
+pivpn_user_home: "{{ ansible_env.HOME }}"
+
+# Firewall Settings
+pivpn_use_ufw: false
+pivpn_dhcp_reservation: true
+
+# Installation Settings
+pivpn_unattended_upgrades: true
+pivpn_debug: false
+pivpn_log_dir: "/var/log"
+
+# Template file for setupVars.conf
+pivpn_config_template: "pivpn_options.j2"

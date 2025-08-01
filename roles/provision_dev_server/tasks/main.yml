@@ -353,7 +353,7 @@
       path: /etc/ansible
       state: directory
       mode: '0755'
-      owner: {{ user }}
+      owner: "{{ user }}"
       group: admin
     become: yes
 
@@ -417,9 +417,21 @@
   #     remote_src: true
   
   # https://github.com/KolinSmith/GitHub-Backup#readme-ov-file
-  - name: Install github-backup python package
-    ansible.builtin.pip:
-      name: git+https://github.com/clockfort/GitHub-Backup
+  # - name: Install github-backup python package
+  #   ansible.builtin.pip:
+  #     name: git+https://github.com/clockfort/GitHub-Backup
+  - name: Install pipx if not present
+    apt:
+      name: pipx
+      state: present
+    become: yes
+
+  - name: Install github-backup using pipx
+    command: pipx install git+https://github.com/clockfort/GitHub-Backup
+    become_user: "{{ user }}"
+    become: yes
+
+    
 
 
   - name: clone dotfiles repository to {{ inventory_hostname }}
@@ -497,7 +509,7 @@
 
   - name: Remove ls aliases from .zshrc if exa isn't installed
     lineinfile:
-      path: /home/dax/.zshrc
+      path: /home/{{ user }}/.zshrc
       regexp: "{{ item }}"
       state: absent
       backup: yes
@@ -512,9 +524,9 @@
   #     state: absent
   #     path: /tmp/tmp-ansible-projects
 
-  - name: import the install_rsyslog_server role
-    import_role:
-      name: install_rsyslog_server
+  # - name: import the install_rsyslog_server role
+  #   import_role:
+  #     name: install_rsyslog_server
 
   # - name: import the figurine (login banner) role
   #   import_role:
@@ -538,13 +550,13 @@
       #     day: "3"
       #     job: "ansible-playbook /home/dax/code_base/ansible_projects/playbooks/piHoleUpdate/piHoleUpdate.yml -i /home/dax/code_base/ansible_projects/hosts"
 
-      - name: create reconnectUnifi job
-        cron:
-          name: reconnectUnifi
-          minute: "0"
-          hour: "2"
-          job: "ansible-playbook ~/code_base/ansible_projects/playbooks/reconnectUnifi/reconnectUnifi.yml && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/fde13bd7-10af-4762-b3d3-112c805b3e33"
-        become_user: "{{ user }}"
+  - name: create reconnectUnifi job
+    cron:
+      name: reconnectUnifi
+      minute: "0"
+      hour: "2"
+      job: "ansible-playbook ~/code_base/ansible_projects/playbooks/reconnectUnifi/reconnectUnifi.yml && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/fde13bd7-10af-4762-b3d3-112c805b3e33"
+    become_user: "{{ user }}"
 
   - name: turn off swap
     command: sudo dphys-swapfile swapoff
@@ -633,8 +645,70 @@
         git pull
 
         echo "Cleanup complete!"
-      dest: /usr/local/bin/cleanup-merged-branches.sh
+      dest: /home/{{ user }}/.scripts/cleanup-merged-branches.sh
       mode: '0755'
+
+  Install gh poi extension and update git aliases
+
+  # - name: Check if GitHub CLI is installed
+  #   command: gh --version
+  #   register: gh_version_check
+  #   failed_when: false
+  #   changed_when: false
+  #   tags: ['gh', 'check']
+
+  # - name: Install GitHub CLI if not present
+  #   apt:
+  #     name: gh
+  #     state: present
+  #     update_cache: yes
+  #   become: yes
+  #   when: gh_version_check.rc != 0
+  #   tags: ['gh', 'install']
+
+  # - name: Check if gh poi extension is already installed
+  #   shell: gh extension list | grep -q "seachicken/gh-poi"
+  #   register: gh_poi_check
+  #   failed_when: false
+  #   changed_when: false
+  #   become_user: "{{ user }}"
+  #   become: yes
+  #   tags: ['gh', 'poi', 'check']
+
+  # - name: Install gh poi extension
+  #   command: gh extension install seachicken/gh-poi
+  #   become_user: "{{ user }}"
+  #   become: yes
+  #   when: gh_poi_check.rc != 0
+  #   tags: ['gh', 'poi', 'install']
+
+  # - name: Verify gh poi installation
+  #   command: gh poi --help
+  #   register: gh_poi_help
+  #   changed_when: false
+  #   become_user: "{{ user }}"
+  #   become: yes
+  #   when: gh_poi_check.rc != 0
+  #   tags: ['gh', 'poi', 'verify']
+
+  # - name: Update git pull alias to include gh poi cleanup
+  #   lineinfile:
+  #     path: /home/{{ user }}/.zshrc
+  #     regexp: "^gpl='git pull'.*"
+  #     line: "gpl='gh poi; git pull'"
+  #     backup: yes
+  #     create: yes
+  #   tags: ['zsh', 'alias', 'git']
+
+  # - name: Display gh poi installation status
+  #   debug:
+  #     msg: 
+  #       - "gh poi extension installed successfully!"
+  #       - "Updated gpl alias to: gpl='gh poi; git pull'"
+  #       - "This will clean up merged branches before pulling"
+  #       - "Use 'gh poi --help' for more options"
+  #   when: gh_poi_check.rc != 0 or gh_poi_help is defined
+  #   tags: ['gh', 'poi', 'info']
 
 
   # need to reboot machine to make sure processes use new swap space
