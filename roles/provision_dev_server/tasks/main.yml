@@ -592,7 +592,7 @@
 
   - name: Create scripts folder
     file: 
-      path: /home/{{ user }}.scripts
+      path: /home/{{ user }}/.scripts
       state: directory
       mode: '0755'
       owner: '{{ user }}'
