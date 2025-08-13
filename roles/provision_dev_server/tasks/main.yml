@@ -592,7 +592,7 @@
 
   - name: Create scripts folder
     file: 
-      path: ~/.scripts
+      path: /home/{{ user }}.scripts
       state: directory
       mode: '0755'
       owner: '{{ user }}'
@@ -648,7 +648,7 @@
       dest: /home/{{ user }}/.scripts/cleanup-merged-branches.sh
       mode: '0755'
 
-  Install gh poi extension and update git aliases
+  # Install gh poi extension and update git aliases
 
   # - name: Check if GitHub CLI is installed
   #   command: gh --version
