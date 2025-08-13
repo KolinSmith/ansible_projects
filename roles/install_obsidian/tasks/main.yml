@@ -78,6 +78,40 @@
   when: obsidian_vault_git_repo is defined
   tags: ['obsidian', 'sync', 'git']
 
+- name: Ensure .gitignore exists for vault
+  copy:
+    content: |
+      # Obsidian workspace files
+      .obsidian/workspace.json
+      .obsidian/workspace-mobile.json
+      .obsidian/cache/
+      .trash/
+    dest: "{{ obsidian_vault_path }}/.gitignore"
+    owner: "{{ obsidian_user }}"
+    group: "{{ obsidian_user }}"
+    mode: '0644'
+    force: no
+  become: yes
+  when: obsidian_vault_git_repo is defined
+  tags: ['obsidian', 'git']
+
+- name: Create cron job to sync vault to Git repository nightly
+  cron:
+    name: "Obsidian vault Git sync"
+    minute: "{{ obsidian_git_sync_minute | default('0') }}"
+    hour: "{{ obsidian_git_sync_hour | default('4') }}"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    user: "{{ obsidian_user }}"
+    job: 'cd {{ obsidian_vault_path }} && git add . && git diff --staged --quiet || (git commit -m "Nightly auto-sync: $(date +\%Y-\%m-\%d)" && git push origin {{ obsidian_vault_git_branch | default("main") }}) 2>/dev/null'
+    state: present
+  become: yes
+  when: 
+    - obsidian_vault_git_repo is defined
+    - obsidian_auto_git_sync | default(true)
+  tags: ['obsidian', 'git', 'cron']
+
 - name: Create default vault directory (for new vaults only)
   file:
     path: "{{ obsidian_vault_path }}"
@@ -194,9 +228,11 @@
       - "Architecture: {{ obsidian_arch }}"
       - "Vault location: {{ obsidian_vault_path }}"
       - "Vault source: {{ 'GitHub: ' + obsidian_vault_git_repo if obsidian_vault_git_repo is defined else 'New vault created' }}"
+      - "Git sync: {{ 'Enabled (nightly at ' + obsidian_git_sync_hour | default('4') + ':' + obsidian_git_sync_minute | default('00') + ')' if obsidian_vault_git_repo is defined and obsidian_auto_git_sync | default(true) else 'Disabled' }}"
       - "Launch command: obsidian"
       - ""
       - "Next steps:"
       - "1. Launch Obsidian from Applications menu or run 'obsidian'"
       - "2. Your vault will open automatically"
+      - "3. Sign into Obsidian Sync for real-time syncing (if desired)"
   tags: ['obsidian', 'info']

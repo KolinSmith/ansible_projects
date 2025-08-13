@@ -29,3 +29,8 @@ obsidian_vim_mode: false
 # obsidian_vault_git_repo: "https://github.com/yourusername/obsidian-vault.git"
 # obsidian_vault_git_branch: "main"
 # obsidian_vault_git_force: false
+
+# Auto-sync to Git repository
+obsidian_auto_git_sync: true
+obsidian_git_sync_hour: "4"      # 4am
+obsidian_git_sync_minute: "0"

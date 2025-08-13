@@ -23,6 +23,7 @@
     roles:
       - role: check_if_pi
       - role: remove_default_user
+      - role: install_obsidian
       - role: import_dotfiles 
       - role: install_pivpn
       - role: install_rsyslog_server
