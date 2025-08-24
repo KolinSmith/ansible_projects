@@ -25,6 +25,7 @@
       - .vimrc
       - .ansible_password
       - .gitconfig
+      - .exports
 
 
 # also need to remove docker and other things if they aren't used (like bat!)

@@ -5,7 +5,7 @@ galaxy_info:
   description: Install and enable a Tailscale node.
   license: license (MIT)
 
-  min_ansible_version: "2.12"
+  min_ansible_version: "2.18"
 
   # Find supported platforms on https://galaxy.ansible.com/api/v1/platforms/
   platforms:
@@ -13,14 +13,13 @@ galaxy_info:
       versions:
         - eoan
         - bionic
-        - xenial
         - focal
         - groovy
         - hirsute
         - jammy
+        - noble
     - name: EL
       versions:
-        - "7"
         - "8"
     - name: Amazon Linux
       versions:
@@ -44,6 +43,14 @@ galaxy_info:
         - "15.1"
         - "15.2"
         - "15.3"
+        - "15.4"
+        - "15.5"
+        # - "15.6"
+    # Linux Mint not supported in schema
+    # https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/meta.json
+    # - name: LinuxMint
+    #   versions:
+    #     - "22"
 
   galaxy_tags:
     - tailscale

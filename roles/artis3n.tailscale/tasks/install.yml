@@ -2,8 +2,13 @@
 - name: Install | CentOS and related families
   when: >
     ansible_distribution in tailscale_centos_family_distros
-    or (ansible_distribution == 'Amazon' and ansible_distribution_major_version | int < 2023)
   ansible.builtin.include_tasks: centos/install.yml
+
+- name: Install | Amazon Linux 2
+  when:
+    - ansible_distribution == 'Amazon'
+    - ansible_distribution_major_version | int < 2023
+  ansible.builtin.include_tasks: centos/install-legacy.yml
 
 - name: Install | Debian and related families
   when: ansible_distribution in tailscale_debian_family_distros
@@ -66,14 +71,61 @@
 
 - name: Install | Parse status JSON
   vars:
-    status: "{{ tailscale_status.stdout | from_json }}"
+    tailscale_status_parsed: "{{ tailscale_status.stdout | from_json }}"
   ansible.builtin.set_fact:
-    tailscale_is_online: "{{ status.Self.Online }}"
-    tailscale_version: "{{ status.Version }}"
+    tailscale_is_online: "{{ tailscale_status_parsed.Self.Online }}"
+    tailscale_version: "{{ tailscale_status_parsed.Version }}"
 
 - name: Install | Tailscale version and online status
   ansible.builtin.debug:
     msg: "Ver: {{ tailscale_version }} Online: {{ tailscale_is_online }}"
+  when: verbose
+
+- name: Install | Prepend 'tag:' to each item in the list
+  ansible.builtin.set_fact:
+    tailscale_prepared_tags: "{{ tailscale_tags | map('regex_replace', '^', 'tag:') | list }}"
+
+# OAuth key starts with 'tskey-client-', auth key starts with 'tskey-auth-', with headscale it can be 'unused'
+- name: Install | Build `tailscale up` arguments strings
+  ansible.builtin.set_fact:
+    tailscale_authkey_type: >-
+      {# Check if the key is an OAuth key #}
+      {% if tailscale_authkey.startswith('tskey-client-') %}
+      OAuth Client Secret
+      {% elif tailscale_authkey.startswith('tskey-auth-') %}
+      API Token
+      {% else %}
+      Unknown token format
+      {% endif %}
+    tailscale_authkey_string: >-
+      {# Check if the key is an OAuth key #}
+      {% if tailscale_authkey.startswith('tskey-client-') %}
+      {{ tailscale_authkey }}?ephemeral={{ tailscale_oauth_ephemeral | bool }}&preauthorized={{ tailscale_oauth_preauthorized | bool }}
+      {# Check if the key is not OAuth (regular authkey or unused) #}
+      {% else %}
+      {{ tailscale_authkey }}
+      {% endif %}
+    tailscale_tags_string: >-
+      {% if tailscale_tags | length > 0 %}
+      --advertise-tags={{ tailscale_prepared_tags | join(',') }}
+      {% endif %}
+  no_log: "{{ not (insecurely_log_authkey | bool) }}"
+
+- name: Install | Authkey Type
+  ansible.builtin.debug:
+    msg: "{{ tailscale_authkey_type | trim }}"
+  when: verbose
+
+- name: Install | Build the final tailscale_args
+  ansible.builtin.set_fact:
+    tailscale_args_string: >
+      {{ tailscale_args }}
+      {{ tailscale_tags_string | trim if tailscale_tags_string is not none else '' }}
+      --timeout={{ tailscale_up_timeout | trim }}s
+
+- name: Install | Final `tailscale up` arguments string
+  ansible.builtin.debug:
+    msg: "{{ tailscale_args_string | trim }}"
   when: verbose
 
 - name: Install | Save State
@@ -87,7 +139,7 @@
 
 - name: Install | Bring Tailscale Up
   become: true
-  ansible.builtin.command: "tailscale up {{ tailscale_args | trim }} --authkey={{ tailscale_authkey }}"
+  ansible.builtin.command: "tailscale up {{ tailscale_args_string | trim }} --authkey={{ tailscale_authkey_string | trim }}"
   # Since the auth key is included in this task's output, we do not want to log output
   no_log: "{{ not (insecurely_log_authkey | bool) }}"
   changed_when: true
@@ -98,7 +150,7 @@
     - not tailscale_up_skip
     - state_file is changed or not tailscale_is_online
   notify: Confirm Tailscale is Connected
-  async: 60
+  async: "{{ (tailscale_up_timeout | trim | int) + 10 }}"
   poll: 5
 
 - name: Install | Report non-sensitive stdout from "tailscale up"  # noqa: no-handler
@@ -110,8 +162,8 @@
   register: nonsensitive_stdout
 
 - name: Install | Pausing to highlight stdout message above
-  ansible.builtin.pause:
-    seconds: 5
+  ansible.builtin.wait_for:
+    timeout: 5
   when: nonsensitive_stdout is not skipped
 
 - name: Install | Clear State Upon Error
@@ -123,6 +175,11 @@
 
 - name: Install | Report redacted failure from "tailscale up"  # noqa: no-handler
   ansible.builtin.fail:
-    msg: "{{ tailscale_start.stderr | default () | regex_replace('tskey.*\\s', 'REDACTED ') | regex_replace('\\t', '') | split('\n') }}"
+    msg: "{{ tailscale_start.stderr | default () | regex_replace(tailscale_authkey, 'REDACTED') | regex_replace('\\t', '') | split('\n') }}"
   when:
     - tailscale_start is failed
+
+- name: Install | Register role facts
+  ansible.builtin.include_tasks: facts.yml
+  when:
+    - not tailscale_up_skip

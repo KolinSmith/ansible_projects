@@ -550,13 +550,13 @@
       #     day: "3"
       #     job: "ansible-playbook /home/dax/code_base/ansible_projects/playbooks/piHoleUpdate/piHoleUpdate.yml -i /home/dax/code_base/ansible_projects/hosts"
 
-  - name: create reconnectUnifi job
-    cron:
-      name: reconnectUnifi
-      minute: "0"
-      hour: "2"
-      job: "ansible-playbook ~/code_base/ansible_projects/playbooks/reconnectUnifi/reconnectUnifi.yml && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/fde13bd7-10af-4762-b3d3-112c805b3e33"
-    become_user: "{{ user }}"
+  # - name: create reconnectUnifi job
+  #   cron:
+  #     name: reconnectUnifi
+  #     minute: "0"
+  #     hour: "2"
+  #     job: "ansible-playbook ~/code_base/ansible_projects/playbooks/reconnectUnifi/reconnectUnifi.yml && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/fde13bd7-10af-4762-b3d3-112c805b3e33"
+  #   become_user: "{{ user }}"
 
   - name: turn off swap
     command: sudo dphys-swapfile swapoff
@@ -647,6 +647,14 @@
         echo "Cleanup complete!"
       dest: /home/{{ user }}/.scripts/cleanup-merged-branches.sh
       mode: '0755'
+
+  - name: Update git pull alias to include cleanup script
+    lineinfile:
+      path: /home/{{ user }}/.zshrc
+      regexp: "^gpl='git pull'.*"
+      line: "gpl='/home/{{ user }}/.scripts/cleanup-merged-branches.sh ; git pull'"
+      backup: yes
+      create: yes
 
   # Install gh poi extension and update git aliases
 
