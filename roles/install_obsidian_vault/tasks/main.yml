@@ -1,6 +1,17 @@
 ---
 # Obsidian Vault Sync (No App Installation)
 
+  # Need to run this first or else it errors
+- name: Add GitHub to known_hosts
+  known_hosts:
+    name: github.com
+    path: "/home/{{ obsidian_user }}/.ssh/known_hosts"
+    key: "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
+    state: present
+  become: yes
+  when: obsidian_vault_git_repo is defined and obsidian_vault_git_repo.startswith('git@')
+  # tags: ['obsidian', 'git', 'ssh']
+
 - name: Clone Obsidian vault from GitHub
   git:
     repo: "{{ obsidian_vault_git_repo }}"
@@ -10,7 +21,7 @@
   become_user: "{{ obsidian_user }}"
   become: yes
   when: obsidian_vault_git_repo is defined
-  tags: ['obsidian', 'sync', 'git']
+  # tags: ['obsidian', 'sync', 'git']
 
 - name: Ensure .gitignore exists for vault
   copy:

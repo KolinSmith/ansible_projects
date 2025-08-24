@@ -9,7 +9,7 @@ obsidian_create_vault: true
 obsidian_vault_path: "/home/{{ obsidian_user }}/wiki/"
 
 # Git sync options (configure for GitHub sync)
-obsidian_vault_git_repo: "https://github.com/KolinSmith/obsidian-vault.git"
+obsidian_vault_git_repo: "git@github.com:KolinSmith/obsidian-vault.git"
 obsidian_vault_git_branch: "main"
 obsidian_vault_git_force: false
 

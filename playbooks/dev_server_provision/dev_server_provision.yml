@@ -31,7 +31,6 @@
       - role: artis3n.tailscale 
       - role: geerlingguy.pip
       - role: geerlingguy.docker
-      - role: geerlingguy.docker_arm
       - role: geerlingguy.ntp
       # - role: geerlingguy.node_exporter
       - role: geerlingguy.clamav
