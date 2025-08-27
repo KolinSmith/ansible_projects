@@ -17,27 +17,30 @@ env:
 
 jobs:
   molecule:
-    name: "Test Distro"
+    name: "Test Distros"
     strategy:
       fail-fast: false
       matrix:
         include:
           - image: ghcr.io/artis3n/docker-amazonlinux2023-ansible:latest
-          - image: geerlingguy/docker-rockylinux8-ansible:latest
-          - image: geerlingguy/docker-rockylinux9-ansible:latest
-          - image: ghcr.io/artis3n/docker-almalinux8-ansible:latest
-          - image: ghcr.io/artis3n/docker-rhel8-ansible:latest
-          - image: ghcr.io/artis3n/docker-oraclelinux8-ansible:latest
+#          - image: geerlingguy/docker-rockylinux8-ansible:latest
+          # Temporary: until https://github.com/rocky-linux/sig-cloud-instance-images/issues/56 is resolved
+#          - image: geerlingguy/docker-rockylinux9-ansible:latest
+#          - image: ghcr.io/artis3n/docker-almalinux8-ansible:latest
+#          - image: ghcr.io/artis3n/docker-rhel8-ansible:latest
+#          - image: ghcr.io/artis3n/docker-oraclelinux8-ansible:latest
+          - image: geerlingguy/docker-ubuntu2404-ansible:latest
+          - image: ghcr.io/fkonradmain/docker-linuxmint22-ansible:latest
           - image: geerlingguy/docker-ubuntu2204-ansible:latest
-          - image: geerlingguy/docker-ubuntu2004-ansible:latest
-          - image: geerlingguy/docker-ubuntu1804-ansible:latest
-            command: /lib/systemd/systemd
-          - image: cisagov/docker-debian12-ansible:latest
+#          - image: geerlingguy/docker-ubuntu2004-ansible:latest
+#          - image: geerlingguy/docker-ubuntu1804-ansible:latest
+#            command: /lib/systemd/systemd
+          - image: geerlingguy/docker-debian12-ansible:latest
           - image: geerlingguy/docker-debian11-ansible:latest
             command: /lib/systemd/systemd
-          - image: geerlingguy/docker-debian10-ansible:latest
-            command: /lib/systemd/systemd
-          - image: geerlingguy/docker-fedora31-ansible:latest
+#          - image: geerlingguy/docker-debian10-ansible:latest
+#            command: /lib/systemd/systemd
+          - image: geerlingguy/docker-fedora36-ansible:latest
           - image: ghcr.io/artis3n/docker-arch-ansible:latest
           - image: ghcr.io/artis3n/docker-opensuse-tumbleweed-ansible:latest
           - image: ghcr.io/artis3n/docker-opensuse-leap-ansible:latest
@@ -47,116 +50,88 @@ jobs:
     with:
       image: ${{ matrix.image }}
       command: ${{ matrix.command }}
+      scenario: 'default'
     secrets:
       tailscale_key: ${{ secrets.TAILSCALE_CI_KEY }}
 
   # Systems that aren't working with cgroups v2 on ubuntu 22.04, but works on ubuntu 20.04
-  molecule-legacy:
-    name: "Test Legacy Distro"
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - image: geerlingguy/docker-centos7-ansible:latest
-            command: /usr/lib/systemd/systemd
-          - image: ghcr.io/artis3n/docker-amazonlinux2-ansible:latest
-            command: /usr/lib/systemd/systemd
-          - image: geerlingguy/docker-ubuntu1604-ansible:latest
-            command: /lib/systemd/systemd
+#  molecule-legacy:
+#    name: "Test Legacy Distros"
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        include:
+#          - image: ghcr.io/artis3n/docker-amazonlinux2-ansible:latest
+#            command: /usr/lib/systemd/systemd
+#
+#    uses: ./.github/workflows/molecule.yml
+#    with:
+#      image: ${{ matrix.image }}
+#      command: ${{ matrix.command }}
+#      scenario: 'default'
+#      runner: ubuntu-20.04
+#    secrets:
+#      tailscale_key: ${{ secrets.TAILSCALE_CI_KEY }}
 
+  molecule-state-absent:
+    name: "Run Molecule Scenario: state-absent"
     uses: ./.github/workflows/molecule.yml
     with:
-      image: ${{ matrix.image }}
-      command: ${{ matrix.command }}
-      runner: ubuntu-20.04
+      scenario: 'state-absent'
     secrets:
       tailscale_key: ${{ secrets.TAILSCALE_CI_KEY }}
 
   molecule-skip-auth:
-    name: "Test Skip Authentication"
-    runs-on: ubuntu-22.04
-    environment: E2E
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Install dependency manager
-        run: pipx install poetry
-
-      - name: Set up Python 3.x
-        id: setup-python
-        uses: actions/setup-python@v4.6.1
-        with:
-          python-version: "3.11"
-          cache: 'poetry'
-
-      - name: Install packages
-        run: poetry install --no-interaction
-
-      - name: Molecule - Skip Authentication
-        run: poetry run molecule test --scenario-name skip-authentication
+    name: "Run Molecule Scenario: skip-authentication"
+    uses: ./.github/workflows/molecule.yml
+    with:
+      scenario: 'skip-authentication'
+    secrets:
+      tailscale_key: ${{ secrets.TAILSCALE_CI_KEY }}
 
   molecule-args:
-    name: "Test Up Args"
-    runs-on: ubuntu-22.04
-    environment: E2E
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Install dependency manager
-        run: pipx install poetry
-
-      - name: Set up Python 3.x
-        id: setup-python
-        uses: actions/setup-python@v4.6.1
-        with:
-          python-version: "3.11"
-          cache: 'poetry'
-
-      - name: Install packages
-        run: poetry install --no-interaction
-
-      - name: Molecule - Custom Arguments Validation
-        run: poetry run molecule test --scenario-name args
-        env:
-          TAILSCALE_CI_KEY: "${{ secrets.TAILSCALE_CI_KEY }}"
+    name: "Run Molecule Scenario: args"
+    uses: ./.github/workflows/molecule.yml
+    with:
+      scenario: 'args'
+    secrets:
+      tailscale_key: ${{ secrets.TAILSCALE_CI_KEY }}
 
   molecule-state-present:
-    name: "Test State Idempotency"
-    runs-on: ubuntu-22.04
-    environment: E2E
+    name: "Run Molecule Scenario: state-idempotency"
+    uses: ./.github/workflows/molecule.yml
+    with:
+      scenario: 'state-idempotency'
+    secrets:
+      tailscale_key: ${{ secrets.TAILSCALE_CI_KEY }}
 
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
+  molecule-oauth:
+    name: "Run Molecule Scenario: oauth"
+    uses: ./.github/workflows/molecule.yml
+    with:
+      scenario: 'oauth'
+    secrets:
+      tailscale_key: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
 
-      - name: Install dependency manager
-        run: pipx install poetry
+  molecule-reinstall:
+    name: "Run Molecule Scenario: reinstall"
+    uses: ./.github/workflows/molecule.yml
+    with:
+      scenario: "reinstall"
+    secrets:
+      tailscale_key: ${{ secrets.TAILSCALE_CI_KEY }}
 
-      - name: Set up Python 3.x
-        id: setup-python
-        uses: actions/setup-python@v4.6.1
-        with:
-          python-version: "3.11"
-          cache: 'poetry'
-
-      - name: Install packages
-        run: poetry install --no-interaction
-
-      - name: Molecule - State Present
-        run: poetry run molecule test --scenario-name state-present
-        env:
-          TAILSCALE_CI_KEY: "${{ secrets.TAILSCALE_CI_KEY }}"
+  molecule-strategy-free:
+    name: "Run Molecule Scenario: strategy-free"
+    uses: ./.github/workflows/molecule.yml
+    with:
+      scenario: 'strategy-free'
+    secrets:
+      tailscale_key: ${{ secrets.TAILSCALE_CI_KEY }}
 
   molecule-headscale:
     name: "Test Headscale Compatibility"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     environment: E2E
     strategy:
       fail-fast: false
@@ -165,9 +140,10 @@ jobs:
           - default
           - state-absent
           - idempotent-up
+          - strategy-free
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
@@ -176,9 +152,9 @@ jobs:
 
       - name: Set up Python 3.x
         id: setup-python
-        uses: actions/setup-python@v4.6.1
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version-file: pyproject.toml
           cache: 'poetry'
 
       - name: Install packages

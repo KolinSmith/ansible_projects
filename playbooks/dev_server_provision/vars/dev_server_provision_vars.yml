@@ -11,7 +11,7 @@ ansible_projects_repo: 'git@github.com:KolinSmith/ansible_projects.git'
 docker_projects_repo: 'git@github.com:KolinSmith/docker_projects.git'
 terraform_projects_repo: 'git@github.com:KolinSmith/terraform_projects.git'
 github_backup_repo: 'git@github.com:KolinSmith/GitHub-Backup.git'
-tailscale_auth_key: '{{ tailscale_auth_key }}' #expires March 26th 2024
+tailscale_auth_key: '{{ tailscale_auth_key }}' #expires Nov 21, 2025
 tailscale_release_stability: 'stable'
 distro:
   ubuntu: 'ubuntu'

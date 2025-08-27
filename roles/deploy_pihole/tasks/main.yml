@@ -87,7 +87,7 @@
       - clickserve.dartsearch.net
       - ad.doubleclick.net
       - ally.com
-      - 
+      - protonmail.com
 
   - name: add blacklisted domains
     command: "pihole -b {{ item }}"

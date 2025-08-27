@@ -1,0 +1,19 @@
+---
+# Obsidian Vault Sync Role Defaults
+
+# User configuration
+obsidian_user: "{{ ansible_user }}"
+
+# Vault configuration
+obsidian_create_vault: true
+obsidian_vault_path: "/home/{{ obsidian_user }}/wiki/"
+
+# Git sync options (configure for GitHub sync)
+obsidian_vault_git_repo: "git@github.com:KolinSmith/obsidian-vault.git"
+obsidian_vault_git_branch: "main"
+obsidian_vault_git_force: false
+
+# Auto-sync to Git repository
+obsidian_auto_git_sync: true
+obsidian_git_sync_hour: "4"      # 4am
+obsidian_git_sync_minute: "0"

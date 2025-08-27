@@ -1,0 +1,105 @@
+# PiVPN WireGuard Configuration File
+# This file contains installation variables for automated PiVPN setup
+
+# =============================================================================
+# FIREWALL SETTINGS
+# =============================================================================
+# Disable UFW (Uncomplicated Firewall) management
+# Set to 1 if you want PiVPN to manage UFW rules automatically
+USING_UFW=0
+
+# Firewall chain modification flags
+# These track whether PiVPN has modified iptables chains
+INPUT_CHAIN_EDITED=0
+FORWARD_CHAIN_EDITED=0
+
+# =============================================================================
+# NETWORK INTERFACE SETTINGS
+# =============================================================================
+# Primary network interface for the VPN server
+# Usually eth0 for Ethernet, wlan0 for WiFi
+# IPv4dev=eth0
+IPv4dev=end1
+
+# Reserve DHCP IP address for this device
+# Set to 1 to prevent IP conflicts
+dhcpReserv=1
+
+# =============================================================================
+# USER CONFIGURATION
+# =============================================================================
+# User account that will manage the VPN
+install_user=dax
+
+# Home directory for the install user
+install_home=/home/dax
+
+# =============================================================================
+# VPN PROTOCOL SETTINGS
+# =============================================================================
+# VPN protocol to use (wireguard or openvpn)
+VPN=wireguard
+
+# WireGuard network device name
+pivpnDEV=wg0
+
+# VPN server port (default WireGuard port is 51820)
+pivpnPORT=51820
+
+# Protocol for VPN traffic (udp or tcp)
+# WireGuard typically uses UDP
+pivpnPROTO=udp
+
+# Maximum Transmission Unit for WireGuard (typically 1420)
+# Optimizes packet size for better performance
+pivpnMTU=1420
+
+# =============================================================================
+# DNS CONFIGURATION
+# =============================================================================
+# Primary DNS server for VPN clients
+# Using local network DNS
+pivpnDNS1=192.168.9.3
+
+# Secondary DNS server for VPN clients
+pivpnDNS2=192.168.9.4
+
+# =============================================================================
+# SERVER IDENTIFICATION
+# =============================================================================
+# Public hostname or IP address for the VPN server
+# This is what clients will connect to
+pivpnHOST=lame.duckdns.org
+
+# =============================================================================
+# VPN NETWORK SETTINGS
+# =============================================================================
+# VPN internal network range (10.6.0.0/24)
+# This creates a private network for VPN clients
+pivpnNET=10.6.0.0
+
+# Subnet mask class (24 = 255.255.255.0)
+# Allows for 254 client connections (10.6.0.1 - 10.6.0.254)
+subnetClass=24
+
+# Traffic routing for VPN clients
+# "0.0.0.0/0, ::0/0" routes ALL traffic through VPN (full tunnel)
+# Change to specific networks if you only want certain traffic routed
+ALLOWED_IPS="0.0.0.0/0, ::0/0"
+
+# Keep connection alive through NAT (seconds, 0 to disable)
+# Helps maintain connection for clients behind firewalls/NAT
+pivpnPERSISTENTKEEPALIVE=25
+
+# =============================================================================
+# INSTALLATION OPTIONS
+# =============================================================================
+# Enable unattended upgrades for security updates
+# Set to 1 for automatic security updates
+UNATTUPG=1
+
+# Enable verbose logging for troubleshooting (0 to disable, 1 to enable)
+PIVPN_DEBUG=0
+
+# Log file location for installation process
+INSTALL_LOG=/var/log/pivpn-install.log

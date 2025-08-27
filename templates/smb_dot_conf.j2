@@ -220,15 +220,31 @@
    read only = yes
    create mask = 0700
 
-[code_base]
-   comment = code_base
-   path = /home/dax/code_base
+# [code_base]
+#    comment = code_base
+#    path = /home/dax/code_base
+#    browseable = yes
+#    writeable = yes
+#    only guest = no
+#    create mask = 0777
+#    directory mask = 0777
+#    public = no
+
+[obsidian_vault]
+   comment = Obsidian Vault
+   path = /home/dax/wiki
    browseable = yes
    writeable = yes
+   # Restrict access to only dax
+   valid users = dax
    only guest = no
-   create mask = 0777
-   directory mask = 0777
+   # More secure permissions
+   create mask = 0664
+   directory mask = 0775
    public = no
+   # Force ownership to dax
+   force user = dax
+   force group = dax
 
 # Windows clients look for this share name as a source of downloadable
 # printer drivers

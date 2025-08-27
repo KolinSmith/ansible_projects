@@ -16,7 +16,7 @@
       #     descr: "List of IPs that will be sent through PIA VPN"
 
       - name: remove firewall rule for pia
-        pfsense_rule:
+        pfsensible.core.pfsense_rule:
           name: 'Send PIA alias over VPN'
           action: pass
           interface: lan

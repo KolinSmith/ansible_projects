@@ -1,6 +1,6 @@
 # Ansible Role: Docker
 
-[![CI](https://github.com/geerlingguy/ansible-role-docker/workflows/CI/badge.svg?event=push)](https://github.com/geerlingguy/ansible-role-docker/actions?query=workflow%3ACI)
+[![CI](https://github.com/geerlingguy/ansible-role-docker/actions/workflows/ci.yml/badge.svg)](https://github.com/geerlingguy/ansible-role-docker/actions/workflows/ci.yml)
 
 An Ansible Role that installs [Docker](https://www.docker.com) on Linux.
 
@@ -34,10 +34,18 @@ docker_obsolete_packages:
   - docker
   - docker.io
   - docker-engine
+  - docker-doc
+  - docker-compose
+  - docker-compose-v2
   - podman-docker
   - containerd
   - runc
 ```
+
+`docker_obsolete_packages` for different os-family:
+
+- [`RedHat.yaml`](./vars/RedHat.yml)
+- [`Debian.yaml`](./vars/Debian.yml)
 
 A list of packages to be uninstalled prior to running this role. See [Docker's installation instructions](https://docs.docker.com/engine/install/debian/#uninstall-old-versions) for an up-to-date list of old packages that should be removed.
 
@@ -51,7 +59,7 @@ docker_restart_handler_state: restarted
 Variables to control the state of the `docker` service, and whether it should start on boot. If you're installing Docker inside a Docker container without systemd or sysvinit, you should set `docker_service_manage` to `false`.
 
 ```yaml
-docker_install_compose_plugin: false
+docker_install_compose_plugin: true
 docker_compose_package: docker-compose-plugin
 docker_compose_package_state: present
 ```
@@ -59,9 +67,10 @@ docker_compose_package_state: present
 Docker Compose Plugin installation options. These differ from the below in that docker-compose is installed as a docker plugin (and used with `docker compose`) instead of a standalone binary.
 
 ```yaml
-docker_install_compose: true
-docker_compose_version: "1.26.0"
+docker_install_compose: false
+docker_compose_version: "v2.32.1"
 docker_compose_arch: "{{ ansible_architecture }}"
+docker_compose_url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-linux-{{ docker_compose_arch }}"
 docker_compose_path: /usr/local/bin/docker-compose
 ```
 
@@ -82,7 +91,7 @@ The main Docker repo URL, common between Debian and RHEL systems.
 ```yaml
 docker_apt_release_channel: stable
 docker_apt_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
-docker_apt_repository: "deb [arch={{ docker_apt_arch }}] {{ docker_repo_url }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} {{ docker_apt_release_channel }}"
+docker_apt_repository: "deb [arch={{ docker_apt_arch }}{{' signed-by=/etc/apt/keyrings/docker.asc' if add_repository_key is not failed}}] {{ docker_repo_url }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} {{ docker_apt_release_channel }}"
 docker_apt_ignore_key_error: True
 docker_apt_gpg_key: "{{ docker_repo_url }}/{{ ansible_distribution | lower }}/gpg"
 docker_apt_filename: "docker"
@@ -97,7 +106,7 @@ Usually in combination with changing `docker_apt_repository` as well. `docker_ap
 docker_yum_repo_url: "{{ docker_repo_url }}/{{ (ansible_distribution == 'Fedora') | ternary('fedora','centos') }}/docker-{{ docker_edition }}.repo"
 docker_yum_repo_enable_nightly: '0'
 docker_yum_repo_enable_test: '0'
-docker_yum_gpg_key: "{{ docker_repo_url }}/centos/gpg"
+docker_yum_gpg_key: "{{ docker_repo_url }}/{{ (ansible_distribution == 'Fedora') | ternary('fedora', 'centos') }}/gpg"
 ```
 
 (Used only for RedHat/CentOS.) You can enable the Nightly or Test repo by setting the respective vars to `1`.
@@ -115,7 +124,7 @@ A list of system users to be added to the `docker` group (so they can use Docker
 
 ```yaml
 docker_daemon_options:
-  storage-driver: "devicemapper"
+  storage-driver: "overlay2"
   log-opts:
     max-size: "100m"
 ```

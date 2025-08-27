@@ -127,7 +127,7 @@ ansible_python_interpreter=/usr/bin/python3
 [provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-Voyager ansible_host=192.168.9.101
+internetPi ansible_host=192.168.9.100
 
 [provision_servers:vars]
 #pre provisioning
@@ -152,7 +152,7 @@ ansible_python_interpreter=/usr/bin/python3
 [post_provision_servers]
 #CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
 #OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
-post_test ansible_host=192.168.9.101
+post_test ansible_host=192.168.9.100
 
 [post_provision_servers:vars]
 #post provisioning

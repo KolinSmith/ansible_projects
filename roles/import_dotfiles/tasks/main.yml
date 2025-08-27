@@ -13,9 +13,9 @@
   - name: copy dotfiles into ~/
     copy:
       src: /tmp/tmp-dotfiles/{{ item }}
-      dest: "/home/{{ username }}/{{ item }}"
-      owner: "{{ username }}"
-      group: "admin"
+      dest: "/home/{{ ansible_user }}/{{ item }}"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
       mode: '0644'
     with_items:
       - .zshrc
@@ -25,7 +25,15 @@
       - .vimrc
       - .ansible_password
       - .gitconfig
+      - .exports
 
+  - name: copy vim directory
+    copy:
+      src: /tmp/tmp-dotfiles/.vim/
+      dest: "/home/{{ ansible_user }}/.vim/"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: '0644'
 
 # also need to remove docker and other things if they aren't used (like bat!)
   - name: Remove ls aliases from .zshrc if exa isn't installed
@@ -46,4 +54,4 @@
       path: /tmp/tmp-dotfiles
 
   - name: source new .zshrc file
-    shell: "/bin/zsh /home/{{ username }}/.zshrc"
+    shell: "/bin/zsh /home/{{ ansible_user }}/.zshrc"
