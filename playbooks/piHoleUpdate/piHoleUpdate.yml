@@ -10,6 +10,7 @@
           upgrade: yes
           update_cache: yes
           cache_valid_time: 86400 #One day
+          
       - name: update pihole
         #I had to use this instead of the normal "pihole -up" because of the way I have DNS setup
         shell: "PIHOLE_SKIP_OS_CHECK=true sudo -E pihole -up"
