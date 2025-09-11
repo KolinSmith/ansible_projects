@@ -49,3 +49,12 @@
     state: started
     enabled: yes
   become: yes
+
+- name: Create status alias for Tor nyx monitoring
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.zshrc"
+    line: "alias status='sudo -u debian-tor nyx'"
+    regexp: "^alias status="
+    state: present
+    backup: yes
+  become: no

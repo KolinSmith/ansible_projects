@@ -49,6 +49,7 @@ necessary_packages:
   - rsyslog
   # - trash-cli
   - exa
+  - nyx # needed for Tor stats
 
 #  add way to install ansible via pip on orange pi instead of apt
   
