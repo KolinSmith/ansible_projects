@@ -1,3 +1,7 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# vars file for orangepi_disable_ramlog
+# Variables for orangepi_disable_ramlog role
+
+ramlog_config_path: /etc/default/armbian-ramlog
+zram_config_path: /etc/default/armbian-zram-config
+rsyslog_orangepi_config: /etc/rsyslog.d/01-orangepi-direct-logging.conf
+logrotate_orangepi_config: /etc/logrotate.d/orangepi-aggressive
