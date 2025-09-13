@@ -5,3 +5,7 @@
       # name: sshd
       name: ssh
       state: restarted
+  - name: restart armbian-ramlog
+    systemd:
+      name: armbian-ramlog
+      state: restarted
