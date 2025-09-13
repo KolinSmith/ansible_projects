@@ -261,17 +261,10 @@
   - name: Disable armbian-ramlog on Orange Pis
     lineinfile:
       path: /etc/default/armbian-ramlog
-      regexp: '^Enabled='
-      line: 'Enabled=false'
+      regexp: '^ENABLED='
+      line: 'ENABLED=false'
     when: orange_pi == true
-
-  - name: Disable armbian-zram-config on Orange Pis
-    lineinfile:
-      path: /etc/default/armbian-zram-config
-      regexp: '^Enabled='
-      line: 'Enabled=false'
-    when: orange_pi == true
-    
+    notify: restart armbian-ramlog
 
   # - name: Set raspberry_pi fact
   #   set_fact:
