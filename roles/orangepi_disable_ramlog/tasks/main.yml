@@ -1,0 +1,118 @@
+---
+- name: Stop armbian-ramlog service
+  systemd:
+    name: armbian-ramlog
+    state: stopped
+  ignore_errors: true
+
+- name: Disable armbian-ramlog service
+  systemd:
+    name: armbian-ramlog
+    enabled: false
+  ignore_errors: true
+
+- name: Disable armbian-ramlog in configuration
+  lineinfile:
+    path: "{{ ramlog_config_path }}"
+    regexp: '^ENABLED='
+    line: 'ENABLED=false'
+    backup: true
+
+- name: Check if /var/log is currently a zram mount
+  shell: mount | grep -q "zram.*/var/log"
+  register: zram_mounted
+  failed_when: false
+  changed_when: false
+
+- name: Sync current logs from RAM to disk before unmounting
+  shell: |
+    if [ -d /var/log.hdd ]; then
+      rsync -av --delete /var/log/ /var/log.hdd/
+    fi
+  when: zram_mounted.rc == 0
+
+- name: Unmount zram /var/log
+  mount:
+    path: /var/log
+    state: unmounted
+  when: zram_mounted.rc == 0
+
+- name: Unmount bind mount /var/log.hdd
+  mount:
+    path: /var/log.hdd
+    state: unmounted
+  ignore_errors: true
+
+- name: Move logs from /var/log.hdd to /var/log
+  shell: |
+    if [ -d /var/log.hdd ] && [ "$(ls -A /var/log.hdd 2>/dev/null)" ]; then
+      # Backup current /var/log if it exists
+      if [ -d /var/log ] && [ "$(ls -A /var/log 2>/dev/null)" ]; then
+        mv /var/log /var/log.backup.$(date +%Y%m%d-%H%M%S)
+      fi
+      # Move hdd logs to main location
+      mv /var/log.hdd /var/log
+    fi
+
+- name: Ensure /var/log directory exists with correct permissions
+  file:
+    path: /var/log
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Remove /var/log.hdd directory if empty
+  file:
+    path: /var/log.hdd
+    state: absent
+  ignore_errors: true
+
+- name: Update rsyslog configuration for direct disk logging
+  blockinfile:
+    path: "{{ rsyslog_orangepi_config }}"
+    create: true
+    block: |
+      # Direct disk logging for Orange Pi (ramlog disabled)
+      # Reduce logging frequency to minimize SD card wear
+      
+      {% if orangepi_disable_file_sync %}
+      # Reduce sync frequency to minimize writes
+      $ActionFileEnableSync off
+      {% endif %}
+      
+      {% if orangepi_reduce_repeated_messages %}
+      $RepeatedMsgReduction on
+      {% endif %}
+      
+      # Log rotation friendly settings
+      $FileOwner syslog
+      $FileGroup adm
+      $FileCreateMode 0640
+      $DirCreateMode 0755
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - Orange Pi Direct Logging"
+
+- name: Create aggressive log rotation for Orange Pi
+  template:
+    src: orangepi-aggressive.j2
+    dest: "{{ logrotate_orangepi_config }}"
+    mode: '0644'
+  when: orangepi_aggressive_rotation
+
+- name: Disable zram for logging in zram config
+  lineinfile:
+    path: "{{ zram_config_path }}"
+    regexp: '^ENABLED='
+    line: 'ENABLED=false'
+    backup: true
+  ignore_errors: true
+
+- name: Remove zram log device if it exists
+  shell: |
+    for zram_dev in /dev/zram*; do
+      if [ -b "$zram_dev" ] && [ "$(e2label "$zram_dev" 2>/dev/null)" = "log2ram" ]; then
+        swapoff "$zram_dev" 2>/dev/null || true
+        echo 1 > /sys/block/$(basename "$zram_dev")/reset 2>/dev/null || true
+      fi
+    done
+  ignore_errors: true
