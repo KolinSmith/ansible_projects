@@ -38,4 +38,4 @@ username: "{{ vault_username }}"
 
 dmz_username: "{{ vault_dmz_username }}"
 
-tailscale_authkey: "{{ vault_tailscale_auth_key }}"
+tailscale_auth_key: "{{ vault_tailscale_auth_key }}"

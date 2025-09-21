@@ -23,6 +23,7 @@
     roles:
       - role: check_if_pi
       - role: remove_default_user
+      - role: orangepi_disable_ramlog
       - role: install_obsidian_vault
       - role: import_dotfiles 
       - role: install_pivpn

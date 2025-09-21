@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  author: Kolin Smith
+  author: your_name
   description: Disable Armbian ramlog system and configure direct disk logging for Orange Pi devices
   company: your_company
   license: license (GPL-2.0-or-later, MIT, etc)
@@ -20,4 +20,5 @@ galaxy_info:
     - logging
     - ramlog
 
-dependencies: []
+dependencies: 
+  - role: check_if_pi
