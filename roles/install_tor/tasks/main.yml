@@ -1,20 +1,60 @@
 ---
-  - name: install tor
-    apt:
-      name: "{{ necessary_packages }}"
-      state: latest
+- name: Add Tor Project GPG key
+  apt_key:
+    url: "https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc"
+    state: present
+  become: yes
 
-  - name: stop tor
-    service:
-      name: tor
-      state: stopped
+- name: Add Tor Project repository
+  apt_repository:
+    repo: "deb https://deb.torproject.org/torproject.org {{ ansible_distribution_release }} main"
+    state: present
+    filename: tor
+  become: yes
 
-  - name: add in my torrc file
-    template:
-      src: /home/dax/code_base/ansible_projects/templates/torrc.j2
-      dest: /etc/tor/torrc
+- name: Update apt cache after adding repository
+  apt:
+    update_cache: yes
+  become: yes
 
-  - name: start tor
-    service:
-      name: tor
-      state: start
+- name: Install tor packages
+  apt:
+    name: 
+      - tor
+      - tor-geoipdb
+      # tor-arm might not be available, check if you need it
+    state: latest
+  become: yes
+
+- name: Stop tor service
+  systemd:
+    name: tor
+    state: stopped
+  become: yes
+
+- name: Add torrc configuration file
+  template:
+    src: /home/dax/code_base/ansible_projects/templates/torrc.j2
+    dest: /etc/tor/torrc
+    owner: debian-tor
+    group: debian-tor
+    mode: '0644'
+    backup: yes
+  become: yes
+  notify: restart tor
+
+- name: Start and enable tor service
+  systemd:
+    name: tor
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Create status alias for Tor nyx monitoring
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.zshrc"
+    line: "alias status='sudo -u debian-tor nyx'"
+    regexp: "^alias status="
+    state: present
+    backup: yes
+  become: no

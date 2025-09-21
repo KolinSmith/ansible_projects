@@ -1,2 +1,6 @@
 ---
-# handlers file for install_tor
+- name: restart tor
+  systemd:
+    name: tor
+    state: restarted
+  become: yes

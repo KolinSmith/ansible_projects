@@ -1,0 +1,1174 @@
+{
+ "files": [
+  {
+   "name": ".",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "CHANGELOG.rst",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "a1a22ba74a3f267e5a7f110266fdae33578bcc4e88541b2ee8816ed4c13311e9",
+   "format": 1
+  },
+  {
+   "name": "LICENSE",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+   "format": 1
+  },
+  {
+   "name": "README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "186a764e9d4de50f3bf40bbe0a2d8166ba90d00b5106bed1fe5d3dd893938a8f",
+   "format": 1
+  },
+  {
+   "name": "meta",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "meta/runtime.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "817b591c8afa0b51367a3da1941d828d5ad97c917dba0dd9b0883866857e28cf",
+   "format": 1
+  },
+  {
+   "name": "plugins",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/lookup",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/lookup/pfsense.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9bc01eb167557e385c19cdd13f1402d5e7b6d537e7b0b66e22867c0aaca4c396",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/__impl",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/__impl/__init__.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/__impl/addresses.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "3e3b8f208197556333c5ba1fe0f594b53dfa5125ba90b79d5a7322fd08b94400",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/__impl/checks.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4d59ce36b5893454373f16e972822794952f9d08403a9b8d60616f89db9827cc",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/__impl/interfaces.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "bd5514b562e0fe0ee4353a809aca2bfdce8ed62ff95bc4e8eef872ff9bbf718e",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/__init__.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/alias.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ab551f575e7638b612e5eb1c6866d558a75964e4048c84a9d678ab39ac7b413b",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/default_gateway.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "70847d33c3ac79fbb0f07ea134b956560c47856ccc19c4a34eeaaf1cb1e728ad",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/gateway.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "26ae99f9fc3236e526d9e338371612149c3c725cc3ed47ab44eee2c448b2c59f",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/haproxy_backend.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "47aa3b1e5acaf6c7ee0d8f1bd3cee20e47e5e4e92ab3f4ecfecb7c7e79e0eb67",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/haproxy_backend_server.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4786a52e6bc21a13e68e32893a7e31c07164c38abfe1a4a27028d1cf1a119c31",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/interface.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "465dbf7013d3dd744d8326fc84b5895e5f409a8354c58c17d10e1ffbe60362d6",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/interface_group.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "dedfa7ec0491c9fd5837c9b4d0cae269dec4f44366e1998b929e8c1991232bf5",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/ipsec.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "24d21547134ab043f67c1d770dfa50570971ac89ec8b98f56b3b85f49632f3cf",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/ipsec_p2.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "bbf8d9f9980eb3c76d50f5fd31d826a3a92c1e94b91d1069713f890370bf3f1c",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/ipsec_proposal.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f79052f0c40d59bd2a1a1524d6695bd254e9838c7ccfbeeab8c04df2ab3f9c46",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/module_base.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "94acd890498c282eab23e8d29ea4e7086a55a5bdc94c6d04b4a7e25bb3563920",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/nat_outbound.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "af9c62279c20b329d1b44009fabe6bd320a975e5552c847e9ebaa4c7653d72b2",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/nat_port_forward.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "43e8c9b2a2e4429f78c5c2577fa11fd6f8e124719b804e0bc8112a7747174b78",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/openvpn_client.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7b38946bd8c25d2d436b883590d16acdd6944715ef8ef7fcfe4fb032e2a1abe5",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/openvpn_override.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "d90d7ff328c6a508ca66de0639217ba43a9968a108c920f918d8dcc5775b9168",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/openvpn_server.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e2f36b27297592228c34d30d9673b939c3fd019da43e0a250bd4853589ad4cf3",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/pfsense.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "317e66f6ca9f5d32bf78c1d7324de467f15da71bc539a91aad1115638251cbb4",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/route.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "bddd97f2a27448b3abc2d37cc9226b6bd2bc4abebb67293c106ecff08d29637e",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/rule.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "36ae98a58cbde807b404609a8ed678a576d5fbe0db6d900864bf57ea8856f354",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/rule_separator.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "6fee7333ed616afc2ab70343fdc36394778c3b1356861cb8eaf17bd38fb24466",
+   "format": 1
+  },
+  {
+   "name": "plugins/module_utils/vlan.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "dfb80a59fcdd87aea882f74c5eb7eea0d4a6156329442a1fe3129276cfb527ce",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_aggregate.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "57563d97ebc2014fa915ca6a4b5ecd321e58270a6b8a6182c92419789dfd580e",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_alias.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "600846ab4a3f8724a78cfe92a1b07e9121cf842cbd697450a25b8e013438596c",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_authserver_ldap.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "2a4f56728238b738f7125ab08d414385fbb67cf80e1fac64263f0feec8443f76",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_authserver_radius.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1c8abea48e29fcd13d25dc6bb8c8bc1094d15c757c6602b7d84f38696859547d",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_ca.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9b6946f9f17e07ba6572624da7b4206a523cf5f4313ca51ad1c171908adedb14",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_cert.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "5689acc03fbb8464288b8c01b3efc6449e8766859bc5617c482f091510fd0423",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_default_gateway.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "8af77cd693ef82427779644f6caa4b3d5a09bf779d70aa6c583ee4b6b86c28bb",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_dhcp_static.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9a483bf44ba4877f6101b1cba18d2351840f4ad8a5836aaff9d8faf6131c73af",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_dns_resolver.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "a513a2f199e7894ac7464206f224f926dae60de367bcf375161ad31079853fdc",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_gateway.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "62d684598c51bbdfdda12c691e3dfbb2ea768dbe413ecccaa367c62350cacfc7",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_group.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e17455539029da1cbac543f1276e9a9d28cbd26098d1733f84d8b1b9b7de0040",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_haproxy_backend.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f3f4f11946931739ba52a7aee014901ad3f4df6dcb5657e76da370e1358d370c",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_haproxy_backend_server.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c0c4253042db06869c0400ed862c6e865675e010647c9ff8c93af673564b89c3",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_interface.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9eb2896486257f8e5806cbcb7c8f101874c2d0e77b84b51af0485de622af74b0",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_interface_group.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4fccd7a29201827d8e35542108d5dab0939c523a253b3c31445e11f82c1b0c9c",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_ipsec.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e025935a5fddc364f9545a91c72ca81e2f11ad73f7a46eebaffa57293d3a54d6",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_ipsec_aggregate.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "6fc9537b21c29f6628ad57412972c91fdf7fa589b30b13012f85ae1cba183d22",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_ipsec_p2.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e752069f6ef98983589e588fb3392e5fb8734a891febe4c90e5b5d9e7f734bd4",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_ipsec_proposal.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "8bbd132b8a809a0a98cd4174daab8b723cea8057665ac37ebe7d88abb665dc1c",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_log_settings.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4565bf6a5319d3492dd27c49617b980fa33dad0d237271feace9463c8b19b5f0",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_nat_outbound.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "11eebb25b54a4605ca46b20ddafa0c4bec8f14d57bd619bac72b6fdec5326c30",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_nat_port_forward.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "664e81b06d055767a8298f3de7530d5cb0413eefc170e9306c5477ca7f715d5b",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_openvpn_client.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "8e8bf1be09a4e412e27e98fdc1d5364328a831ac1ff2cbc3e7d4a2bb45500fe2",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_openvpn_override.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "2ebfcbeb664343461cbcb9c5387ad4821cc197fa57537bc7eaeb30bfc89ada30",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_openvpn_server.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ef273121e101018caed68a5ad15c967e54390f6883aade119e4813383e1bc8e9",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_rewrite_config.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "fc373d967fc51abdfd7be9da62e4d303e55687834cf2d9c13b71056422c67f1f",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_route.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "725da5a8c8b790d8f5dd6345395cbd993c4bc441f77e26ff4d11dc8e2478dd85",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_rule.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "139762397ab7456b31b755512c9a8a1636ab8ebbaf840d4f588f35a267d42250",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_rule_separator.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f26b54eeef55e65528cf07b04e1e3d78d83aff87673e22b8675a9b58df9e1ca0",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_setup.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "557f74518709cd8de480ccf652deb1181eee722cbc224314a7eee04f6731c54c",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_user.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "b68a2cd4525a4016695189a7a1dda1941539172a2a6bd0404b51dcb92c18ae06",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/pfsense_vlan.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "be6911c347eb0b362d8ae64b0671816df4aefcad00797e692ba0e31d7bb17820",
+   "format": 1
+  },
+  {
+   "name": "tests",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/plays",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/plays/README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "dbd1f34bfd9b13427b85e72b5bf20fe9641af5168c71db6de4b9d74c10b7297f",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/ansible.cfg",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "af6397db125c96ec2812d011492302e19b6ba2551d0cb1d98d54a43661bfc05f",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/host_vars",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/plays/host_vars/pfsense-test.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1a19f628f16c2d249021c5f635204877341088f902ba8e15975c80036a3b0ab0",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/hosts",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "251eda590d35e4187b218115fb5bfe66e77003a587a6feff08c0ea5f79952a54",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/openvpn.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "6316124c3b2b827356580d65958548821da616530fa00ea66212658b3c640ce9",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/tasks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/plays/tasks/test_interface_create.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e304140f227f041a00f9efcb68d2ed6ee4e235e5e4f052dd65fb0d118fe95245",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/tasks/test_interface_group_create.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "684d9ea64924aff54f945a3372e3bd5cf458d55f85325200130f6bac9b7ae6c7",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/tasks/test_interface_group_ifconfig_groups.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "81c5eb98d63d79bcbc7583fe61a42e5ebe0e85b85205336a80e07e18386bfa90",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/tasks/test_openvpn_override_create.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "708e3934ca56fc59f287e12dc5df958e6e30d5663541c42144624098ad019a27",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/tasks/test_openvpn_override_delete.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "6b33b0fe1387021edc544913a9c490c7f5eeec99736c805d004fb89b1ed0f0e4",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/tasks/test_openvpn_override_file_exists.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "46acc21f83f7e8da69fe2a3aee13222b59b021af2df262cf47934dfc4810a71c",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/tasks/test_openvpn_server_create.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "04fe07022472bd348f0b06aeb6b1ab7334b72d80cbe73510b32cd8ade2ca881c",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/tasks/test_openvpn_server_delete.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "82ac671fcafb1e9dcf52b566d8306579337d8ac8fbe89e899c89fc9afef341e0",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/templates",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/plays/templates/openvpn-override.j2",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "80bbfa609519ec80a7a35c560e51fd716b81c1fd8a0ec2e9d5867302e7631a44",
+   "format": 1
+  },
+  {
+   "name": "tests/plays/templates/openvpn-server-config.ovpn.j2",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "d0cad47db3adadb8e8e6fb470cb92bde51516c829ad04a1b6ccbb32b0700f4c6",
+   "format": 1
+  },
+  {
+   "name": "tests/sanity",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/sanity/ignore-2.12.txt",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7a3c38dd18b5a2ddf87541b284acb65cc38692ff8aaf6b62c0a0595a515b6e63",
+   "format": 1
+  },
+  {
+   "name": "tests/sanity/ignore-2.13.txt",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7a3c38dd18b5a2ddf87541b284acb65cc38692ff8aaf6b62c0a0595a515b6e63",
+   "format": 1
+  },
+  {
+   "name": "tests/sanity/ignore-2.14.txt",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7a3c38dd18b5a2ddf87541b284acb65cc38692ff8aaf6b62c0a0595a515b6e63",
+   "format": 1
+  },
+  {
+   "name": "tests/sanity/ignore-2.15.txt",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7a3c38dd18b5a2ddf87541b284acb65cc38692ff8aaf6b62c0a0595a515b6e63",
+   "format": 1
+  },
+  {
+   "name": "tests/sanity/ignore-2.16.txt",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7a3c38dd18b5a2ddf87541b284acb65cc38692ff8aaf6b62c0a0595a515b6e63",
+   "format": 1
+  },
+  {
+   "name": "tests/unit",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/lookup",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/lookup/test_pfsense.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9c67a744f1291a7d9937bb7711864edc43a83392cfcfc68f84051f29cc93be67",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/module_utils",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/module_utils/fixtures",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/module_utils/fixtures/pfsense_setup_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ef0e41add8ebbb0b072d61351bd663f084de149646c835665b58f57e18e3159e",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/module_utils/test_pfsense.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "03b1df9ebd18c39a6ce5b354611db1807f987e76d159acb6f7113be6bd3be661",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/__init__.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/2.4",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/2.4/pfsense_ipsec_aggregate_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7d7892e17f76f95ec8b29c57640b357b637537771183291379f45175945528d9",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/2.4/pfsense_ipsec_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "919f7af15c266acd6196f7e3444fd1b69f39298bd378583e3d82377ddd630f22",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/2.4/pfsense_ipsec_proposal_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "cd8ba0a5df15a50eaf4cdc67abc0fd861918ab9d91d0ec4ed5aa7a73d88cee49",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_aggregate_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "a510297454ade0cf40a77a24cb0d01d14920b2482a6be465b12d81bf8b3f339f",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_alias_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f034b22de1f8abd17a92c11e21308dfa518d2f5595d8ebae56a89e077a2c0c97",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_alias_null_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "fd869c617f7edb24bacf45e5929c6e6aaf6d0a44845a7cd030b55f3bf39c8316",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_authserver_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "12b8f73be5f4dd5807ad14549829e4dfbe99bca5d7a0474e5657c0b7fa32e403",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_ca_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9b1f315193ba1fda452fe04c84542822e4775016a8bf276d40bd0d10c212ecf3",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_dhcp_static_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "852aea0c826f11121247cd47b450be1ca9917ea918849ded381bd82a2b854941",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_gateway_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "86decb3870751236b36ca1c39b714adb635853c7af4fb37b6409bdd84b76bb0e",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_haproxy_backend_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ba746c1be12653860d82f4661d553d5a13131936260c37276cc11e6ee8197f8f",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_haproxy_backend_server_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1ce3ab15410d01ed0083936d7cf06a646224d27d26fecaedb06c519e33178850",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_interface_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "3e1b07bcca169684f08a8fbdd5c6e2985122d70ced84243fdf26721f766f1639",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_ipsec_aggregate_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4a9fd5d4041c32662c4744569347197c7ed8aca75fa320a1e66318d445b5e3b2",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_ipsec_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c85596e7918fc26052b8ae7111a0d258b9259a08e58c881c98d7e78590c51ebb",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_ipsec_p2_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7d7892e17f76f95ec8b29c57640b357b637537771183291379f45175945528d9",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_ipsec_proposal_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c518bd2a9edfe0f814dd6a0fba7c27c75c616bfd5c75f378fb94aaf2df7b8468",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_nat_outbound.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "3d232c44a3e2b1d64d6bf800bb6e6ee56ee707f624891f847c9c7c1bd43b2705",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_nat_port_forward_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e64a71339b110f285fbfd1342a752093983b6072cb83660bf4354536a5c3c9af",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_openvpn_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "5f3db3bb30faf680852578081c1de1d64978960f0fc1a195c0bb7e4b93f5c88f",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_route_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9dd2845e44f6e4218de3756099b9d31b8d12517cfd0c976cebc07218e4727bec",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_rule_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e668cb632864f1584ec736d1db61ebdb57e0c3582eb83bd92e429a424fd41d36",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_rule_separator_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f034b22de1f8abd17a92c11e21308dfa518d2f5595d8ebae56a89e077a2c0c97",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_setup_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ef0e41add8ebbb0b072d61351bd663f084de149646c835665b58f57e18e3159e",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_syslog_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e450f3cfbc1a110cb2730a26f2f8f9ad1fc058d2119fc3782aba3ccbcfc41f59",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_user_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "22f74e2c7e302511e399a246365406dd0ff94ccb170149de82519f7b8096d48e",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/fixtures/pfsense_vlan_config.xml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "799ce9c7aedc4b6a4a7f82dc2e6d80f6a4b0d9acb9701f4fe431ea6bcee031d5",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/pfsense_module.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e42ba0951e2740acc267e693784924e50d6bb986ede948656f858c88afb81b27",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_aggregate.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ba4aa2d78f0d7d6cf620370c54b87c7279795ff8f1b7110aca0eda7f3e03eee3",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_alias.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "6b558ef086d7d643cebf92d040f02f7bddaad06cd012c5f92b96b28ba08e3342",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_alias_null.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "3ba900af517af1b7d8b104887c8afe758660da501356b4886fbdfb0537852bc7",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_authserver_ldap.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ef5d53b8c1bb26d60b40867e602054a04de88002138521263a5c145f475401d2",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_authserver_radius.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e1ce7d2e4bcd4f5802c06869b993fff4e00a37bc0507a87611fc439e688da4d8",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_ca.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7f5abd588ad5c5da3d43f995d1aad3b92579dcd865b00c459dcc91786fb33bab",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_dhcp_static.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "008401b7926a3eae784f2e7816556aa14abf0a13da57845efc07c44b4b2a2e90",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_gateway.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "57757c4c8913637adbf6dd977f8eb4a35fd821bcfba06c45e29b9d86911df45c",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_haproxy_backend.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "96018cb64da9e06bcfcb4cd74236d53445f0227c35b3d3e3ff9431ed87b5ac92",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_haproxy_backend_server.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "5643fcbf2b124413a7608cb8a6335fbfff4ac647d89f4ee442f05d962e56f04f",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_interface.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "a7ab957cb09d45b53a2e10545bf2a9c78fed537959cf74e06a283184d4818783",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_interface_group.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "23829c3d86a6a258657ef5c3abeb3f2795d1b2ba474eea781c44a434b4a6940a",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_ipsec.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "73ef405abb325cd13a8648d20bd410a4a35f00336df25a3bf4387c59d52b037d",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_ipsec_aggregate.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "5b5eae85cdd58adde09127ec8872b6cc0270b1485c6d39706ca180a6cb333578",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_ipsec_p2.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "6c53609fda7aad9b7be2a67dd3ddf758e043202015a5ae30f3a6d307b7848baf",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_ipsec_proposal.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "90bbab78f68a1585f378d9f7d74625ce581ed6e8e57337094e8c9bd29b9551ee",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_log_settings.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "362ecca90a18556954d9ed8ce23e966772e18d974376d7a5df1534b5411e36a6",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_nat_outbound.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "34221362a25acb4bba2057e5eda9117206976e48b2eb768eb07f46c61b0c57ef",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_nat_port_forward.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "513f852e510aa715884206a5e659aae1a22ffd5a5147b8a2c23efb9c1719b43e",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_openvpn_override.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7e63b7ca224ec20cb58ea0b8de075f1c277f3d9d493a262a4ff5df6f11092348",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_openvpn_server.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c7bdcaf5589f4580d3726ee4c2785d75e8477870548587393500c8f52908acc4",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_route.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "af4f5bbd8c367cf287b68fca6140fd908a3b9e88f832f2fcab962a6f77a20dae",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_rule.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "6a01d60aa05162ca7b1f1c231dd1d85f1d598d84d2515daed4453ae2cb407557",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_rule_create.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "a3db0782ed5d2ffcb469c619115186e5714fb251ba3fd010484dc75bdeecbadf",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_rule_misc.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7f9176bfd4e436f0130cc512532d8e41459b9ff3606b4a4948f5f438c4454b1c",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_rule_noop.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4df6e366d5b9fb4e77287fbd73514c51be1c8dbef0733b28683e23b45871f3f4",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_rule_separator.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "a1394956e6a12f428003d9f61127019bb93d145639bd2a33a5923ebed7eba0ee",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_rule_update.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e78b898651ee55f5ca761f02dfac450b8a98857d419a0b2469ccae68c5411eb3",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_setup.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "55be4da632bedd95334950d6b2135165ad0a1935542bf2e58a295fb860a9fcdf",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_user.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "0e3fdc71c7c98d9132cc14827877a73e4a44dad11a13fbde0c5ad1013923a7bc",
+   "format": 1
+  },
+  {
+   "name": "tests/unit/plugins/modules/test_pfsense_vlan.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "433ab29ac4ab201e70e15254e35797db95fbfd5fff70e2a5c6f93eb47c666708",
+   "format": 1
+  }
+ ],
+ "format": 1
+}
