@@ -1,0 +1,6 @@
+---
+- name: quick fix for zram
+  hosts: post_provision_servers
+  become: yes
+  roles:
+    - orangepi_disable_ramlog
