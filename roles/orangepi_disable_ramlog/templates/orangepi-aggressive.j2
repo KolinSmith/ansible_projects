@@ -1,0 +1,46 @@
+# Aggressive log rotation for Orange Pi to minimize storage usage
+# Managed by Ansible - orangepi_disable_ramlog role
+
+/var/log/syslog
+/var/log/auth.log
+/var/log/kern.log
+/var/log/daemon.log
+/var/log/user.log
+/var/log/mail.log
+/var/log/cron.log
+/var/log/debug
+/var/log/messages
+{
+    daily
+    rotate {{ orangepi_log_rotation_days }}
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+        /usr/lib/rsyslog/rsyslog-rotate
+    endscript
+}
+
+# Reduce atop data retention
+/var/log/atop/atop_*
+{
+    daily
+    rotate {{ orangepi_atop_retention_days }}
+    missingok
+    notifempty
+    compress
+    delaycompress
+}
+
+# Reduce sysstat data retention  
+/var/log/sysstat/*
+{
+    daily
+    rotate {{ orangepi_sysstat_retention_days }}
+    missingok
+    notifempty
+    compress
+    delaycompress
+}
