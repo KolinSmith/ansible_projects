@@ -162,6 +162,8 @@
       path: /home/{{ username | lower }}/.zshrc
       state: touch
       mode: 0600
+      owner: {{ username | lower }}
+      group: admin
 
   # - name: Print the value of orange_pi fact
   #   debug:
@@ -183,7 +185,7 @@
     git:
       repo: 'https://github.com/ohmyzsh/ohmyzsh.git'
       dest: /home/{{ username | lower }}/.oh-my-zsh
-    # become_user: "{{ username | lower}}"
+    become_user: "{{ username | lower}}"
     when: omz_installed.stat.exists == False or orange_pi == true
 
   - name: Checkout powerlevel10k repo and use refspec to fetch all pull requests

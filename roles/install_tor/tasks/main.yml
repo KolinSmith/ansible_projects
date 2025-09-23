@@ -34,7 +34,7 @@
 
 - name: Add torrc configuration file
   template:
-    src: /home/dax/code_base/ansible_projects/templates/torrc.j2
+    src: /home/{{ username }}/code_base/ansible_projects/templates/torrc.j2
     dest: /etc/tor/torrc
     owner: debian-tor
     group: debian-tor
@@ -52,7 +52,7 @@
 
 - name: Create status alias for Tor nyx monitoring
   lineinfile:
-    path: "{{ ansible_env.HOME }}/.zshrc"
+    path: "/home/{{ username }}/.zshrc"
     line: "alias status='sudo -u debian-tor nyx'"
     regexp: "^alias status="
     state: present
