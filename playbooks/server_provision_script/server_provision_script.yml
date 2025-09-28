@@ -20,10 +20,10 @@
     - vars/server_provision_script_vars.yml
   roles:
     - role: check_if_pi
-    - role: import_dotfiles
-    - role: artis3n.tailscale.machine #install tailscale
-      vars:
-        tailscale_authkey: "{{ tailscale_auth_key }}"
+    # - role: import_dotfiles
+    # - role: artis3n.tailscale.machine #install tailscale
+    #   vars:
+    #     tailscale_authkey: "{{ tailscale_auth_key }}"
     - role: geerlingguy.pip
     # - role: install_rsyslog_client
     - role: install_tor

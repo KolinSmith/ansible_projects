@@ -45,7 +45,7 @@ necessary_packages:
   - atop
   - python3-pip
   # - tailscale
-  - ansible
+  # - ansible #installing with pip3
   - rsyslog
   # - trash-cli
   - exa

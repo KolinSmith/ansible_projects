@@ -50,6 +50,7 @@
     enabled: yes
   become: yes
 
+#not sure this works
 - name: Create status alias for Tor nyx monitoring
   lineinfile:
     path: "/home/{{ username }}/.zshrc"

@@ -38,6 +38,11 @@
       name: "{{ necessary_packages }}"
       state: latest
 
+  - name: Install latest Ansible
+    pip:
+      name: "ansible>=7.0.0"
+      executable: pip3
+
   - name: set hostname
     command: hostnamectl set-hostname {{ hostvars[groups['provision_servers'][0]]['inventory_hostname_short'] }}
     become: true

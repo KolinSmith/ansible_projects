@@ -36,6 +36,11 @@
       name: "{{ necessary_packages }}"
       state: latest
 
+  - name: Install latest Ansible
+    pip:
+      name: "ansible>=7.0.0"
+      executable: pip3
+
   - name: add cups printers.conf file to /etc/cups
     template:
       src: /home/dax/code_base/ansible_projects/templates/cups_printers_dot_conf.j2

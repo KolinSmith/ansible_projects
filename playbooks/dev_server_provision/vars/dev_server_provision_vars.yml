@@ -54,7 +54,7 @@ necessary_packages:
   - vim
   - atop
   - python3-pip
-  - ansible
+  # - ansible #installing via pip3 as a task
   - cups
   - rsyslog
   - tldr
