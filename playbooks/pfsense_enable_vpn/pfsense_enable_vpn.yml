@@ -27,3 +27,18 @@
           gateway: 'PIA_VPN_VPNV4'
           before: 'Default allow LAN to any rule'
           state: present
+
+# unfortunately as of 10/10/25 you can't add tags to the firewall rules so I can't do a proper kill switch
+# https://web.archive.org/web/20220818204050/https://www.reddit.com/r/PFSENSE/comments/6edsav/how_to_proper_partial_network_vpn_with_kill_switch/
+
+      # - name: craete firewall rule for kill switch 
+      #   pfsensible.core.pfsense_rule:
+      #     name: 'Drop PIA group IPv6 traffic'
+      #     action: block
+      #     interface: lan
+      #     ipprotocl: inet
+      #     protocol: any
+      #     source: pia_redirect_group
+      #     destination: any
+      #     before: 'Allow PIA Group to hit Servers VLAN (Needs to be top for DNS)'
+      #     state: present
