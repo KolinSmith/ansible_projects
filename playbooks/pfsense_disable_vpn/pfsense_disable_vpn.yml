@@ -14,7 +14,7 @@
       #     type: host
       #     state: present
 
-      - name: create firewall rule for pia
+      - name: remove firewall rule for pia
         pfsensible.core.pfsense_rule:
           name: 'Send PIA alias over VPN'
           action: pass
