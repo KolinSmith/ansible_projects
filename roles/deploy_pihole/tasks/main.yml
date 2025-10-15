@@ -88,8 +88,8 @@
       - ad.doubleclick.net
       - ally.com
       - protonmail.com
+      - loftliving.com
       - papermario.duckdns.org
-      - *.papermario.duckdns.org
 
   - name: add blacklisted domains
     command: "pihole -b {{ item }}"
