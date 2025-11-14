@@ -18,3 +18,8 @@
     - scoop
     - vscode
     - wsl
+
+
+
+    #make sure to  also install aria2 with scoop so it can handle downloads better
+    
