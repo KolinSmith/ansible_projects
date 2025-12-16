@@ -17,6 +17,8 @@ scoop_apps:
   - ripgrep
   - fzf
   - neovim
+  - gh
+  - xdg-utils     #needed to open browser from dev container when prompted in code
 
 scoop_extras:
   - firefox

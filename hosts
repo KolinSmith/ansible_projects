@@ -4,7 +4,7 @@ pfsense ansible_host=192.168.3.1
 [pfsense_router:vars]
 ansible_connection=ssh
 ansible_user={{ pfsense_username | lower }}
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ecdsa
+ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 #ansible_python_interpreter=/usr/local/bin/python3.11 #make sure to check which python version is installed. regex wont work here
 
 [unifi_devices]
@@ -14,7 +14,7 @@ ubntAP ansible_host=192.168.3.248
 [unifi_devices:vars]
 ansible_connection=ssh
 ansible_user=admin
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_rsa
+ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 
 [windows_test]
 window_node_1 ansible_host=192.168.9.176
@@ -46,7 +46,7 @@ dmz_post_provision ansible_host=129.146.141.62
 
 [dmz_post_provision:vars]
 ansible_user={{ username | lower }}
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ecdsa
+ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 
 [printer]
 printer ansible_host=192.168.3.8
@@ -56,7 +56,7 @@ voyager ansible_host=192.168.9.2
 
 [dev_server:vars]
 ansible_user={{ username | lower }}
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ecdsa
+ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 
 [dns_servers]
 ds9 ansible_host=192.168.9.4
@@ -64,14 +64,14 @@ defiant ansible_host=192.168.9.3
 
 [dns_servers:vars]
 ansible_user={{ username | lower }}
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ecdsa
+ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 
 [load_balancers]
 stargazer ansible_host=192.168.9.6
 shenzhou ansible_host=192.168.9.5
 
 [load_balancers:vars]
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ecdsa
+ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_user={{ username | lower }}
 primary_load_balancer=192.168.9.6
 secondary_load_balancer=192.168.9.5
@@ -83,7 +83,7 @@ loadbalancer_vip_ip=192.168.9.90
 # [internetPi:vars]
 # ansible_connection=ssh
 # ansible_user={{ username | lower }}
-# ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ecdsa
+# ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 # ansible_python_interpreter=/usr/bin/python3
 
 [apt_cache]
@@ -92,7 +92,7 @@ newVoyager ansible_host=192.168.9.2
 [apt_cache:vars]
 ansible_connection=ssh
 ansible_user={{ username | lower }}
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ecdsa
+ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_python_interpreter=/usr/bin/python3
 
 [all_raspberry_pis:children]
@@ -121,7 +121,7 @@ k3s-mysql-2 ansible_host=192.168.9.133
 [mysql_servers:vars]
 ansible_connection=ssh
 ansible_user={{ username | lower }}
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ecdsa
+ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_python_interpreter=/usr/bin/python3
 
 [provision_servers]
@@ -159,7 +159,7 @@ post_test ansible_host=192.168.9.10
 #######################################################################
 ansible_connection=ssh
 ansible_user={{ username | lower }}
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ecdsa
+ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_python_interpreter=/usr/bin/python3
 primary_load_balancer=192.168.9.6
 secondary_load_balancer=192.168.9.5

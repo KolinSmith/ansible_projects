@@ -89,6 +89,7 @@
       - ally.com
       - protonmail.com
       - loftliving.com
+      - claude.ai
 
   - name: add blacklisted domains
     command: "pihole -b {{ item }}"

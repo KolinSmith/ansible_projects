@@ -66,7 +66,8 @@ necessary_packages:
   - sshpass # for ansible use
   - ansible-lint
   - expect
-  
+  - gh
+  - xdg-utils     #needed to open browser from dev container when prompted in code  
 
 
 
