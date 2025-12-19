@@ -180,5 +180,59 @@
       group: admin
       remote_src: true
 
-  
+  # Memory optimization for Oracle free tier (956MB RAM)
+  - name: Check if swap file already exists
+    stat:
+      path: /swapfile
+    register: swap_file_check
+
+  - name: Create 2GB swap file
+    command: fallocate -l 2G /swapfile
+    when: not swap_file_check.stat.exists
+
+  - name: Set swap file permissions
+    file:
+      path: /swapfile
+      mode: '0600'
+    when: not swap_file_check.stat.exists
+
+  - name: Format swap file
+    command: mkswap /swapfile
+    when: not swap_file_check.stat.exists
+
+  - name: Enable swap file
+    command: swapon /swapfile
+    when: not swap_file_check.stat.exists
+
+  - name: Add swap to fstab
+    lineinfile:
+      path: /etc/fstab
+      line: '/swapfile none swap sw 0 0'
+      state: present
+      create: no
+    when: not swap_file_check.stat.exists
+
+  - name: Disable apt-daily timer
+    systemd:
+      name: apt-daily.timer
+      enabled: no
+      state: stopped
+
+  - name: Disable apt-daily-upgrade timer
+    systemd:
+      name: apt-daily-upgrade.timer
+      enabled: no
+      state: stopped
+
+  - name: Disable apt-daily service
+    systemd:
+      name: apt-daily.service
+      enabled: no
+
+  - name: Disable apt-daily-upgrade service
+    systemd:
+      name: apt-daily-upgrade.service
+      enabled: no
+
+
 
