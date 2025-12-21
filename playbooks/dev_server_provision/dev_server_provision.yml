@@ -16,7 +16,7 @@
 
   - name: post server provision
     hosts: post_provision_servers
-    gather_facts: true 
+    gather_facts: true
     become: true
     vars_files:
       - vars/dev_server_provision_vars.yml
@@ -25,11 +25,12 @@
       - role: remove_default_user
       - role: orangepi_disable_ramlog
       - role: install_obsidian_vault
-      - role: import_dotfiles 
+      - role: import_dotfiles
       - role: install_pivpn
       - role: install_rsyslog_server
-      - role: IronicBadger.figurine
-      - role: artis3n.tailscale 
+      # - role: IronicBadger.figurine  # Replaced by install_custom_motd (more comprehensive)
+      - role: install_custom_motd
+      - role: artis3n.tailscale
       - role: geerlingguy.pip
       - role: geerlingguy.docker
       - role: geerlingguy.ntp

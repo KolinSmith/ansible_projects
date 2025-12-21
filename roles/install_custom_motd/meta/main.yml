@@ -1,0 +1,28 @@
+---
+galaxy_info:
+  author: dax
+  description: Install custom MOTD with system stats on Debian-based systems
+  license: MIT
+  min_ansible_version: 2.9
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+
+  galaxy_tags:
+    - motd
+    - system
+    - monitoring
+    - login
+    - banner
+    - debian
+    - ubuntu
+
+dependencies: []
