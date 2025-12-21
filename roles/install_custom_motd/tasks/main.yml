@@ -1,0 +1,148 @@
+---
+- name: Check for existing Armbian MOTD
+  stat:
+    path: /etc/update-motd.d/10-armbian-header
+  register: armbian_motd_file
+
+- name: Check for Armbian release file
+  stat:
+    path: /etc/armbian-release
+  register: armbian_release_file
+
+- name: Set armbian_motd_exists fact
+  set_fact:
+    armbian_motd_exists: "{{ armbian_motd_file.stat.exists or armbian_release_file.stat.exists or (is_armbian | default(false)) }}"
+
+- name: Display detection result
+  debug:
+    msg: "Armbian MOTD detected: {{ armbian_motd_exists }}"
+
+- name: Skip installation on Armbian systems
+  debug:
+    msg: "Armbian MOTD detected - skipping custom MOTD installation (already has great MOTD)"
+  when:
+    - armbian_motd_exists
+    - motd_skip_armbian
+    - not motd_force_install
+
+- name: Exit early if skipping Armbian
+  meta: end_host
+  when:
+    - armbian_motd_exists
+    - motd_skip_armbian
+    - not motd_force_install
+
+# Only continue if NOT Armbian or force_install is true
+- name: Install dependencies for MOTD
+  apt:
+    name:
+      - figlet
+      - lsb-release
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install optional MOTD dependencies
+  apt:
+    name:
+      - lm-sensors
+      - smartmontools
+    state: present
+  ignore_errors: yes
+
+- name: Detect sensors (if lm-sensors installed)
+  command: sensors-detect --auto
+  when: ansible_facts.packages['lm-sensors'] is defined
+  failed_when: false
+  changed_when: false
+
+- name: Check if update-motd.d directory exists
+  stat:
+    path: /etc/update-motd.d
+  register: motd_dir
+
+- name: Create update-motd.d directory if missing
+  file:
+    path: /etc/update-motd.d
+    state: directory
+    mode: '0755'
+  when: not motd_dir.stat.exists
+
+- name: Backup existing MOTD scripts
+  shell: |
+    if [ ! -d /etc/update-motd.d.backup ]; then
+      cp -r /etc/update-motd.d /etc/update-motd.d.backup
+      echo "Backup created"
+    else
+      echo "Backup already exists"
+    fi
+  register: backup_result
+  changed_when: "'Backup created' in backup_result.stdout"
+  when: motd_backup_existing
+
+- name: Find existing MOTD scripts
+  find:
+    paths: /etc/update-motd.d
+    patterns: "*"
+    file_type: file
+  register: existing_motd_scripts
+
+- name: Disable existing MOTD scripts (keep as backup)
+  file:
+    path: "{{ item.path }}"
+    mode: '0644'
+  loop: "{{ existing_motd_scripts.files }}"
+  when:
+    - not armbian_motd_exists
+    - item.path is not search('00-header|10-sysinfo|40-commands')
+
+- name: Deploy custom MOTD header script
+  template:
+    src: 00-header.j2
+    dest: /etc/update-motd.d/00-header
+    mode: '0755'
+  when: motd_show_header
+
+- name: Deploy custom MOTD sysinfo script
+  template:
+    src: 10-sysinfo.j2
+    dest: /etc/update-motd.d/10-sysinfo
+    mode: '0755'
+  when: motd_show_sysinfo
+
+- name: Deploy custom MOTD commands script
+  template:
+    src: 40-commands.j2
+    dest: /etc/update-motd.d/40-commands
+    mode: '0755'
+  when: motd_show_commands
+
+- name: Disable Ubuntu's MOTD news/spam
+  file:
+    path: "{{ item }}"
+    mode: '0644'
+  loop:
+    - /etc/update-motd.d/10-help-text
+    - /etc/update-motd.d/50-motd-news
+    - /etc/update-motd.d/88-esm-announce
+    - /etc/update-motd.d/90-updates-available
+    - /etc/update-motd.d/91-release-upgrade
+    - /etc/update-motd.d/95-hwe-eol
+  failed_when: false
+  when: is_ubuntu | default(false)
+
+- name: Remove static MOTD file if it exists
+  file:
+    path: /etc/motd
+    state: absent
+  when: motd_dir.stat.exists
+
+- name: Test MOTD generation
+  command: run-parts /etc/update-motd.d/
+  register: motd_test
+  changed_when: false
+  failed_when: false
+
+- name: Display MOTD test result
+  debug:
+    msg: "MOTD test {{ 'succeeded' if motd_test.rc == 0 else 'failed' }}"

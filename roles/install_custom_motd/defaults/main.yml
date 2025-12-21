@@ -1,0 +1,42 @@
+---
+# Behavior control
+motd_skip_armbian: true              # Don't touch Armbian systems (they have great MOTD)
+motd_force_install: false            # Override and install anyway
+motd_backup_existing: true           # Backup before modifying
+
+# Temperature thresholds (Celsius)
+motd_cpu_temp_warning: 60
+motd_cpu_temp_critical: 80
+motd_disk_temp_warning: 50
+
+# Display settings
+motd_show_header: true
+motd_show_sysinfo: true
+motd_show_commands: true
+
+# Color scheme
+motd_color_good: '\e[0;92m'          # Green
+motd_color_warning: '\e[0;93m'       # Yellow
+motd_color_critical: '\e[0;91m'      # Red
+motd_color_info: '\e[0;96m'          # Cyan
+motd_color_reset: '\e[0m'            # Reset
+
+# Header settings
+motd_header_font: 'standard'         # Can use figlet fonts if installed
+motd_show_hostname: true
+
+# System info to display
+motd_show_load: true
+motd_show_memory: true
+motd_show_cpu_temp: true
+motd_show_disk_usage: true
+motd_show_uptime: true
+motd_show_ip_addresses: true
+motd_show_updates: false             # Requires apt-check, can be slow
+
+# Commands section
+motd_helpful_commands:
+  - { name: "Configuration", command: "sudo dpkg-reconfigure -plow unattended-upgrades" }
+  - { name: "Monitoring", command: "htop" }
+  - { name: "System logs", command: "journalctl -f" }
+  - { name: "Disk usage", command: "ncdu /" }
