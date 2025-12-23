@@ -1,0 +1,11 @@
+---
+- name: Deploy Docker environment files from Ansible Vault
+  hosts: docker_hosts
+  gather_facts: true
+  become: true
+  vars_files:
+    - ../../group_vars/all/vars.yml
+    - ../../group_vars/all/docker_vars.yml
+
+  roles:
+    - role: deploy_docker_env

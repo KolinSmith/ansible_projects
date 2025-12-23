@@ -1,0 +1,70 @@
+---
+# Clone or update docker_projects repository
+- name: Check if docker_projects directory exists
+  stat:
+    path: "{{ docker_projects_base_path }}"
+  register: docker_projects_dir
+
+- name: Clone docker_projects repository
+  git:
+    repo: "{{ docker_projects_repo }}"
+    dest: "{{ docker_projects_base_path }}"
+    version: "{{ docker_projects_branch }}"
+    force: no
+  when: not docker_projects_dir.stat.exists
+
+- name: Update docker_projects repository (pull latest)
+  git:
+    repo: "{{ docker_projects_repo }}"
+    dest: "{{ docker_projects_base_path }}"
+    version: "{{ docker_projects_branch }}"
+    update: yes
+  when: docker_projects_dir.stat.exists
+
+- name: Set ownership of docker_projects directory
+  file:
+    path: "{{ docker_projects_base_path }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    recurse: yes
+
+# Backup existing .env files
+- name: Backup existing .env files if they exist
+  shell: |
+    if [ -f {{ item }}/.env ]; then
+      cp {{ item }}/.env {{ item }}/.env.backup-$(date +%Y%m%d-%H%M%S)
+    fi
+  loop:
+    - "{{ docker_projects_base_path }}/dmz"
+    - "{{ docker_projects_base_path }}/voyager"
+    - "{{ docker_projects_base_path }}/operator"
+    - "{{ docker_projects_base_path }}/intranet_monitor"
+  ignore_errors: yes
+
+# Deploy .env files based on deploy_docker_services_for variable
+# Templates named .env.example contain Jinja2 variables
+# They get deployed as .env files with secrets filled in from vault
+
+# Define template mappings based on deployment target
+- name: Set template list based on deployment target
+  set_fact:
+    env_templates: "{{ dmz_templates if deploy_docker_services_for == 'dmz' else voyager_templates }}"
+  vars:
+    dmz_templates:
+      - { src: 'dmz.env.example', dest: 'dmz/.env', service: 'dmz' }
+    voyager_templates:
+      - { src: 'voyager.env.example', dest: 'voyager/.env', service: 'voyager' }
+      - { src: 'operator.env.example', dest: 'operator/.env', service: 'operator' }
+      - { src: 'intranet_monitor.env.example', dest: 'intranet_monitor/.env', service: 'intranet_monitor' }
+
+# Deploy all .env files for the selected deployment target
+- name: Deploy .env files from templates for {{ deploy_docker_services_for }}
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ docker_projects_base_path }}/{{ item.dest }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+  loop: "{{ env_templates }}"
+  loop_control:
+    label: "{{ item.service }}"
