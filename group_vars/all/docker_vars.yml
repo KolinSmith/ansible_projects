@@ -1,0 +1,20 @@
+---
+# Docker environment variables (references vault)
+docker_duckdns_token: "{{ vault_docker_duckdns_token }}"
+docker_cf_api_key: "{{ vault_docker_cf_api_key }}"
+docker_capture_api_secret: "{{ vault_docker_capture_api_secret }}"
+docker_superuser_password: "{{ vault_docker_superuser_password }}"
+docker_duckdns_domain: "{{ vault_docker_duckdns_domain }}"
+docker_search_domain: "{{ vault_docker_search_domain }}"
+docker_superuser_email: "{{ vault_docker_superuser_email }}"
+
+# Non-secret configuration
+docker_puid: "1000"
+docker_pgid: "100"
+docker_site_root: "https://healthchecks.{{ docker_duckdns_domain }}"
+docker_cf_api_email: "{{ docker_superuser_email }}"
+
+# Docker projects repository
+docker_projects_repo: "https://github.com/kolinsmith/docker_projects.git"
+docker_projects_base_path: "/home/{{ ansible_user }}/docker_projects"  # Voyager default
+docker_projects_branch: "main"

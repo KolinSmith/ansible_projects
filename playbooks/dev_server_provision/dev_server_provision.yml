@@ -1,14 +1,14 @@
 ---
-  # - name: dev server provision (voyager)
-  #   hosts: provision_servers
-  #   gather_facts: true
-  #   become: true
-  #   vars_files:
-  #     - vars/dev_server_provision_vars.yml
-  #   roles:
-  #     - role: bootstrap_python
-  #     - role: check_if_pi
-  #     - role: provision_dev_server
+  - name: dev server provision (voyager)
+    hosts: provision_servers
+    gather_facts: true
+    become: true
+    vars_files:
+      - vars/dev_server_provision_vars.yml
+    roles:
+      - role: bootstrap_python
+      - role: check_if_pi
+      - role: provision_dev_server
 
 #add in adding ansible collections (pfsense)
 #also create and populate /etc/ansible/hosts
@@ -33,6 +33,9 @@
       - role: artis3n.tailscale
       - role: geerlingguy.pip
       - role: geerlingguy.docker
+      - role: deploy_docker_env
+        vars:
+          deploy_docker_services_for: voyager
       - role: geerlingguy.ntp
       # - role: geerlingguy.node_exporter
       - role: geerlingguy.clamav

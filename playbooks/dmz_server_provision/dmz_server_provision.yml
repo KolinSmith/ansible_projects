@@ -9,6 +9,9 @@
     - role: bootstrap_python
     - role: check_if_raspberry_pi
     - role: install_docker
+    - role: deploy_docker_env
+      vars:
+        deploy_docker_services_for: dmz
     - role: import_dotfiles
     - role: install_rsyslog_client
     - role: setup_oracle_vps
