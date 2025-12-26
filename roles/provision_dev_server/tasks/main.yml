@@ -202,6 +202,14 @@
     with_items:
       - "{{ public_keys }}"
 
+  - name: create /run/sshd directory for privilege separation
+    file:
+      path: /run/sshd
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+
 #might end up using the one from the dotfiles
   - name: add sshd config file
     template:
