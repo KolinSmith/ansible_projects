@@ -24,12 +24,20 @@
 #     remove: yes
 #   when: raspberry_pi == false
 
+- name: Check if default user exists
+  getent:
+    database: passwd
+    key: "{{ default_user }}"
+  register: default_user_check
+  failed_when: false
+
 - name: remove default user
   user:
-    name: "{{ hostvars[groups['provision_servers'][0]].ansible_ssh_user }}"
+    name: "{{ default_user }}"
     state: absent
     force: true
     remove: true
+  when: default_user_check.ansible_facts.getent_passwd is defined and default_user in default_user_check.ansible_facts.getent_passwd
 
 - name: Reboot the machine (Wait for 5 min)
   reboot:

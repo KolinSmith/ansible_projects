@@ -17,4 +17,4 @@ docker_cf_api_email: "{{ docker_superuser_email }}"
 # Docker projects repository
 docker_projects_repo: "https://github.com/kolinsmith/docker_projects.git"
 docker_projects_base_path: "/home/{{ ansible_user }}/docker_projects"  # Voyager default
-docker_projects_branch: "main"
+docker_projects_branch: "master"

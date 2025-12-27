@@ -60,7 +60,7 @@ necessary_packages:
   - tldr
   - bat
   - trash-cli
-  - exa
+  - eza
   - golang-go
   - samba
   - sshpass # for ansible use

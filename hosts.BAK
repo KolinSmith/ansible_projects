@@ -5,6 +5,7 @@ pfsense ansible_host=192.168.3.1
 ansible_connection=ssh
 ansible_user={{ pfsense_username | lower }}
 ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
+#ansible_python_interpreter=/usr/local/bin/python3.11 #make sure to check which python version is installed. regex wont work here
 
 [unifi_devices]
 ubntSW ansible_host=192.168.3.247
@@ -19,12 +20,12 @@ ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 window_node_1 ansible_host=192.168.9.176
 
 [windows]
-enterprise ansible_host=192.168.3.3
+enterprise ansible_host=192.168.3.3 
 
 [windows:vars]
-ansible_connection=winrm
-ansible_user=kolin
-ansible_password=r$eBQNgc5U&A2at8kDwpWo.KzT5NvHd
+ansible_connection=winrm 
+ansible_user=kolin 
+ansible_password=r$eBQNgc5U&A2at8kDwpWo.KzLT5NvHd 
 ansible_winrm_server_cert_validation=ignore
 
 [dmz_pre_provision]
@@ -76,6 +77,15 @@ primary_load_balancer=192.168.9.6
 secondary_load_balancer=192.168.9.5
 loadbalancer_vip_ip=192.168.9.90
 
+# [internetPi]
+# internetPi ansible_host=192.168.9.10
+
+# [internetPi:vars]
+# ansible_connection=ssh
+# ansible_user={{ username | lower }}
+# ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
+# ansible_python_interpreter=/usr/bin/python3
+
 [apt_cache]
 newVoyager ansible_host=192.168.9.2
 
@@ -90,6 +100,7 @@ ansible_python_interpreter=/usr/bin/python3
 dns_servers
 load_balancers
 post_provision_servers
+#internetPi
 apt_cache
 
 [ansible_target_servers]
@@ -100,6 +111,8 @@ ansible-node-3 ansible_host=192.168.9.116
 [ansible_target_servers:vars]
 ansible_connection=ssh
 ansible_python_interpreter=/usr/bin/python2.7
+#ansible_user=serveradmin
+#ansible_become_pass=nilok3
 
 [mysql_servers]
 k3s-mysql-1 ansible_host=192.168.9.129
@@ -112,28 +125,38 @@ ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_python_interpreter=/usr/bin/python3
 
 [provision_servers]
-# HP G4 Mini - Will become new Voyager (dev server)
-# voyager ansible_host=192.168.9.103  # Commented out - already has dax user, use post_provision_servers
+#CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
+#OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
+internetPi ansible_host=192.168.9.10
 
 [provision_servers:vars]
-# Pre-provisioning with pi user
+#pre provisioning
+######################################################################
 ansible_connection=ssh
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
+# ansible_ssh_pass={{ proxmox_template_password }}
+ansible_ssh_pass=raspberry 
+###need to login to ubuntu server first (login ubuntu:ubuntu) and change password to "raspberry"
 ansible_user=pi
 ansible_ssh_user=pi
-ansible_password=raspberry
+# ansible_user=serveradmin
+# ansible_password={{ proxmox_template_password }}
+ansible_password=raspberry 
 ansible_become=yes
 ansible_become_method=sudo
-ansible_become_password=raspberry
+# ansible_become_password={{ proxmox_template_password }}
+ansible_become_password=raspberry 
 ansible_python_interpreter=/usr/bin/python3
-default_user=pi
+#ansible_python_interpreter=/usr/bin/python
+#######################################################################
 
 [post_provision_servers]
-# HP G4 Mini - After initial provisioning creates dax user
-voyager ansible_host=192.168.9.103 ansible_user=dax
+#CANNOT USE HOSTNAME THAT IS ALREADY USED ABOVE UNLESS YOU COMMENT IT OUT
+#OR ANSIBLE WILL USE ABOVE VARIABLES (USERNAME, PASSWORD, ETC)
+post_test ansible_host=192.168.9.10
 
 [post_provision_servers:vars]
-# Post-provisioning with dax user (created by provision_servers)
+#post provisioning
+#######################################################################
 ansible_connection=ssh
 ansible_user={{ username | lower }}
 ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
@@ -141,4 +164,6 @@ ansible_python_interpreter=/usr/bin/python3
 primary_load_balancer=192.168.9.6
 secondary_load_balancer=192.168.9.5
 loadbalancer_vip_ip=192.168.9.90
+######################################################################
 default_user=pi
+# default_user=serveradmin

@@ -11,6 +11,8 @@
     dest: "{{ docker_projects_base_path }}"
     version: "{{ docker_projects_branch }}"
     force: no
+    accept_hostkey: yes
+    key_file: "/home/{{ ansible_user }}/.ssh/id_ed25519"
   when: not docker_projects_dir.stat.exists
 
 - name: Update docker_projects repository (pull latest)
@@ -19,6 +21,8 @@
     dest: "{{ docker_projects_base_path }}"
     version: "{{ docker_projects_branch }}"
     update: yes
+    accept_hostkey: yes
+    key_file: "/home/{{ ansible_user }}/.ssh/id_ed25519"
   when: docker_projects_dir.stat.exists
 
 - name: Set ownership of docker_projects directory
@@ -46,16 +50,11 @@
 # They get deployed as .env files with secrets filled in from vault
 
 # Define template mappings based on deployment target
+# Each server should only get its own .env file
 - name: Set template list based on deployment target
   set_fact:
-    env_templates: "{{ dmz_templates if deploy_docker_services_for == 'dmz' else voyager_templates }}"
-  vars:
-    dmz_templates:
-      - { src: 'dmz.env.example', dest: 'dmz/.env', service: 'dmz' }
-    voyager_templates:
-      - { src: 'voyager.env.example', dest: 'voyager/.env', service: 'voyager' }
-      - { src: 'operator.env.example', dest: 'operator/.env', service: 'operator' }
-      - { src: 'intranet_monitor.env.example', dest: 'intranet_monitor/.env', service: 'intranet_monitor' }
+    env_templates:
+      - { src: '{{ deploy_docker_services_for }}.env.example', dest: '{{ deploy_docker_services_for }}/.env', service: '{{ deploy_docker_services_for }}' }
 
 # Deploy all .env files for the selected deployment target
 - name: Deploy .env files from templates for {{ deploy_docker_services_for }}
