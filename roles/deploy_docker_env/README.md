@@ -19,8 +19,9 @@ This role:
 
 **Required:**
 - `deploy_docker_services_for` - Which server's services to deploy
-  - Values: `voyager` or `dmz`
+  - Values: `voyager`, `operator`, `dmz`, `intranet_monitor`, etc.
   - **MUST** be passed when calling the role
+  - Each server gets ONLY its own .env file
 
 **Optional (defined in group_vars/all/docker_vars.yml):**
 - `docker_projects_repo` - GitHub repo URL for docker_projects
@@ -64,13 +65,19 @@ ansible-playbook deploy.yml -e "deploy_docker_services_for=dmz"
 
 ## What Gets Deployed
 
+Each server gets ONLY its own `.env` file:
+
 **When `deploy_docker_services_for: voyager`:**
-- `voyager/.env` and `.env.example`
-- `operator/.env` and `.env.example`
-- `intranet_monitor/.env` and `.env.example`
+- `voyager/.env` only
+
+**When `deploy_docker_services_for: operator`:**
+- `operator/.env` only
 
 **When `deploy_docker_services_for: dmz`:**
-- `dmz/.env` and `.env.example`
+- `dmz/.env` only
+
+**When `deploy_docker_services_for: intranet_monitor`:**
+- `intranet_monitor/.env` only
 
 ## File Permissions
 

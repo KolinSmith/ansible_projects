@@ -225,7 +225,7 @@
   - name: make sure voyager ssh private key is installed
     copy:
       content: '{{ voyager_private_ssh_key }}'
-      dest: '/home/{{ user }}/.ssh/id_ecdsa'
+      dest: '/home/{{ user }}/.ssh/id_ed25519'
       owner: "{{ user }}"
       group: "{{ user }}"
       mode: 0600
@@ -337,7 +337,7 @@
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: /home/{{ user }}/.ssh/id_ecdsa
+      key_file: /home/{{ user }}/.ssh/id_ed25519
     delegate_to: "{{ inventory_hostname }}"
     run_once: true
 
@@ -405,7 +405,7 @@
   #     accept_hostkey: yes
   #     force: yes
   #     recursive: no
-  #     key_file: /home/{{ user }}/.ssh/id_ecdsa
+  #     key_file: /home/{{ user }}/.ssh/id_ed25519
   #   delegate_to: "{{ inventory_hostname }}"
   #   run_once: true
 
@@ -449,7 +449,7 @@
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: /home/{{ user }}/.ssh/id_ecdsa
+      key_file: /home/{{ user }}/.ssh/id_ed25519
     delegate_to: "{{ inventory_hostname }}"
     run_once: true
 
@@ -469,7 +469,7 @@
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: /home/{{ user }}/.ssh/id_ecdsa
+      key_file: /home/{{ user }}/.ssh/id_ed25519
     delegate_to: "{{ inventory_hostname }}"
     run_once: true
 
@@ -496,7 +496,7 @@
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: /home/{{ user }}/.ssh/id_ecdsa
+      key_file: /home/{{ user }}/.ssh/id_ed25519
     delegate_to: "{{ inventory_hostname }}"
     run_once: true
 

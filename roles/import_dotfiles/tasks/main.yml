@@ -6,7 +6,7 @@
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: /home/dax/.ssh/id_ecdsa
+      key_file: /home/dax/.ssh/id_ed25519
     delegate_to: localhost
     run_once: true
 

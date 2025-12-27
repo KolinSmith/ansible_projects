@@ -113,7 +113,7 @@ ansible_python_interpreter=/usr/bin/python3
 
 [provision_servers]
 # HP G4 Mini - Will become new Voyager (dev server)
-voyager ansible_host=192.168.9.100
+# voyager ansible_host=192.168.9.103  # Commented out - already has dax user, use post_provision_servers
 
 [provision_servers:vars]
 # Pre-provisioning with pi user
@@ -130,7 +130,7 @@ default_user=pi
 
 [post_provision_servers]
 # HP G4 Mini - After initial provisioning creates dax user
-voyager ansible_host=192.168.9.100
+voyager ansible_host=192.168.9.103 ansible_user=dax
 
 [post_provision_servers:vars]
 # Post-provisioning with dax user (created by provision_servers)
