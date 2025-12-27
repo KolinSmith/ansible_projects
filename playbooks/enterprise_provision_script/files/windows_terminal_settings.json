@@ -1,0 +1,362 @@
+{
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "actions":
+    [
+        {
+            "command":
+            {
+                "action": "copy",
+                "singleLine": false
+            },
+            "id": "User.copy.644BA8F2"
+        },
+        {
+            "command": "paste",
+            "id": "User.paste"
+        },
+        {
+            "command":
+            {
+                "action": "splitPane",
+                "split": "auto",
+                "splitMode": "duplicate"
+            },
+            "id": "User.splitPane.A6751878"
+        },
+        {
+            "command": "find",
+            "id": "User.find"
+        }
+    ],
+    "copyFormatting": "none",
+    "copyOnSelect": false,
+    "defaultProfile": "{51855cb2-8cce-5362-8f54-464b92b32386}",
+    "keybindings":
+    [
+        {
+            "id": "User.copy.644BA8F2",
+            "keys": "ctrl+c"
+        },
+        {
+            "id": "User.find",
+            "keys": "ctrl+shift+f"
+        },
+        {
+            "id": "User.paste",
+            "keys": "ctrl+v"
+        },
+        {
+            "id": "User.splitPane.A6751878",
+            "keys": "alt+shift+d"
+        }
+    ],
+    "newTabMenu":
+    [
+        {
+            "type": "remainingProfiles"
+        }
+    ],
+    "profiles":
+    {
+        "defaults": {},
+        "list":
+        [
+            {
+                "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "hidden": false,
+                "name": "Windows PowerShell"
+            },
+            {
+                "commandline": "%SystemRoot%\\System32\\cmd.exe",
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "hidden": false,
+                "name": "Command Prompt"
+            },
+            {
+                "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+                "hidden": false,
+                "name": "Azure Cloud Shell",
+                "source": "Windows.Terminal.Azure"
+            },
+            {
+                "colorScheme": "Campbell",
+                "guid": "{2c4de342-38b7-51cf-b940-2309a097f518}",
+                "hidden": true,
+                "name": "Ubuntu",
+                "source": "Windows.Terminal.Wsl"
+            },
+            {
+                "colorScheme": "SleepyHollow",
+                "experimental.retroTerminalEffect": false,
+                "font":
+                {
+                    "face": "Cascadia Code"
+                },
+                "guid": "{51855cb2-8cce-5362-8f54-464b92b32386}",
+                "hidden": false,
+                "name": "Ubuntu",
+                "source": "CanonicalGroupLimited.Ubuntu_79rhkp1fndgsc"
+            }
+        ]
+    },
+    "schemes":
+    [
+        {
+            "background": "#2C2B2B",
+            "black": "#000000",
+            "blue": "#0225C7",
+            "brightBlack": "#686868",
+            "brightBlue": "#6871FF",
+            "brightCyan": "#60FDFF",
+            "brightGreen": "#5FFA68",
+            "brightPurple": "#FF77FF",
+            "brightRed": "#FF6E67",
+            "brightWhite": "#FFFFFF",
+            "brightYellow": "#FFFC67",
+            "cursorColor": "#C7C7C7",
+            "cyan": "#00C5C7",
+            "foreground": "#D5A200",
+            "green": "#00C200",
+            "name": "Apple Classic",
+            "purple": "#CA30C7",
+            "red": "#C91B00",
+            "selectionBackground": "#6B5B02",
+            "white": "#C7C7C7",
+            "yellow": "#C7C400"
+        },
+        {
+            "background": "#272932",
+            "black": "#272932",
+            "blue": "#9381FF",
+            "brightBlack": "#7B8097",
+            "brightBlue": "#37EBF3",
+            "brightCyan": "#37EBF3",
+            "brightGreen": "#40FFE9",
+            "brightPurple": "#CB1DCD",
+            "brightRed": "#C71515",
+            "brightWhite": "#C1DEFF",
+            "brightYellow": "#FFF955",
+            "cursorColor": "#FDF500",
+            "cyan": "#00D0DB",
+            "foreground": "#E455AE",
+            "green": "#1AC5B0",
+            "name": "CyberPunk2077",
+            "purple": "#742D8B",
+            "red": "#710000",
+            "selectionBackground": "#742D8B",
+            "white": "#D1C5C0",
+            "yellow": "#FDF500"
+        },
+        {
+            "background": "#212121",
+            "black": "#21222C",
+            "blue": "#82AAFF",
+            "brightBlack": "#545454",
+            "brightBlue": "#D6ACFF",
+            "brightCyan": "#A4FFFF",
+            "brightGreen": "#69FF94",
+            "brightPurple": "#FF92DF",
+            "brightRed": "#FF6E6E",
+            "brightWhite": "#F8F8F2",
+            "brightYellow": "#FFCB6B",
+            "cursorColor": "#ECEFF4",
+            "cyan": "#8BE9FD",
+            "foreground": "#F8F8F2",
+            "green": "#50FA7B",
+            "name": "Dracula+",
+            "purple": "#C792EA",
+            "red": "#FF5555",
+            "selectionBackground": "#F8F8F2",
+            "white": "#F8F8F2",
+            "yellow": "#FFCB6B"
+        },
+        {
+            "background": "#000000",
+            "black": "#000000",
+            "blue": "#0081FF",
+            "brightBlack": "#555555",
+            "brightBlue": "#0000FF",
+            "brightCyan": "#00CDCD",
+            "brightGreen": "#00EE00",
+            "brightPurple": "#FF00FF",
+            "brightRed": "#FF0000",
+            "brightWhite": "#FFFFFF",
+            "brightYellow": "#FFFF00",
+            "cursorColor": "#BBBBBB",
+            "cyan": "#008B8B",
+            "foreground": "#00A595",
+            "green": "#008B00",
+            "name": "ENCOM",
+            "purple": "#BC00CA",
+            "red": "#9F0000",
+            "selectionBackground": "#00A48C",
+            "white": "#BBBBBB",
+            "yellow": "#FFD000"
+        },
+        {
+            "background": "#262626",
+            "black": "#000000",
+            "blue": "#BD6D00",
+            "brightBlack": "#6A4F2A",
+            "brightBlue": "#FFBE55",
+            "brightCyan": "#C69752",
+            "brightGreen": "#F6FF40",
+            "brightPurple": "#FC874F",
+            "brightRed": "#FF8C68",
+            "brightWhite": "#FAFAFF",
+            "brightYellow": "#FFE36E",
+            "cursorColor": "#FC531D",
+            "cyan": "#F79500",
+            "foreground": "#FFCB83",
+            "green": "#A4A900",
+            "name": "IC_Orange_PPL",
+            "purple": "#FC5E00",
+            "red": "#C13900",
+            "selectionBackground": "#C14020",
+            "white": "#FFC88A",
+            "yellow": "#CAAF00"
+        },
+        {
+            "background": "#2C1D16",
+            "black": "#2C1D16",
+            "blue": "#246EB2",
+            "brightBlack": "#666666",
+            "brightBlue": "#0000FF",
+            "brightCyan": "#00E5E5",
+            "brightGreen": "#86A93E",
+            "brightPurple": "#E500E5",
+            "brightRed": "#E50000",
+            "brightWhite": "#E5E5E5",
+            "brightYellow": "#E5E500",
+            "cursorColor": "#23FF18",
+            "cyan": "#00ACEE",
+            "foreground": "#FFCC2F",
+            "green": "#2BAF2B",
+            "name": "Jackie Brown",
+            "purple": "#D05EC1",
+            "red": "#EF5734",
+            "selectionBackground": "#AF8D21",
+            "white": "#BFBFBF",
+            "yellow": "#BEBF00"
+        },
+        {
+            "background": "#1D1908",
+            "black": "#000000",
+            "blue": "#616BB0",
+            "brightBlack": "#5E5219",
+            "brightBlue": "#ACB8FF",
+            "brightCyan": "#FFBC51",
+            "brightGreen": "#B2CA3B",
+            "brightPurple": "#FFA0FF",
+            "brightRed": "#FF9149",
+            "brightWhite": "#FED698",
+            "brightYellow": "#FFE54A",
+            "cursorColor": "#D3BA30",
+            "cyan": "#916C25",
+            "foreground": "#CAC296",
+            "green": "#7C8B16",
+            "name": "Medallion",
+            "purple": "#8C5A90",
+            "red": "#B64C00",
+            "selectionBackground": "#626DAC",
+            "white": "#CAC29A",
+            "yellow": "#D3BD26"
+        },
+        {
+            "background": "#121214",
+            "black": "#572100",
+            "blue": "#5F63B4",
+            "brightBlack": "#4E4B61",
+            "brightBlue": "#8086EF",
+            "brightCyan": "#A4DCE7",
+            "brightGreen": "#D6B04E",
+            "brightPurple": "#E2C2BB",
+            "brightRed": "#D9443F",
+            "brightWhite": "#D2C7A9",
+            "brightYellow": "#F66813",
+            "cursorColor": "#AF9A91",
+            "cyan": "#8FAEA9",
+            "foreground": "#AF9A91",
+            "green": "#91773F",
+            "name": "SleepyHollow",
+            "purple": "#A17C7B",
+            "red": "#BA3934",
+            "selectionBackground": "#575256",
+            "white": "#AF9A91",
+            "yellow": "#B55600"
+        },
+        {
+            "background": "#1A1818",
+            "black": "#302B2A",
+            "blue": "#485B98",
+            "brightBlack": "#4D4E48",
+            "brightBlue": "#7999F7",
+            "brightCyan": "#FAD484",
+            "brightGreen": "#128C21",
+            "brightPurple": "#FD8AA1",
+            "brightRed": "#AA000C",
+            "brightWhite": "#FFFFFF",
+            "brightYellow": "#FC6A21",
+            "cursorColor": "#FFFFFF",
+            "cyan": "#9C814F",
+            "foreground": "#C9C9C9",
+            "green": "#587744",
+            "name": "Sundried",
+            "purple": "#864651",
+            "red": "#A7463D",
+            "selectionBackground": "#302B2A",
+            "white": "#C9C9C9",
+            "yellow": "#9D602A"
+        },
+        {
+            "background": "#151515",
+            "black": "#252525",
+            "blue": "#FC595F",
+            "brightBlack": "#5D6F71",
+            "brightBlue": "#FC595F",
+            "brightCyan": "#BA8586",
+            "brightGreen": "#A63C40",
+            "brightPurple": "#DF9395",
+            "brightRed": "#832E31",
+            "brightWhite": "#F5F5F5",
+            "brightYellow": "#D2494E",
+            "cursorColor": "#FF443E",
+            "cyan": "#BA8586",
+            "foreground": "#A1B0B8",
+            "green": "#A63C40",
+            "name": "Tomorrow Night Burns",
+            "purple": "#DF9395",
+            "red": "#832E31",
+            "selectionBackground": "#B0BEC5",
+            "white": "#F5F5F5",
+            "yellow": "#D3494E"
+        },
+        {
+            "background": "#191919",
+            "black": "#321300",
+            "blue": "#58859A",
+            "brightBlack": "#433626",
+            "brightBlue": "#85CFED",
+            "brightCyan": "#F07D14",
+            "brightGreen": "#55F238",
+            "brightPurple": "#E14C5A",
+            "brightRed": "#ED5D20",
+            "brightWhite": "#FFC800",
+            "brightYellow": "#F2B732",
+            "cursorColor": "#FAC814",
+            "cyan": "#B25A1E",
+            "foreground": "#786B53",
+            "green": "#44A900",
+            "name": "Treehouse",
+            "purple": "#97363D",
+            "red": "#B2270E",
+            "selectionBackground": "#786B53",
+            "white": "#786B53",
+            "yellow": "#AA820C"
+        }
+    ],
+    "theme": "dark",
+    "themes": []
+}

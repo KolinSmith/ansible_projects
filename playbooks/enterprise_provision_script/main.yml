@@ -24,8 +24,8 @@
       when: remove_bloatware
       tags: ["debloat"]
 
-    - import_tasks: tasks/chocolatey.yml
-      tags: ["choco"]
+    - import_tasks: tasks/scoop.yml
+      tags: ["scoop"]
 
     - import_tasks: tasks/windows_features.yml
       when: install_windows_features
@@ -35,9 +35,17 @@
       when: install_wsl2
       tags: ["wsl"]
 
+    - import_tasks: tasks/wsl_configure.yml
+      when: configure_wsl | default(true)
+      tags: ["wsl_configure"]
+
     - import_tasks: tasks/fonts.yml
       when: install_fonts
       tags: ["fonts"]
+
+    - import_tasks: tasks/windows_terminal.yml
+      when: configure_windows_terminal | default(true)
+      tags: ["windows_terminal"]
 
     - import_tasks: tasks/ohmyposh.yml
       when: install_ohmyposh

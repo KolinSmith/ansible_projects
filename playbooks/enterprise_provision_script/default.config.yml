@@ -29,71 +29,88 @@ update_categories:
 change_power_plan: true
 power_plan: "high performance"
 
-choco_installed_packages:
-  # installs 2019.2.2.20191 version of the adobe reader
-  - name: adobereader
-    version: "2022.002.20191"
-  # installs latest version of the auto-dark-mode while ignoring the package checksum
-  - name: auto-dark-mode
-    state: latest
-    choco_args: --ignorechecksum
-  # installs awscli, but won't update it
-  # - awscli
-  - authy-desktop
-  - caffeine
-  - calibre
-  - discord
-  - everything #search everything
-  - ext2fsd #allows reading and writing on ext file systems on windows
-  - firefox
-  - f.lux
-  - geekuninstaller
+scoop_installed_packages:
+  # Core utilities (main bucket)
+  - 7zip
+  - aria2  # Download manager (speeds up Scoop downloads)
   - git
-  # - golang
-  - jre8
-  - kubernetes-cli
-  - ledger-live
-  - libreoffice-fresh
-  - malwarebytes
-  - megasync
-  - microsoft-windows-terminal
-  - msiafterburner
-  - nextcloud-client
-  - notepadplusplus
-  - peazip
-  - plex
-  - powertoys
-  - python
-  - python3
-  - reflect-free #macrium reflect
-  - rufus
-  - spotify
-  - steam-client
-  # - sharex
-  # - telegram
-  - teracopy
-  - terraform
-  - veracrypt
-  - vlc
-  - vscodium #FOSS binaries of vscode
-  # - zoom
-  - windirstat
+  - dark  # Dark mode toggle
 
-  #stuff I can't find on chocolatey:
-  # IPMIView
-  # Microsoft Remote Desktop
-  # Sidebar Diagnostics
-  # Super F4
-  # Razer Synapse
-  # ProfExam Simulator
-  # VCE Player
+  # PDF Reader
+  - adobereader  # Available in extras bucket
+
+  # Authentication & Security
+  - authy  # Available in extras bucket
+  - veracrypt
+  # - malwarebytes  # Check availability
+
+  # Utilities
+  - caffeine  # Keep display awake
+  - everything  # Fast file search
+  - geekuninstaller  # Uninstaller tool
+  - windirstat  # Disk usage analyzer
+  - peazip  # Archive manager
+  - teracopy  # Enhanced file copy
+
+  # Browsers (extras bucket)
+  - brave
+  - librewolf
+  - firefox
+
+  # Productivity (extras bucket)
+  - powertoys
+  - nextcloud
+  - windows-terminal
+  - notepadplusplus
+  - calibre  # E-book manager
+  - libreoffice  # Office suite
+  - flux  # Blue light filter (f.lux)
+
+  # Media & Entertainment
+  - vlc
+  - spotify
+  - plex
+  - discord
+  - steam
+
+  # Development tools
+  - python
+  - terraform
+  - kubernetes-cli
+  - vscode  # or vscodium for FOSS version
+  # - golang  # Available in main bucket
+
+  # Cloud & Sync
+  - megasync  # Check availability in extras
+
+  # System Tools
+  - rufus  # Bootable USB creator
+  # - msiafterburner  # GPU overclocking (check availability)
+  # - ext2fsd  # ext filesystem support (may need chocolatey)
+  # - reflect-free  # Macrium Reflect (may need chocolatey)
+
+  # Optional/Specialized (uncomment as needed)
+  # - authy-desktop
+  # - jre8  # Java Runtime
+  # - ledger-live  # Cryptocurrency wallet
+  # - zoom
+
+# Packages that may still need Chocolatey (Scoop doesn't have them):
+# - ext2fsd (ext filesystem support)
+# - reflect-free (Macrium Reflect backup)
+# - IPMIView
+# - Sidebar Diagnostics
+# - Super F4
+# - Razer Synapse
+# - ProfExam Simulator
+# - VCE Player
 
 install_fonts: true
 installed_nerdfonts:
   - FiraCode
   - FantasqueSansMono
 
-install_ohmyposh: true
+install_ohmyposh: false  # Using oh-my-zsh in WSL instead
 
 # List of features: "Get-WindowsOptionalFeature -Online"
 install_windows_features: false
@@ -168,3 +185,15 @@ defrag_volumes: true
 include_volumes:
   - C
   - D
+
+# WSL Configuration
+configure_wsl: true
+wsl_user: "{{ ansible_user_id }}"  # Uses the Windows username
+install_oh_my_zsh: true
+install_tmuxinator: true
+deploy_dotfiles: true
+dotfiles_repo: "git@github.com:KolinSmith/dotfiles.git"
+dotfiles_path: "/home/{{ wsl_user }}/code_base/dotfiles"
+
+# Windows Terminal Configuration
+configure_windows_terminal: true
