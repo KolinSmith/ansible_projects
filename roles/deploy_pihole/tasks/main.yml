@@ -10,7 +10,7 @@
   # - name: add SSH public key for local username
   #   # authorized_key:
   #   #     username: "{{ username }}"
-  #   #     key: "{{ lookup('file', '/home/dax/.ssh/id_ecdsa.pub') }}"
+  #   #     key: "{{ lookup('file', lookup('env', 'HOME') ~ '/.ssh/id_ecdsa.pub') }}"
   #   #     state: present
   #   #     manage_dir: yes
   #   authorized_key:
@@ -42,7 +42,7 @@
   - name: add pihole config file setupVars.conf file to /etc/pihole
     #https://web.archive.org/web/20230102233129/https://www.tecmint.com/install-rsyslog-centralized-logging-in-centos-ubuntu/
     template:
-      src: /home/dax/code_base/ansible_projects/templates/pihole_setup_vars.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/pihole_setup_vars.j2"
       dest: /etc/pihole/setupVars.conf
       owner: pihole #replaced root with this so that the pihole username could access the database file
       group: pihole
@@ -125,7 +125,7 @@
 
   - name: add gravity-sync.conf file to /etc/gravity-sync/
     template:
-      src: /home/dax/code_base/ansible_projects/templates/gravity_sync_dot_conf.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/gravity_sync_dot_conf.j2"
       dest: /etc/gravity-sync/gravity-sync.conf
       owner: "{{ username }}"
       group: "{{ username }}"

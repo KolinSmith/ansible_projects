@@ -91,7 +91,7 @@
       home: /home/{{ username | lower}}
       create_home: yes
       state: present
-      password: "{{ dax_password }}"
+      password: "{{ user_password }}"
 
   - name: Add local user {{ username | lower}} to sudo
     lineinfile:
@@ -121,7 +121,7 @@
   - name: add SSH public key for local user
     # authorized_key:
     #     user: "{{ username | lower}}"
-    #     key: "{{ lookup('file', '/home/dax/.ssh/id_ecdsa.pub') }}"
+    #     key: "{{ lookup('file', lookup('env', 'HOME') ~ '/.ssh/id_ecdsa.pub') }}"
     #     state: present
     #     manage_dir: yes
     authorized_key:
@@ -142,7 +142,7 @@
 #might end up using the one from the dotfiles
   - name: add sshd config file
     template:
-      src: /home/dax/code_base/ansible_projects/templates/sshd_config.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/sshd_config.j2"
       dest: /etc/ssh/sshd_config
       owner: root
       group: root
@@ -213,7 +213,7 @@
 
   # - name: Remove ls aliases from .zshrc if exa isn't installed
   #   lineinfile:
-  #     path: /home/dax/.zshrc
+  #     path: /home/{{ username | lower }}/.zshrc
   #     regexp: "{{ item }}"
   #     state: absent
   #     backup: yes

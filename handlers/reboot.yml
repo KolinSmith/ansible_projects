@@ -1,0 +1,33 @@
+---
+# Global reboot handlers
+# Import into playbooks with: handlers: - import_tasks: ../../handlers/reboot.yml
+# Or from roles with: handlers: - import_tasks: ../../../handlers/reboot.yml
+
+- name: reboot and wait
+  ansible.builtin.reboot:
+    msg: "Reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: whoami
+  listen: reboot
+
+- name: reboot immediately
+  ansible.builtin.reboot:
+    msg: "Immediate reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 10
+  listen: reboot now
+
+- name: reboot with delay
+  ansible.builtin.reboot:
+    msg: "Delayed reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 60
+    post_reboot_delay: 30
+    test_command: whoami
+  listen: reboot delayed

@@ -11,7 +11,7 @@
 
   - name: add in my i2pd file
     template:
-      src: /home/dax/code_base/ansible_projects/templates/i2pd.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/i2pd.j2"
       dest: /etc/i2pd/i2pd.conf
 
   - name: start i2pd

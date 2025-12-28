@@ -2,7 +2,7 @@
   - name: piHoleUpdate
     hosts: dns_servers
     gather_facts: yes
-    #become_user: dax
+    #become_user: {{ ansible_user }}
     become: yes
     tasks:
       - name: Update and upgrade apt packages

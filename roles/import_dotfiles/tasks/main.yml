@@ -6,7 +6,7 @@
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: /home/dax/.ssh/id_ed25519
+      key_file: "{{ lookup('env', 'HOME') }}/.ssh/id_ed25519"
     delegate_to: localhost
     run_once: true
 
@@ -38,7 +38,7 @@
 # also need to remove docker and other things if they aren't used (like bat!)
   - name: Remove ls aliases from .zshrc if exa isn't installed
     lineinfile:
-      path: /home/dax/.zshrc
+      path: /home/{{ ansible_user }}/.zshrc
       regexp: "{{ item }}"
       state: absent
       backup: yes

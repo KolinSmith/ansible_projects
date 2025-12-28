@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  author: dax
+  author: your_name
   description: Install custom MOTD with system stats on Debian-based systems
   license: MIT
   min_ansible_version: 2.9
