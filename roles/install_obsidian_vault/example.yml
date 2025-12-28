@@ -3,8 +3,8 @@
 - hosts: workstations
   become: yes
   vars:
-    obsidian_user: "dax"
-    obsidian_vault_path: "/home/dax/Notes"
+    obsidian_user: "{{ ansible_user }}"
+    obsidian_vault_path: "/home/{{ ansible_user }}/Notes"
     obsidian_version: "1.8.10"
     
     # GitHub vault sync

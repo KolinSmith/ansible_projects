@@ -34,7 +34,7 @@
 
 - name: Add torrc configuration file
   template:
-    src: /home/dax/code_base/ansible_projects/templates/torrc.j2
+    src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/torrc.j2"
     dest: /etc/tor/torrc
     owner: debian-tor
     group: debian-tor

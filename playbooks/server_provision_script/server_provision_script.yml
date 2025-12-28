@@ -1,5 +1,5 @@
 ---
-#sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/server_provision_script/server_provision_script.yml
+#sudo ansible-playbook ~/code_base/ansible_projects/playbooks/server_provision_script/server_provision_script.yml
 # - name: server provision
 #   hosts: provision_servers
 #   gather_facts: true

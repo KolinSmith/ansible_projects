@@ -38,7 +38,7 @@
 
   - name: add cups printers.conf file to /etc/cups
     template:
-      src: /home/dax/code_base/ansible_projects/templates/cups_printers_dot_conf.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/cups_printers_dot_conf.j2"
       dest: /etc/cups/printer.conf
       owner: root
       group: root
@@ -47,7 +47,7 @@
   - name: add rsyslog rsyslog.conf file to /etc/rsyslog.conf
     #https://web.archive.org/web/20230102233129/https://www.tecmint.com/install-rsyslog-centralized-logging-in-centos-ubuntu/
     template:
-      src: /home/dax/code_base/ansible_projects/templates/rsyslog_dot_conf.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/rsyslog_dot_conf.j2"
       dest: /etc/rsyslog.conf
       owner: root
       group: root
@@ -57,7 +57,7 @@
   - name: add samba smb.conf file to /etc/samba
     #https://web.archive.org/web/20230102233129/https://www.tecmint.com/install-rsyslog-centralized-logging-in-centos-ubuntu/
     template:
-      src: /home/dax/code_base/ansible_projects/templates/smb_dot_conf.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/smb_dot_conf.j2"
       dest: /etc/samba/smb.conf
       owner: root
       group: root
@@ -82,7 +82,7 @@
 
   - name: add logrotate config file
     template:
-      src: /home/dax/code_base/ansible_projects/templates/logrotate_dot_conf.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/logrotate_dot_conf.j2"
       dest: /etc/logrotate.conf
       owner: root
       group: root
@@ -182,7 +182,7 @@
       home: /home/{{ user }}
       create_home: yes
       state: present
-      password: "{{ dax_password }}"
+      password: "{{ user_password }}"
 
   - name: Add local user {{ user }} to sudo
     lineinfile:
@@ -213,7 +213,7 @@
 #might end up using the one from the dotfiles
   - name: add sshd config file
     template:
-      src: /home/dax/code_base/ansible_projects/templates/sshd_config.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/sshd_config.j2"
       dest: /etc/ssh/sshd_config
       owner: root
       group: root
@@ -315,7 +315,7 @@
     file:
       path: "{{ item }}"
       state: directory
-      owner: dax
+      owner: "{{ user }}"
       group: admin
     loop:
       - /home/{{ user }}/code_base/
@@ -556,7 +556,7 @@
       #     minute: "0"
       #     hour: "3"
       #     day: "3"
-      #     job: "ansible-playbook /home/dax/code_base/ansible_projects/playbooks/piHoleUpdate/piHoleUpdate.yml -i /home/dax/code_base/ansible_projects/hosts"
+      #     job: "ansible-playbook {{ lookup('env', 'HOME') }}/code_base/ansible_projects/playbooks/piHoleUpdate/piHoleUpdate.yml -i {{ lookup('env', 'HOME') }}/code_base/ansible_projects/hosts"
 
   # - name: create reconnectUnifi job
   #   cron:

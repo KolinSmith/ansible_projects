@@ -222,7 +222,7 @@
 
 # [code_base]
 #    comment = code_base
-#    path = /home/dax/code_base
+#    path = /home/{{ ansible_user }}/code_base
 #    browseable = yes
 #    writeable = yes
 #    only guest = no
@@ -232,19 +232,19 @@
 
 [obsidian_vault]
    comment = Obsidian Vault
-   path = /home/dax/wiki
+   path = /home/{{ ansible_user }}/wiki
    browseable = yes
    writeable = yes
-   # Restrict access to only dax
-   valid users = dax
+   # Restrict access to only {{ ansible_user }}
+   valid users = {{ ansible_user }}
    only guest = no
    # More secure permissions
    create mask = 0664
    directory mask = 0775
    public = no
-   # Force ownership to dax
-   force user = dax
-   force group = dax
+   # Force ownership to {{ ansible_user }}
+   force user = {{ ansible_user }}
+   force group = {{ ansible_user }}
 
 # Windows clients look for this share name as a source of downloadable
 # printer drivers

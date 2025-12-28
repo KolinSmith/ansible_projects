@@ -1,5 +1,5 @@
 ---
-  #sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/dns_server_provision/dns_server_provision.yml
+  #sudo ansible-playbook ~/code_base/ansible_projects/playbooks/dns_server_provision/dns_server_provision.yml
   - name: initial setup (defiant & ds9)
     hosts: provision_servers
     gather_facts: true

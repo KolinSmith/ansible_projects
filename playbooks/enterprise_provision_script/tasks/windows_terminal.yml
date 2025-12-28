@@ -1,0 +1,26 @@
+---
+# Deploy Windows Terminal settings.json configuration
+
+- name: Check if Windows Terminal is installed
+  ansible.builtin.raw: >
+    powershell.exe -Command "Test-Path '$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe'"
+  register: wt_installed
+  changed_when: false
+  failed_when: false
+
+- name: Backup existing Windows Terminal settings
+  ansible.builtin.raw: >
+    powershell.exe -Command "
+    if (Test-Path '$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json') {
+      Copy-Item '$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json' `
+                '$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json.backup'
+    }
+    "
+  when: wt_installed.rc == 0
+  changed_when: false
+
+- name: Deploy Windows Terminal settings.json
+  ansible.windows.win_copy:
+    src: windows_terminal_settings.json
+    dest: '%LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+  when: wt_installed.rc == 0

@@ -1,0 +1,70 @@
+---
+# Ensure Scoop is installed
+- name: Check if Scoop is installed
+  ansible.builtin.raw: powershell.exe -Command "Get-Command scoop -ErrorAction SilentlyContinue"
+  register: scoop_check
+  changed_when: false
+  failed_when: false
+
+- name: Install Scoop
+  ansible.builtin.raw: >
+    powershell.exe -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force;
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;
+    Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression"
+  when: scoop_check.rc != 0
+
+# Ensure required buckets are added
+- name: Check if extras bucket exists
+  ansible.builtin.raw: powershell.exe -Command "scoop bucket list | Select-String -Pattern 'extras'"
+  register: extras_bucket_check
+  changed_when: false
+  failed_when: false
+
+- name: Add extras bucket
+  ansible.builtin.raw: powershell.exe -Command "scoop bucket add extras"
+  when: extras_bucket_check.rc != 0
+
+- name: Check if nerd-fonts bucket exists
+  ansible.builtin.raw: powershell.exe -Command "scoop bucket list | Select-String -Pattern 'nerd-fonts'"
+  register: nerdfonts_bucket_check
+  changed_when: false
+  failed_when: false
+
+- name: Add nerd-fonts bucket
+  ansible.builtin.raw: powershell.exe -Command "scoop bucket add nerd-fonts"
+  when:
+    - install_fonts | default(false)
+    - nerdfonts_bucket_check.rc != 0
+
+# Install Scoop packages
+- name: Get list of installed Scoop apps
+  ansible.builtin.raw: powershell.exe -Command "scoop list | Select-Object -Skip 3 | ForEach-Object { ($_ -split '\s+')[0] }"
+  register: scoop_installed
+  changed_when: false
+
+- name: Install configured Scoop packages
+  ansible.builtin.raw: powershell.exe -Command "scoop install {{ item.name | default(item) }}"
+  loop: "{{ scoop_installed_packages }}"
+  when:
+    - item.name | default(item) not in scoop_installed.stdout
+    - item.state | default('present') == 'present'
+
+- name: Update configured Scoop packages
+  ansible.builtin.raw: powershell.exe -Command "scoop update {{ item.name | default(item) }}"
+  loop: "{{ scoop_installed_packages }}"
+  when:
+    - item.state | default('present') == 'latest'
+
+# Install Nerd Fonts if configured
+- name: Install Nerd Fonts
+  ansible.builtin.raw: powershell.exe -Command "scoop install {{ item }}"
+  loop: "{{ installed_nerdfonts | default([]) }}"
+  when: install_fonts | default(false)
+  ignore_errors: true
+
+- name: Update Scoop
+  ansible.builtin.raw: powershell.exe -Command "scoop update"
+
+- name: Cleanup Scoop cache
+  ansible.builtin.raw: powershell.exe -Command "scoop cleanup *; scoop cache rm *"
+  ignore_errors: true

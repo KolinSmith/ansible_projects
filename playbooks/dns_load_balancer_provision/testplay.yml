@@ -18,7 +18,7 @@
       # 
       # - name: Remove ls aliases from .zshrc if exa isn't installed
       #   lineinfile:
-      #     path: /home/dax/.zshrc
+      #     path: /home/{{ ansible_user }}/.zshrc
       #     regexp: "{{ item }}"
       #     state: absent
       #     backup: yes

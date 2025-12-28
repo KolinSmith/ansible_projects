@@ -17,7 +17,7 @@
       home: /home/{{ user }}
       create_home: yes
       state: present
-      password: "{{ dax_password }}"
+      password: "{{ user_password }}"
 
   - name: Add local user {{ user }} to sudo
     lineinfile:
@@ -32,7 +32,7 @@
     file:
       path: "{{ item }}"
       state: directory
-      owner: dax
+      owner: "{{ user }}"
       group: admin
     loop:
       - /home/{{ user }}/code_base/
@@ -51,7 +51,7 @@
 #might end up using the one from the dotfiles
   - name: add sshd config file
     template:
-      src: /home/dax/code_base/ansible_projects/templates/sshd_config.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/sshd_config.j2"
       dest: /etc/ssh/sshd_config
       owner: root
       group: root
@@ -156,7 +156,7 @@
     file:
       path: "{{ item }}"
       state: directory
-      owner: dax
+      owner: "{{ user }}"
       group: admin
     loop:
       - /home/{{ user }}/docker/
