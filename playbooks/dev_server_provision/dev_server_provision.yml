@@ -26,6 +26,7 @@
       - role: orangepi_disable_ramlog
       - role: install_obsidian_vault
       - role: import_dotfiles
+      - role: install_claude_code
       - role: install_pivpn
       - role: install_rsyslog_server
       # - role: IronicBadger.figurine  # Replaced by install_custom_motd (more comprehensive)
