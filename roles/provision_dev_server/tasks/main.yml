@@ -65,19 +65,19 @@
     notify: Restart smbd
 
   - name: Check if Samba user exists
-    shell: pdbedit -L | grep -q "^{{ vault_username }}:"
+    shell: pdbedit -L | grep -q "^{{ vault_smb_username }}:"
     register: samba_user_exists
     failed_when: false
     changed_when: false
 
-  - name: Create Samba user for {{ vault_username }}
+  - name: Create Samba user for {{ vault_smb_username }}
     shell: |
-      (echo "{{ vault_dax_password }}"; echo "{{ vault_dax_password }}") | smbpasswd -a -s {{ vault_username }}
+      (echo "{{ vault_smb_password }}"; echo "{{ vault_smb_password }}") | smbpasswd -a -s {{ vault_smb_username }}
     when: samba_user_exists.rc != 0
     no_log: true
 
-  - name: Enable Samba user {{ vault_username }}
-    shell: smbpasswd -e {{ vault_username }}
+  - name: Enable Samba user {{ vault_smb_username }}
+    shell: smbpasswd -e {{ vault_smb_username }}
     when: samba_user_exists.rc != 0
 
   - name: create /etc/logrotate.d/ directory
