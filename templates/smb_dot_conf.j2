@@ -235,8 +235,8 @@
    path = /home/{{ ansible_user }}/wiki
    browseable = yes
    writeable = yes
-   # Restrict access to only {{ ansible_user }}
-   valid users = {{ ansible_user }}
+   # Restrict access to SMB user
+   valid users = {{ vault_smb_username }}
    only guest = no
    # More secure permissions
    create mask = 0664
