@@ -1,0 +1,38 @@
+---
+# Configure Docker-based Pi-hole
+# This task file runs when Pi-hole is deployed via Docker Compose
+
+- name: Wait for Pi-hole container to be ready
+  command: "docker exec {{ pihole_container_name }} pihole status"
+  register: pihole_status
+  retries: 10
+  delay: 5
+  until: pihole_status.rc == 0
+  failed_when: false
+  changed_when: false
+
+- name: Read whitelist domains from file
+  set_fact:
+    whitelist_domains: "{{ lookup('file', 'whitelist.txt').split('\n') | reject('match', '^#.*') | reject('match', '^\\s*$') | list }}"
+
+- name: Read blacklist domains from file
+  set_fact:
+    blacklist_domains: "{{ lookup('file', 'blacklist.txt').split('\n') | reject('match', '^#.*') | reject('match', '^\\s*$') | list }}"
+
+- name: Add whitelisted domains to Docker Pi-hole
+  command: "docker exec {{ pihole_container_name }} pihole -w {{ item }}"
+  with_items: "{{ whitelist_domains }}"
+  register: whitelist_result
+  changed_when: "'Already whitelisted' not in whitelist_result.stdout"
+  failed_when: false
+
+- name: Add blacklisted domains to Docker Pi-hole
+  command: "docker exec {{ pihole_container_name }} pihole -b {{ item }}"
+  with_items: "{{ blacklist_domains }}"
+  register: blacklist_result
+  changed_when: "'Already blacklisted' not in blacklist_result.stdout"
+  failed_when: false
+
+- name: Display Docker Pi-hole configuration status
+  debug:
+    msg: "Docker Pi-hole configured: whitelist and blacklist applied to {{ pihole_container_name }}"
