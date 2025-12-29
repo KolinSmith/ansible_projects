@@ -62,6 +62,29 @@
       owner: root
       group: root
       mode: 0600
+    notify: Restart smbd
+
+  - name: Check if Samba user exists
+    shell: pdbedit -L | grep -q "^{{ vault_smb_username }}:"
+    register: samba_user_exists
+    failed_when: false
+    changed_when: false
+
+  - name: Create Samba user for {{ vault_smb_username }}
+    shell: |
+      (echo "{{ vault_smb_password }}"; echo "{{ vault_smb_password }}") | smbpasswd -a -s {{ vault_smb_username }}
+    when: samba_user_exists.rc != 0
+    no_log: true
+
+  - name: Enable Samba user {{ vault_smb_username }}
+    shell: smbpasswd -e {{ vault_smb_username }}
+    when: samba_user_exists.rc != 0
+
+  - name: Ensure {{ ansible_user }} home directory is readable for Samba access
+    file:
+      path: /home/{{ ansible_user }}
+      mode: '0755'
+      state: directory
 
   - name: create /etc/logrotate.d/ directory
     file:
