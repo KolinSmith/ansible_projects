@@ -1,0 +1,14 @@
+# Pi-hole Whitelist
+# One domain per line
+# Lines starting with # are ignored
+
+dartsearch.net
+googleadservices.com
+www.dartsearch.net
+www.googleadservices.com
+clickserve.dartsearch.net
+ad.doubleclick.net
+ally.com
+protonmail.com
+loftliving.com
+claude.ai

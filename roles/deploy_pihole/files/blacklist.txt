@@ -1,0 +1,8 @@
+# Pi-hole Blacklist
+# One domain per line
+# Lines starting with # are ignored
+
+app-analytics-v2.snapchat.com
+metrics.icloud.com
+metrics.plex.tv
+analytics.plex.tv
