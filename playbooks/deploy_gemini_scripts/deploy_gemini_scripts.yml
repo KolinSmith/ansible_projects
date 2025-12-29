@@ -3,10 +3,10 @@
     hosts: post_provision_servers
     gather_facts: yes
     become: yes
-    become_user: dax
+    become_user: "{{ ansible_user }}"
     vars:
-      - user: 'dax'
-      - dest: '/home/dax/scripts'
+      - user: "{{ ansible_user }}"
+      - dest: '/home/{{ ansible_user }}/scripts'
     tasks:
 
       - name: check if python3 is installed and try to install it. ignore error if you can't install
@@ -20,7 +20,7 @@
 
       - name: add gemini scripts
         template:
-          src: /home/dax/code_base/ansible_projects/templates/gemini_api_scripts/{{ item }}.j2
+          src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/gemini_api_scripts/{{ item }}.j2"
           dest: "{{ dest }}/{{ item }}.py"
           owner: "{{ user }}"
           mode: 0644

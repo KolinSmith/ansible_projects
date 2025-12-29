@@ -2,7 +2,7 @@
   - name: tor_node_provision
     hosts: all
     gather_facts: yes
-    #become_user: dax
+    #become_user: {{ ansible_user }}
     become: yes
     vars:
       necessary_packages:

@@ -1,0 +1,152 @@
+---
+# Configure WSL Ubuntu environment with oh-my-zsh, tmuxinator, and dotfiles
+
+- name: Check if WSL is installed
+  ansible.builtin.raw: powershell.exe -Command "Get-Command wsl -ErrorAction SilentlyContinue"
+  register: wsl_check
+  changed_when: false
+  failed_when: false
+
+- name: Ensure WSL is installed before continuing
+  ansible.builtin.fail:
+    msg: "WSL is not installed. Please enable WSL2 and install Ubuntu first."
+  when: wsl_check.rc != 0
+
+# Update package lists
+- name: Update apt package cache in WSL
+  ansible.builtin.raw: wsl sudo apt-get update
+  changed_when: false
+
+# Install dependencies
+- name: Install required packages in WSL
+  ansible.builtin.raw: wsl sudo apt-get install -y zsh git curl wget ruby-full build-essential tmux
+
+# Install oh-my-zsh
+- name: Check if oh-my-zsh is installed
+  ansible.builtin.raw: wsl test -d ~/.oh-my-zsh
+  register: ohmyzsh_check
+  changed_when: false
+  failed_when: false
+
+- name: Install oh-my-zsh
+  ansible.builtin.raw: >
+    wsl sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  when:
+    - install_oh_my_zsh | default(true)
+    - ohmyzsh_check.rc != 0
+
+# Install Powerlevel10k theme
+- name: Check if Powerlevel10k is installed
+  ansible.builtin.raw: wsl test -d ~/.oh-my-zsh/custom/themes/powerlevel10k
+  register: p10k_check
+  changed_when: false
+  failed_when: false
+
+- name: Clone Powerlevel10k theme
+  ansible.builtin.raw: >
+    wsl git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.oh-my-zsh/custom/themes/powerlevel10k
+  when:
+    - install_oh_my_zsh | default(true)
+    - p10k_check.rc != 0
+
+# Change default shell to zsh
+- name: Set zsh as default shell
+  ansible.builtin.raw: wsl sudo chsh -s $(which zsh) {{ wsl_user }}
+  when: install_oh_my_zsh | default(true)
+  ignore_errors: true
+
+# Install tmuxinator
+- name: Check if tmuxinator is installed
+  ansible.builtin.raw: wsl which tmuxinator
+  register: tmuxinator_check
+  changed_when: false
+  failed_when: false
+
+- name: Install tmuxinator via gem
+  ansible.builtin.raw: wsl sudo gem install tmuxinator
+  when:
+    - install_tmuxinator | default(true)
+    - tmuxinator_check.rc != 0
+
+# Create directory structure
+- name: Create code_base directory
+  ansible.builtin.raw: wsl mkdir -p ~/code_base
+  changed_when: false
+
+- name: Create .ssh directory
+  ansible.builtin.raw: wsl mkdir -p ~/.ssh && wsl chmod 700 ~/.ssh
+  changed_when: false
+
+- name: Create .config/tmuxinator directory
+  ansible.builtin.raw: wsl mkdir -p ~/.config/tmuxinator
+  when: install_tmuxinator | default(true)
+  changed_when: false
+
+# Clone dotfiles repository
+- name: Check if dotfiles repository exists
+  ansible.builtin.raw: wsl test -d {{ dotfiles_path }}
+  register: dotfiles_check
+  changed_when: false
+  failed_when: false
+  when: deploy_dotfiles | default(true)
+
+- name: Clone dotfiles repository
+  ansible.builtin.raw: wsl git clone {{ dotfiles_repo }} {{ dotfiles_path }}
+  when:
+    - deploy_dotfiles | default(true)
+    - dotfiles_check.rc != 0
+  ignore_errors: true  # May fail if SSH keys not yet deployed
+
+# Deploy SSH keys (these should be in vault)
+- name: Deploy SSH private key
+  ansible.builtin.raw: >
+    powershell.exe -Command "
+    $key = '{{ voyager_private_ssh_key }}';
+    wsl bash -c \"echo '$key' > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519\"
+    "
+  when: voyager_private_ssh_key is defined
+  no_log: true
+
+- name: Deploy SSH public key
+  ansible.builtin.raw: >
+    powershell.exe -Command "
+    $key = '{{ voyager_public_ssh_key }}';
+    wsl bash -c \"echo '$key' > ~/.ssh/id_ed25519.pub && chmod 644 ~/.ssh/id_ed25519.pub\"
+    "
+  when: voyager_public_ssh_key is defined
+  no_log: true
+
+# Symlink dotfiles
+- name: Symlink .zshrc
+  ansible.builtin.raw: wsl ln -sf {{ dotfiles_path }}/.zshrc ~/.zshrc
+  when: deploy_dotfiles | default(true)
+  ignore_errors: true
+
+- name: Symlink .p10k.zsh
+  ansible.builtin.raw: wsl ln -sf {{ dotfiles_path }}/.p10k.zsh ~/.p10k.zsh
+  when: deploy_dotfiles | default(true)
+  ignore_errors: true
+
+- name: Symlink .tmux.conf
+  ansible.builtin.raw: wsl ln -sf {{ dotfiles_path }}/.tmux.conf ~/.tmux.conf
+  when: deploy_dotfiles | default(true)
+  ignore_errors: true
+
+- name: Symlink tmuxinator configs
+  ansible.builtin.raw: wsl ln -sf {{ dotfiles_path }}/tmuxinator/* ~/.config/tmuxinator/
+  when:
+    - deploy_dotfiles | default(true)
+    - install_tmuxinator | default(true)
+  ignore_errors: true
+
+- name: Configure git user
+  ansible.builtin.raw: wsl git config --global user.name "Kolin Smith"
+  when: deploy_dotfiles | default(true)
+
+- name: Configure git email
+  ansible.builtin.raw: wsl git config --global user.email "kolinksmith@gmail.com"
+  when: deploy_dotfiles | default(true)
+
+- name: Set git to use SSH instead of HTTPS
+  ansible.builtin.raw: wsl git config --global url."git@github.com:".insteadOf "https://github.com/"
+  when: deploy_dotfiles | default(true)

@@ -38,7 +38,7 @@
 
   - name: add cups printers.conf file to /etc/cups
     template:
-      src: /home/dax/code_base/ansible_projects/templates/cups_printers_dot_conf.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/cups_printers_dot_conf.j2"
       dest: /etc/cups/printer.conf
       owner: root
       group: root
@@ -47,7 +47,7 @@
   - name: add rsyslog rsyslog.conf file to /etc/rsyslog.conf
     #https://web.archive.org/web/20230102233129/https://www.tecmint.com/install-rsyslog-centralized-logging-in-centos-ubuntu/
     template:
-      src: /home/dax/code_base/ansible_projects/templates/rsyslog_dot_conf.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/rsyslog_dot_conf.j2"
       dest: /etc/rsyslog.conf
       owner: root
       group: root
@@ -57,7 +57,7 @@
   - name: add samba smb.conf file to /etc/samba
     #https://web.archive.org/web/20230102233129/https://www.tecmint.com/install-rsyslog-centralized-logging-in-centos-ubuntu/
     template:
-      src: /home/dax/code_base/ansible_projects/templates/smb_dot_conf.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/smb_dot_conf.j2"
       dest: /etc/samba/smb.conf
       owner: root
       group: root
@@ -82,7 +82,7 @@
 
   - name: add logrotate config file
     template:
-      src: /home/dax/code_base/ansible_projects/templates/logrotate_dot_conf.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/logrotate_dot_conf.j2"
       dest: /etc/logrotate.conf
       owner: root
       group: root
@@ -182,7 +182,7 @@
       home: /home/{{ user }}
       create_home: yes
       state: present
-      password: "{{ dax_password }}"
+      password: "{{ user_password }}"
 
   - name: Add local user {{ user }} to sudo
     lineinfile:
@@ -202,10 +202,18 @@
     with_items:
       - "{{ public_keys }}"
 
+  - name: create /run/sshd directory for privilege separation
+    file:
+      path: /run/sshd
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+
 #might end up using the one from the dotfiles
   - name: add sshd config file
     template:
-      src: /home/dax/code_base/ansible_projects/templates/sshd_config.j2
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/sshd_config.j2"
       dest: /etc/ssh/sshd_config
       owner: root
       group: root
@@ -217,7 +225,7 @@
   - name: make sure voyager ssh private key is installed
     copy:
       content: '{{ voyager_private_ssh_key }}'
-      dest: '/home/{{ user }}/.ssh/id_ecdsa'
+      dest: '/home/{{ user }}/.ssh/id_ed25519'
       owner: "{{ user }}"
       group: "{{ user }}"
       mode: 0600
@@ -307,7 +315,7 @@
     file:
       path: "{{ item }}"
       state: directory
-      owner: dax
+      owner: "{{ user }}"
       group: admin
     loop:
       - /home/{{ user }}/code_base/
@@ -329,7 +337,7 @@
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: /home/{{ user }}/.ssh/id_ecdsa
+      key_file: /home/{{ user }}/.ssh/id_ed25519
     delegate_to: "{{ inventory_hostname }}"
     run_once: true
 
@@ -397,7 +405,7 @@
   #     accept_hostkey: yes
   #     force: yes
   #     recursive: no
-  #     key_file: /home/{{ user }}/.ssh/id_ecdsa
+  #     key_file: /home/{{ user }}/.ssh/id_ed25519
   #   delegate_to: "{{ inventory_hostname }}"
   #   run_once: true
 
@@ -441,7 +449,7 @@
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: /home/{{ user }}/.ssh/id_ecdsa
+      key_file: /home/{{ user }}/.ssh/id_ed25519
     delegate_to: "{{ inventory_hostname }}"
     run_once: true
 
@@ -461,7 +469,7 @@
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: /home/{{ user }}/.ssh/id_ecdsa
+      key_file: /home/{{ user }}/.ssh/id_ed25519
     delegate_to: "{{ inventory_hostname }}"
     run_once: true
 
@@ -488,7 +496,7 @@
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: /home/{{ user }}/.ssh/id_ecdsa
+      key_file: /home/{{ user }}/.ssh/id_ed25519
     delegate_to: "{{ inventory_hostname }}"
     run_once: true
 
@@ -507,16 +515,16 @@
       group: admin
       remote_src: true  
 
-  - name: Remove ls aliases from .zshrc if exa isn't installed
+  - name: Remove ls aliases from .zshrc if eza isn't installed
     lineinfile:
       path: /home/{{ user }}/.zshrc
       regexp: "{{ item }}"
       state: absent
       backup: yes
     with_items:
-      - ls="exa --git"
-      - lsd="exa -a -l -i --git -H"
-   #when raspberry not pi 1 or pi zero which are both armv6l
+      - ls="eza"
+      - lsd="eza -a -l -i -H"
+   #when raspberry pi 1 or pi zero (armv6l) which can't install eza
     when: not (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
 
   # - name: delete dotfiles from /tmp
@@ -548,7 +556,7 @@
       #     minute: "0"
       #     hour: "3"
       #     day: "3"
-      #     job: "ansible-playbook /home/dax/code_base/ansible_projects/playbooks/piHoleUpdate/piHoleUpdate.yml -i /home/dax/code_base/ansible_projects/hosts"
+      #     job: "ansible-playbook {{ lookup('env', 'HOME') }}/code_base/ansible_projects/playbooks/piHoleUpdate/piHoleUpdate.yml -i {{ lookup('env', 'HOME') }}/code_base/ansible_projects/hosts"
 
   # - name: create reconnectUnifi job
   #   cron:

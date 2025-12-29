@@ -1,4 +1,4 @@
-# user: 'dax'
+# user: "{{ ansible_user }}"
 # my_custom_path_var: '/home/{{ user }}/.local/bin'
 # public_keys:
 #   - name: Enterprise Public Key File

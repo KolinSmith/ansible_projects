@@ -1,5 +1,5 @@
 ---
-  #sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/dns_load_balancer_provision/dns_load_balancer_provision.yml
+  #sudo ansible-playbook ~/code_base/ansible_projects/playbooks/dns_load_balancer_provision/dns_load_balancer_provision.yml
   - name: initial setup (stargazer & shenzhou)
     hosts: provision_servers
     gather_facts: yes

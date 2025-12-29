@@ -17,9 +17,10 @@ FORWARD_CHAIN_EDITED=0
 # NETWORK INTERFACE SETTINGS
 # =============================================================================
 # Primary network interface for the VPN server
-# Usually eth0 for Ethernet, wlan0 for WiFi
+# Usually eth0 for Ethernet, wlan0 for WiFi, eno1 for newer systems
 # IPv4dev=eth0
-IPv4dev=end1
+# IPv4dev=end1
+IPv4dev=eno1
 
 # Reserve DHCP IP address for this device
 # Set to 1 to prevent IP conflicts
@@ -29,10 +30,10 @@ dhcpReserv=1
 # USER CONFIGURATION
 # =============================================================================
 # User account that will manage the VPN
-install_user=dax
+install_user={{ ansible_user }}
 
 # Home directory for the install user
-install_home=/home/dax
+install_home=/home/{{ ansible_user }}
 
 # =============================================================================
 # VPN PROTOCOL SETTINGS

@@ -1,0 +1,91 @@
+---
+# Install NVM (Node Version Manager)
+- name: Check if NVM is already installed
+  stat:
+    path: "/home/{{ ansible_user }}/.nvm/nvm.sh"
+  register: nvm_installed
+  become_user: "{{ ansible_user }}"
+
+- name: Download and install NVM
+  shell: >
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+  args:
+    creates: "/home/{{ ansible_user }}/.nvm/nvm.sh"
+  become_user: "{{ ansible_user }}"
+  when: not nvm_installed.stat.exists
+
+# Install Node.js LTS via NVM
+- name: Install Node.js LTS via NVM
+  shell: >
+    export NVM_DIR="$HOME/.nvm" &&
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" &&
+    nvm install --lts
+  args:
+    executable: /bin/bash
+    creates: "/home/{{ ansible_user }}/.nvm/versions/node"
+  become_user: "{{ ansible_user }}"
+
+# Install Claude Code via npm
+- name: Check if Claude Code is already installed
+  shell: >
+    export NVM_DIR="$HOME/.nvm" &&
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" &&
+    command -v claude
+  args:
+    executable: /bin/bash
+  register: claude_check
+  failed_when: false
+  changed_when: false
+  become_user: "{{ ansible_user }}"
+
+- name: Install Claude Code via npm
+  shell: >
+    export NVM_DIR="$HOME/.nvm" &&
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" &&
+    npm install -g @anthropic-ai/claude-code
+  args:
+    executable: /bin/bash
+  become_user: "{{ ansible_user }}"
+  when: claude_check.rc != 0
+
+# Configure .claude symlink
+- name: Check if .claude symlink already exists
+  stat:
+    path: "/home/{{ ansible_user }}/.claude"
+  register: claude_dir_stat
+
+- name: Remove .claude if it's not a symlink
+  file:
+    path: "/home/{{ ansible_user }}/.claude"
+    state: absent
+  when: claude_dir_stat.stat.exists and not claude_dir_stat.stat.islnk
+
+- name: Create symlink from ~/.claude to ~/code_base/dotfiles/.claude
+  file:
+    src: "/home/{{ ansible_user }}/code_base/dotfiles/.claude"
+    dest: "/home/{{ ansible_user }}/.claude"
+    state: link
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    force: yes
+
+# Verify installation
+- name: Verify Claude Code installation
+  shell: >
+    export NVM_DIR="$HOME/.nvm" &&
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" &&
+    claude --version
+  args:
+    executable: /bin/bash
+  register: claude_version
+  changed_when: false
+  become_user: "{{ ansible_user }}"
+
+- name: Display Claude Code installation status
+  debug:
+    msg:
+      - "Claude Code installation complete!"
+      - "Version: {{ claude_version.stdout }}"
+      - "Config symlink: ~/.claude -> ~/code_base/dotfiles/.claude"
+      - "Node.js installed via NVM"
+      - "Run 'claude --version' to verify (after sourcing nvm)"

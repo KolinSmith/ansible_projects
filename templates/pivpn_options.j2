@@ -28,10 +28,10 @@ dhcpReserv=1
 # USER CONFIGURATION
 # =============================================================================
 # User account that will manage the VPN
-install_user=dax
+install_user={{ ansible_user }}
 
 # Home directory for the install user
-install_home=/home/dax
+install_home=/home/{{ ansible_user }}
 
 # =============================================================================
 # VPN PROTOCOL SETTINGS
