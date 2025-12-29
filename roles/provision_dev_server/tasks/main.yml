@@ -80,6 +80,12 @@
     shell: smbpasswd -e {{ vault_smb_username }}
     when: samba_user_exists.rc != 0
 
+  - name: Ensure {{ ansible_user }} home directory is readable for Samba access
+    file:
+      path: /home/{{ ansible_user }}
+      mode: '0755'
+      state: directory
+
   - name: create /etc/logrotate.d/ directory
     file:
       path: /etc/logrotate.d/
