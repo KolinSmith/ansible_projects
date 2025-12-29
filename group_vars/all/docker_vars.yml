@@ -8,6 +8,10 @@ docker_duckdns_domain: "{{ vault_docker_duckdns_domain }}"
 docker_search_domain: "{{ vault_docker_search_domain }}"
 docker_superuser_email: "{{ vault_docker_superuser_email }}"
 
+# Beszel monitoring secrets (unique per hub deployment)
+docker_beszel_agent_token: "{{ vault_beszel_agent_token }}"
+docker_beszel_agent_key: "{{ vault_beszel_agent_key }}"
+
 # Non-secret configuration
 docker_puid: "1000"
 docker_pgid: "100"
