@@ -1,14 +1,22 @@
 ---
-  - name: Install sysbench
-    apt: 
-      name: sysbench
-      state: present
+  # Oracle Cloud Free Tier Keep-Alive
+  # Prevents instance from being reclaimed due to low CPU usage
+  # https://www.reddit.com/r/oraclecloud/comments/122b4gf/
 
-  - name: add a line to root's crontab to run sysbench 
-    become: true
-    cron: 
+  - name: Remove old sysbench keep-alive cron (if exists)
+    cron:
       name: "every 2:00 AM, run for 4 hours"
-      minute: "0"
-      hour: "2"
-      job: "sysbench --test=cpu --time=14400"
+      state: absent
       user: root
+
+  - name: Create Oracle keep-alive cron file
+    copy:
+      dest: /etc/cron.d/dummy-load
+      content: |
+        # Oracle Cloud Free Tier Keep-Alive
+        # Every 5 minutes: run for 46 seconds, generates 100% load on 1 CPU
+        # https://www.reddit.com/r/oraclecloud/comments/122b4gf/
+        */5 * * * * root timeout 46 nice md5sum /dev/zero
+      owner: root
+      group: root
+      mode: '0644'
