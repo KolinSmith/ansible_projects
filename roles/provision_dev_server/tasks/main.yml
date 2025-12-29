@@ -62,6 +62,23 @@
       owner: root
       group: root
       mode: 0600
+    notify: Restart smbd
+
+  - name: Check if Samba user exists
+    shell: pdbedit -L | grep -q "^{{ vault_username }}:"
+    register: samba_user_exists
+    failed_when: false
+    changed_when: false
+
+  - name: Create Samba user for {{ vault_username }}
+    shell: |
+      (echo "{{ vault_dax_password }}"; echo "{{ vault_dax_password }}") | smbpasswd -a -s {{ vault_username }}
+    when: samba_user_exists.rc != 0
+    no_log: true
+
+  - name: Enable Samba user {{ vault_username }}
+    shell: smbpasswd -e {{ vault_username }}
+    when: samba_user_exists.rc != 0
 
   - name: create /etc/logrotate.d/ directory
     file:
