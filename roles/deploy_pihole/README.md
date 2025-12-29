@@ -28,9 +28,22 @@ This role intelligently detects whether Pi-hole should be deployed via Docker Co
 - `ansible_user` - User account for deployment
 - `username` - User for file ownership (legacy variable)
 
+**Required vault variables (in `group_vars/all/vault.yml`):**
+- `vault_pihole_webpassword` - Pi-hole web interface password (hashed with sha256)
+
 **Optional variables:**
-- `pihole_webpassword` - Web interface password (hashed)
-- `dns_server_private_ssh_key` - SSH key for gravity-sync
+- `dns_server_private_ssh_key` - SSH key for gravity-sync (traditional install only)
+
+### How to Generate Password Hash
+
+```bash
+# Generate hashed password for vault
+echo -n 'your_password' | sha256sum | awk '{print $1}'
+
+# Add to group_vars/all/vault.yml
+ansible-vault edit group_vars/all/vault.yml
+# Add: vault_pihole_webpassword: "your_hashed_password_here"
+```
 
 ## Dependencies
 

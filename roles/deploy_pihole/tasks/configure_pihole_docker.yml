@@ -1,6 +1,9 @@
 ---
 # Configure Docker-based Pi-hole
 # This task file runs when Pi-hole is deployed via Docker Compose
+#
+# NOTE: .env file should be deployed by deploy_docker_env role BEFORE this role runs
+# deploy_docker_env uses templates: ds9.env.example / defiant.env.example
 
 - name: Wait for Pi-hole container to be ready
   command: "docker exec {{ pihole_container_name }} pihole status"
