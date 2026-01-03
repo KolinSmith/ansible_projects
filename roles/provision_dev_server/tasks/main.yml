@@ -86,6 +86,25 @@
       mode: '0755'
       state: directory
 
+  - name: Ensure wiki directory has group write permissions
+    file:
+      path: /home/{{ ansible_user }}/wiki
+      state: directory
+      mode: '0775'
+      owner: '{{ ansible_user }}'
+      group: 'users'
+    when: ansible_user is defined
+
+  - name: Set wiki files to have group write permissions (664)
+    shell: find /home/{{ ansible_user }}/wiki -type f -exec chmod 664 {} \;
+    when: ansible_user is defined
+    changed_when: false
+
+  - name: Set wiki directories to have group write permissions (775)
+    shell: find /home/{{ ansible_user }}/wiki -type d -exec chmod 775 {} \;
+    when: ansible_user is defined
+    changed_when: false
+
   - name: create /etc/logrotate.d/ directory
     file:
       path: /etc/logrotate.d/
