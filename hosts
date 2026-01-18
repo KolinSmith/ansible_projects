@@ -112,11 +112,9 @@ ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_python_interpreter=/usr/bin/python3
 
 [provision_servers]
-# HP G4 Mini - Will become new Voyager (dev server)
-# voyager ansible_host=192.168.9.103  # Commented out - already has dax user, use post_provision_servers
+operator ansible_host=192.168.9.101
 
 [provision_servers:vars]
-# Pre-provisioning with pi user
 ansible_connection=ssh
 ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_user=pi
@@ -129,11 +127,9 @@ ansible_python_interpreter=/usr/bin/python3
 default_user=pi
 
 [post_provision_servers]
-# HP G4 Mini - After initial provisioning creates dax user
-voyager ansible_host=192.168.9.103 ansible_user=dax
+post_provision ansible_host=192.168.9.101
 
 [post_provision_servers:vars]
-# Post-provisioning with dax user (created by provision_servers)
 ansible_connection=ssh
 ansible_user={{ username | lower }}
 ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
