@@ -116,7 +116,6 @@ operator ansible_host=192.168.9.101
 
 [provision_servers:vars]
 ansible_connection=ssh
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_user=pi
 ansible_ssh_user=pi
 ansible_password=raspberry
