@@ -133,9 +133,10 @@ operator ansible_host=192.168.9.101
 [post_provision_servers:vars]
 ansible_connection=ssh
 ansible_user={{ username | lower }}
+ansible_ssh_user={{ username | lower }}
 ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_python_interpreter=/usr/bin/python3
-primary_load_balancer=192.168.9.6
-secondary_load_balancer=192.168.9.5
+primary_load_balancer=192.168.9.4
+secondary_load_balancer=192.168.9.3
 loadbalancer_vip_ip=192.168.9.90
-default_user=pi
+default_user={{ username | lower }}
