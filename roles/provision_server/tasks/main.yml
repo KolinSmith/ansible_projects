@@ -73,6 +73,17 @@
     become: true
     # notify: Reload ssh
 
+  # Remove old host key from the Ansible controller's known_hosts file
+  # This runs on the LOCAL machine (where you're running ansible-playbook), not on the target server
+  # Without this, Ansible will fail to reconnect after reboot due to "HOST IDENTIFICATION HAS CHANGED" error
+  - name: Remove old host key from known_hosts after SSH key regeneration
+    delegate_to: localhost
+    become: false
+    known_hosts:
+      name: "{{ ansible_host }}"
+      state: absent
+    ignore_errors: true
+
   - name: add admin group
     group:
       name: admin
@@ -285,6 +296,12 @@
   #     remove: yes
   #   when: raspberry_pi == false
   #   become_user: "{{ username | lower}}"
+
+  # Flush all pending handlers BEFORE rebooting
+  # This ensures handlers (like restart armbian-ramlog) run before the reboot
+  # Otherwise they'll fail trying to connect after reboot when SSH host key has changed
+  - name: Flush handlers before reboot
+    meta: flush_handlers
 
   - name: Reboot the machine (Wait for 60 sec)
     reboot:
