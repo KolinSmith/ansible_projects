@@ -86,24 +86,25 @@
       mode: '0755'
       state: directory
 
-  - name: Ensure wiki directory has group write permissions
+  # Fix Samba share write permissions for existing files
+  # The smb.conf 'force group = users' handles future files, but we need to fix existing ones
+  - name: Ensure wiki directory exists with correct ownership
     file:
       path: /home/{{ ansible_user }}/wiki
       state: directory
-      mode: '0775'
       owner: '{{ ansible_user }}'
       group: 'users'
     when: ansible_user is defined
 
-  - name: Set wiki files to have group write permissions (664)
-    shell: find /home/{{ ansible_user }}/wiki -type f -exec chmod 664 {} \;
+  - name: Fix existing wiki file permissions (664) and directory permissions (775)
+    shell: |
+      find /home/{{ ansible_user }}/wiki -type f -exec chmod 664 {} +
+      find /home/{{ ansible_user }}/wiki -type d -exec chmod 775 {} +
+    args:
+      warn: false
     when: ansible_user is defined
     changed_when: false
-
-  - name: Set wiki directories to have group write permissions (775)
-    shell: find /home/{{ ansible_user }}/wiki -type d -exec chmod 775 {} \;
-    when: ansible_user is defined
-    changed_when: false
+    register: wiki_permissions_fixed
 
   - name: create /etc/logrotate.d/ directory
     file:
