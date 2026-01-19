@@ -3,7 +3,7 @@
 set timeout 30
 
 # Target machine details
-set target_ip "192.168.9.10"
+set target_ip "192.168.9.101"
 set root_password "1234"
 set new_password "raspberry"
 set username "pi"
@@ -78,6 +78,6 @@ send "exit\r"
 # End the script
 expect eof
 
-system "sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/server_provision_script/server_provision_script.yml"
+system "sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/server_provision_script/server_provision_script.yml" -vvvv
 # system "sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/dns_load_balancer_provision/dns_load_balancer_provision.yml"
 # system "sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/dev_server_provision/dev_server_provision.yml"
