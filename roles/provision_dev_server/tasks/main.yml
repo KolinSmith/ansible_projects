@@ -98,7 +98,9 @@
 
   - name: Fix existing wiki file permissions (664) and directory permissions (775)
     shell: |
+      # Set regular files to 664 (rw-rw-r--) - group writable but not executable
       find /home/{{ ansible_user }}/wiki -type f -exec chmod 664 {} +
+      # Set directories to 775 (rwxrwxr-x) - group writable and traversable (x bit needed to cd into dirs)
       find /home/{{ ansible_user }}/wiki -type d -exec chmod 775 {} +
     args:
       warn: false
