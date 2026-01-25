@@ -8,7 +8,7 @@
   roles:
     - role: bootstrap_python
     - role: check_if_raspberry_pi
-    - role: install_docker
+    - role: geerlingguy.docker
     - role: deploy_docker_env
       vars:
         deploy_docker_services_for: dmz

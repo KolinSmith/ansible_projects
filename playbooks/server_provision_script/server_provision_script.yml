@@ -18,17 +18,30 @@
   become: true
   vars_files:
     - vars/server_provision_script_vars.yml
+    - ../../group_vars/all/docker_vars.yml
   roles:
     - role: check_if_pi
+    - role: remove_default_user
+    - role: orangepi_disable_ramlog
     - role: import_dotfiles
     - role: artis3n.tailscale.machine #install tailscale
       vars:
         tailscale_authkey: "{{ tailscale_auth_key }}"
     - role: geerlingguy.pip
+    - role: geerlingguy.docker
+    - role: deploy_docker_env
+      vars:
+        deploy_docker_services_for: operator
     # # - role: install_rsyslog_client
-    - role: install_tor
-    - role: orangepi_disable_ramlog
-    # - role: geerlingguy.docker
-    # - role: geerlingguy.docker_arm
+    # - role: install_tor  # DISABLED: Using Docker-based Tor relay instead (see operator docker-compose)
     # - role: install_bat #doesnt seem to be working
-    - role: remove_default_user
+
+  tasks:
+    - name: Create status alias for Dockerized Tor relay monitoring
+      lineinfile:
+        path: "/home/{{ ansible_user }}/.zshrc"
+        line: "alias status='docker exec -it tor-relay nyx'"
+        create: yes
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
