@@ -1,12 +1,14 @@
 user: "{{ ansible_user }}"
 my_custom_path_var: '/home/{{ user }}/.local/bin'
+# Use absolute path for ansible project - lookup('env', 'HOME') returns /root under sudo
+ansible_project_path: '/home/dax/code_base/ansible_projects'
 public_keys:
   - name: Enterprise Public Key File
-    key: "{{ lookup('file', lookup('env', 'HOME') ~ '/code_base/ansible_projects/files/enterprise_pub_key.pub') }}"
+    key: "{{ lookup('file', ansible_project_path ~ '/files/enterprise_pub_key.pub') }}"
   - name: Voyager Public Key File
-    key: "{{ lookup('file', lookup('env', 'HOME') ~ '/code_base/ansible_projects/files/voyager_pub_key.pub') }}"
+    key: "{{ lookup('file', ansible_project_path ~ '/files/voyager_pub_key.pub') }}"
   - name: Borg Public Key File
-    key: "{{ lookup('file', lookup('env', 'HOME') ~ '/code_base/ansible_projects/files/borg_pub_key.pub') }}"
+    key: "{{ lookup('file', ansible_project_path ~ '/files/borg_pub_key.pub') }}"
 extra_path: '/usr/local/bin'
 dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
 tailscale_release_stability: 'stable'
@@ -48,7 +50,7 @@ necessary_packages:
   - ansible
   - rsyslog
   # - trash-cli
-  - exa
+  # - exa
   - nyx # needed for Tor stats
 
 #  add way to install ansible via pip on orange pi instead of apt

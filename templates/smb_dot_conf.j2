@@ -242,9 +242,9 @@
    create mask = 0664
    directory mask = 0775
    public = no
-   # Force ownership to {{ ansible_user }}
+   # Force ownership to {{ ansible_user }} user and users group
    force user = {{ ansible_user }}
-   force group = {{ ansible_user }}
+   force group = users
 
 # Windows clients look for this share name as a source of downloadable
 # printer drivers

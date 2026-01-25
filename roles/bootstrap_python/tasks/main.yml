@@ -1,4 +1,18 @@
 ---
+    # ==========================================================================
+    # Armbian-specific optimizations (must run before any apt operations)
+    # ==========================================================================
+    # Armbian has a DPkg::Post-Invoke hook that runs `apt-get upgrade -s` twice
+    # after every dpkg operation to count updates for MOTD. On slow storage
+    # (microSD), this adds significant delay to each package operation.
+    # We remove it here before any apt commands run.
+    - name: Remove Armbian apt MOTD hook if present (speeds up provisioning)
+      raw: test -f /etc/armbian-release && rm -f /etc/apt/apt.conf.d/02-armbian-postupdate || true
+      changed_when: false
+
+    # ==========================================================================
+    # Python bootstrap (required for Ansible modules)
+    # ==========================================================================
     - name: check if python2 is installed & install if neccessary
       raw: test -e /usr/bin/python || (apt -y install python2-minimal python-setuptools && ln -s /usr/bin/python2 /usr/bin/python)
       ignore_errors: True
