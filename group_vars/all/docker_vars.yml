@@ -12,7 +12,7 @@ docker_superuser_email: "{{ vault_docker_superuser_email }}"
 docker_beszel_agent_token: "{{ vault_beszel_agent_token }}"
 docker_beszel_agent_key: "{{ vault_beszel_agent_key }}"
 
-# Tor relay configuration
+# Tor relay configuration (operator server)
 docker_tor_nickname: "{{ vault_docker_tor_nickname }}"
 docker_tor_contact_info: "{{ vault_docker_tor_contact_info }}"
 
@@ -22,7 +22,7 @@ docker_pgid: "100"
 docker_site_root: "https://healthchecks.{{ docker_duckdns_domain }}"
 docker_cf_api_email: "{{ docker_superuser_email }}"
 
-# Docker projects repository
+# Docker projects repository (exists on Ansible controller, not target servers)
 docker_projects_repo: "https://github.com/kolinsmith/docker_projects.git"
-docker_projects_base_path: "/home/{{ ansible_user }}/docker_projects"  # Voyager default
+docker_projects_controller_path: "/home/dax/code_base/docker_projects"  # Path on Ansible controller
 docker_projects_branch: "master"

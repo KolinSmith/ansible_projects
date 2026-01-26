@@ -1,7 +1,8 @@
 ---
 ###  NEED TO PASS IN THE DEFAULT_USER PARAMETER, EXAMPLE:
-###    - role: remove_default_user
-###      default_user: "{{ dmz_username }}"
+    # - role: remove_default_user
+    #   vars:
+    #     default_user: "{{ dmz_username }}"
 
 
 

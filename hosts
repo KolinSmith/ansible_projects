@@ -116,7 +116,6 @@ operator ansible_host=192.168.9.101
 
 [provision_servers:vars]
 ansible_connection=ssh
-ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_user=pi
 ansible_ssh_user=pi
 ansible_password=raspberry
@@ -126,15 +125,17 @@ ansible_become_password=raspberry
 ansible_python_interpreter=/usr/bin/python3
 default_user=pi
 
+#make sure to set as the same as the hostname from provision_servers
 [post_provision_servers]
-post_provision ansible_host=192.168.9.101
+operator ansible_host=192.168.9.101
 
 [post_provision_servers:vars]
 ansible_connection=ssh
 ansible_user={{ username | lower }}
+ansible_ssh_user={{ username | lower }}
 ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_python_interpreter=/usr/bin/python3
-primary_load_balancer=192.168.9.6
-secondary_load_balancer=192.168.9.5
+primary_load_balancer=192.168.9.4
+secondary_load_balancer=192.168.9.3
 loadbalancer_vip_ip=192.168.9.90
-default_user=pi
+default_user={{ username | lower }}

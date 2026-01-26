@@ -303,7 +303,7 @@
   - name: Flush handlers before reboot
     meta: flush_handlers
 
-  - name: Reboot the machine (Wait for 60 sec)
+  - name: Reboot the machine (Wait for up to 5 minutes for ARM hardware)
     reboot:
-      reboot_timeout: 60
+      reboot_timeout: 300  # Orange Pi and other ARM boards can take 3-4 minutes to reboot
     ignore_errors: true
