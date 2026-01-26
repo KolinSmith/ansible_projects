@@ -18,13 +18,18 @@
   become: true
   vars_files:
     - vars/server_provision_script_vars.yml
+    - ../../group_vars/all/docker_vars.yml
   roles:
     - role: check_if_pi
+    - role: orangepi_disable_ramlog
+    - role: remove_default_user
+      vars:
+        default_user: "pi"
+    - role: import_dotfiles
     - role: artis3n.tailscale.machine #install tailscale
       vars:
         tailscale_authkey: "{{ tailscale_auth_key }}"
     # - role: install_rsyslog_client
-    - role: import_dotfiles
     - role: geerlingguy.pip
     - role: geerlingguy.docker
       vars:
@@ -32,10 +37,9 @@
     - role: deploy_docker_env
       vars:
         deploy_docker_services_for: "{{ inventory_hostname }}"
-    - role: orangepi_disable_ramlog
-    - role: remove_default_user
-      vars:
-        default_user: "pi"
+    # - role: install_tor  # DISABLED: Using Docker-based Tor relay instead (see operator docker-compose)
+    # - role: install_bat #doesnt seem to be working
+
   tasks:
     - name: Create status alias for Dockerized Tor relay monitoring
       lineinfile:
@@ -43,5 +47,9 @@
         line: "alias status='docker exec -it tor-relay nyx'"
         regexp: "^alias status="
         state: present
+        create: yes
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
         backup: yes
       when: "'operator' in inventory_hostname"
