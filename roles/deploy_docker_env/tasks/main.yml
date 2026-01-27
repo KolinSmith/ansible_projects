@@ -67,3 +67,16 @@
   loop: "{{ env_templates }}"
   loop_control:
     label: "{{ item.service }}"
+
+# Service-specific configuration
+- name: Create status alias for Dockerized Tor relay monitoring (operator only)
+  lineinfile:
+    path: "/home/{{ ansible_user }}/.zshrc"
+    line: "alias status='docker exec -it tor-relay nyx'"
+    regexp: "^alias status="
+    state: present
+    create: yes
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  when: deploy_docker_services_for == 'operator'
