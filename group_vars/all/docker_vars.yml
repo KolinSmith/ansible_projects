@@ -16,6 +16,10 @@ docker_beszel_agent_key: "{{ vault_beszel_agent_key }}"
 docker_tor_nickname: "{{ vault_docker_tor_nickname }}"
 docker_tor_contact_info: "{{ vault_docker_tor_contact_info }}"
 
+# Forgejo Runner configuration (Orange Pi R1 Plus)
+docker_forgejo_instance_url: "{{ vault_forgejo_instance_url }}"
+docker_forgejo_runner_token: "{{ vault_forgejo_runner_token }}"
+
 # Non-secret configuration
 docker_puid: "1000"
 docker_pgid: "100"
