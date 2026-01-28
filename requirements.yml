@@ -1,0 +1,21 @@
+---
+# Ansible Galaxy Requirements
+# Install with: ansible-galaxy install -r requirements.yml
+
+collections:
+  # Required for authorized_key, mount, synchronize modules
+  - name: ansible.posix
+    version: ">=2.1.0"
+
+  # Required for timezone and various system management modules
+  - name: community.general
+    version: ">=11.0.0"
+
+roles:
+  # Existing roles from requirements.txt
+  - name: geerlingguy.pip
+  - name: geerlingguy.docker
+  - name: geerlingguy.ntp
+  - name: geerlingguy.clamav
+  - name: prometheus.prometheus.node_exporter
+  - name: artis3n.tailscale
