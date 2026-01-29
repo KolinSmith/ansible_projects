@@ -1,7 +1,7 @@
 user: "{{ ansible_user }}"
 my_custom_path_var: '/home/{{ user }}/.local/bin'
 # Use absolute path for ansible project - lookup('env', 'HOME') returns /root under sudo
-ansible_project_path: '/home/dax/code_base/ansible_projects'
+ansible_project_path: '/home/{{ username }}/code_base/ansible_projects'
 public_keys:
   - name: Enterprise Public Key File
     key: "{{ lookup('file', ansible_project_path ~ '/files/enterprise_pub_key.pub') }}"
