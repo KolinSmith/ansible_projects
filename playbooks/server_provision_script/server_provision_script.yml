@@ -22,7 +22,6 @@
   roles:
     - role: check_if_pi
     - role: orangepi_disable_ramlog
-    - role: remove_default_user
       vars:
         default_user: "pi"
     - role: import_dotfiles
@@ -37,6 +36,8 @@
     - role: deploy_docker_env
       vars:
         deploy_docker_services_for: "{{ inventory_hostname }}"
+    - role: remove_default_user
+
     # - role: install_tor  # DISABLED: Using Docker-based Tor relay instead (see operator docker-compose)
     # - role: install_bat #doesnt seem to be working
 
