@@ -6,7 +6,7 @@
       accept_hostkey: yes
       force: yes
       recursive: no
-      key_file: "{{ lookup('env', 'HOME') }}/.ssh/id_ed25519"
+      key_file: "/home/{{ username }}/.ssh/id_ed25519"
     delegate_to: localhost
     run_once: true
 
