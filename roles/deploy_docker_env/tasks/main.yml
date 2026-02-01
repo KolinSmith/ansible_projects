@@ -16,17 +16,16 @@
     group: "{{ ansible_user }}"
     mode: '0755'
 
-# Copy only this service's files from the controller's docker_projects repo
-- name: Copy service files for {{ deploy_docker_services_for }}
+# Copy docker-compose.yml to ~/docker/
+- name: Copy docker-compose.yml for {{ deploy_docker_services_for }}
   copy:
-    src: "{{ docker_projects_base_path }}/{{ deploy_docker_services_for }}/"
-    dest: "/home/{{ ansible_user }}/docker/"
+    src: "{{ docker_projects_base_path }}/{{ deploy_docker_services_for }}/docker-compose.yml"
+    dest: "/home/{{ ansible_user }}/docker/docker-compose.yml"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: '0644'
 
-# Deploy .env from vault-populated template (runs after copy so it is never
-# overwritten by a stale .env from the controller)
+# Deploy .env from vault-populated template
 - name: Deploy .env for {{ deploy_docker_services_for }}
   template:
     src: "{{ deploy_docker_services_for }}.env.example"
@@ -34,6 +33,47 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: '0600'
+
+# Remove .env.example from target -- secrets live in .env only
+- name: Remove .env.example from target
+  file:
+    path: "/home/{{ ansible_user }}/docker/.env.example"
+    state: absent
+
+# Find service config files on the controller (anything beyond docker-compose.yml
+# and .env* that needs to be bind-mounted into the container, e.g. torrc, traefik.yml)
+- name: Find service config files on controller
+  find:
+    paths: "{{ docker_projects_base_path }}/{{ deploy_docker_services_for }}"
+    file_type: file
+    excludes:
+      - "docker-compose.yml"
+      - ".env*"
+      - "README*"
+      - ".gitignore"
+  register: config_files
+  delegate_to: localhost
+
+# Copy config files into ~/docker_data/<service>/ for use as bind mounts
+- name: Create service config directory in docker_data
+  file:
+    path: "/home/{{ ansible_user }}/docker_data/{{ deploy_docker_services_for }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+  when: config_files.files | length > 0
+
+- name: Copy service config files to docker_data
+  copy:
+    src: "{{ item.path }}"
+    dest: "/home/{{ ansible_user }}/docker_data/{{ deploy_docker_services_for }}/"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  loop: "{{ config_files.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
 
 # Service-specific configuration
 - name: Create status alias for Dockerized Tor relay monitoring (operator only)
