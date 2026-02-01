@@ -93,7 +93,6 @@
     mode: '0644'
   loop: "{{ existing_motd_scripts.files }}"
   when:
-    - not armbian_motd_exists
     - item.path is not search('00-header|10-sysinfo|40-commands')
 
 - name: Deploy custom MOTD header script
