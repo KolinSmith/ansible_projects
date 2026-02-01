@@ -1,72 +1,39 @@
 ---
-# Clone or update docker_projects repository
-- name: Check if docker_projects directory exists
-  stat:
-    path: "{{ docker_projects_base_path }}"
-  register: docker_projects_dir
-
-- name: Clone docker_projects repository
-  git:
-    repo: "{{ docker_projects_repo }}"
-    dest: "{{ docker_projects_base_path }}"
-    version: "{{ docker_projects_branch }}"
-    force: no
-    accept_hostkey: yes
-    key_file: "/home/{{ ansible_user }}/.ssh/id_ed25519"
-  when: not docker_projects_dir.stat.exists
-
-- name: Update docker_projects repository (pull latest)
-  git:
-    repo: "{{ docker_projects_repo }}"
-    dest: "{{ docker_projects_base_path }}"
-    version: "{{ docker_projects_branch }}"
-    update: yes
-    accept_hostkey: yes
-    key_file: "/home/{{ ansible_user }}/.ssh/id_ed25519"
-  when: docker_projects_dir.stat.exists
-
-- name: Set ownership of docker_projects directory
+# Create target directories on remote host
+- name: Create docker directory
   file:
-    path: "{{ docker_projects_base_path }}"
+    path: "/home/{{ ansible_user }}/docker"
+    state: directory
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    recurse: yes
+    mode: '0755'
 
-# Backup existing .env files
-- name: Backup existing .env files if they exist
-  shell: |
-    if [ -f {{ item }}/.env ]; then
-      cp {{ item }}/.env {{ item }}/.env.backup-$(date +%Y%m%d-%H%M%S)
-    fi
-  loop:
-    - "{{ docker_projects_base_path }}/dmz"
-    - "{{ docker_projects_base_path }}/voyager"
-    - "{{ docker_projects_base_path }}/operator"
-    - "{{ docker_projects_base_path }}/intranet_monitor"
-  ignore_errors: yes
+- name: Create docker_data directory
+  file:
+    path: "/home/{{ ansible_user }}/docker_data"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
 
-# Deploy .env files based on deploy_docker_services_for variable
-# Templates named .env.example contain Jinja2 variables
-# They get deployed as .env files with secrets filled in from vault
+# Copy only this service's files from the controller's docker_projects repo
+- name: Copy service files for {{ deploy_docker_services_for }}
+  copy:
+    src: "{{ docker_projects_base_path }}/{{ deploy_docker_services_for }}/"
+    dest: "/home/{{ ansible_user }}/docker/"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
 
-# Define template mappings based on deployment target
-# Each server should only get its own .env file
-- name: Set template list based on deployment target
-  set_fact:
-    env_templates:
-      - { src: '{{ deploy_docker_services_for }}.env.example', dest: '{{ deploy_docker_services_for }}/.env', service: '{{ deploy_docker_services_for }}' }
-
-# Deploy all .env files for the selected deployment target
-- name: Deploy .env files from templates for {{ deploy_docker_services_for }}
+# Deploy .env from vault-populated template (runs after copy so it is never
+# overwritten by a stale .env from the controller)
+- name: Deploy .env for {{ deploy_docker_services_for }}
   template:
-    src: "{{ item.src }}"
-    dest: "{{ docker_projects_base_path }}/{{ item.dest }}"
+    src: "{{ deploy_docker_services_for }}.env.example"
+    dest: "/home/{{ ansible_user }}/docker/.env"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: '0600'
-  loop: "{{ env_templates }}"
-  loop_control:
-    label: "{{ item.service }}"
 
 # Service-specific configuration
 - name: Create status alias for Dockerized Tor relay monitoring (operator only)
