@@ -22,8 +22,6 @@
   roles:
     - role: check_if_pi
     - role: orangepi_disable_ramlog
-      vars:
-        default_user: "pi"
     - role: import_dotfiles
     - role: artis3n.tailscale.machine #install tailscale
       vars:
@@ -36,7 +34,12 @@
     - role: deploy_docker_env
       vars:
         deploy_docker_services_for: "{{ inventory_hostname }}"
+    - role: install_custom_motd
+      vars:
+        motd_force_install: true
     - role: remove_default_user
+      vars:
+        default_user: "pi"
 
     # - role: install_tor  # DISABLED: Using Docker-based Tor relay instead (see operator docker-compose)
     # - role: install_bat #doesnt seem to be working
