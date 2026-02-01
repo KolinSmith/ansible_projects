@@ -112,7 +112,7 @@ ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_python_interpreter=/usr/bin/python3
 
 [provision_servers]
-; forgejo-runner ansible_host=192.168.9.100
+; forgejo-runner ansible_host=192.168.9.101
 
 [provision_servers:vars]
 ansible_connection=ssh
@@ -127,7 +127,7 @@ default_user=pi
 
 #make sure to set as the same as the hostname from provision_servers
 [post_provision_servers]
-forgejo-runner ansible_host=192.168.9.100
+forgejo-runner ansible_host=192.168.9.101
 
 [post_provision_servers:vars]
 ansible_connection=ssh
