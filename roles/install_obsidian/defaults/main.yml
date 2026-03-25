@@ -3,7 +3,7 @@
 
 # Obsidian version to install — pinned for idempotency.
 # To upgrade: bump this value and re-run the role.
-obsidian_version: "1.8.7"
+obsidian_version: "1.12.7"
 
 # User that owns and runs the Obsidian service
 obsidian_user: "{{ ansible_user }}"

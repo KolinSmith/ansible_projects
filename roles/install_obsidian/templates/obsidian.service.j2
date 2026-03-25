@@ -10,7 +10,7 @@ Group={{ obsidian_user }}
 Environment=DISPLAY={{ obsidian_display }}
 Environment=HOME=/home/{{ obsidian_user }}
 ExecStartPre=/bin/sleep 2
-ExecStart=/opt/Obsidian/obsidian --no-sandbox
+ExecStart=/opt/Obsidian/obsidian --no-sandbox --disable-gpu
 Restart=always
 RestartSec=10
 
