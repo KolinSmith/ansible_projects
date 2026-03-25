@@ -1,0 +1,88 @@
+---
+# Install Obsidian headlessly on Ubuntu using Xvfb as a virtual display.
+# Two systemd services are created: xvfb.service and obsidian.service.
+# After this role runs, complete first-time Obsidian Sync login via:
+#   ssh -X dax@voyager && /opt/Obsidian/obsidian --no-sandbox
+
+- name: Install Xvfb and Electron runtime dependencies
+  apt:
+    name:
+      - xvfb
+      - libgbm1
+      - libasound2t64
+    state: present
+    update_cache: true
+  become: true
+
+- name: Check installed Obsidian version
+  command: dpkg-query --showformat='${Version}' --show obsidian
+  register: obsidian_installed_version
+  failed_when: false
+  changed_when: false
+
+- name: Download Obsidian {{ obsidian_version }} .deb
+  get_url:
+    url: "https://github.com/obsidianmd/obsidian-releases/releases/download/v{{ obsidian_version }}/obsidian_{{ obsidian_version }}_amd64.deb"
+    dest: "/tmp/obsidian_{{ obsidian_version }}_amd64.deb"
+    mode: '0644'
+  when: obsidian_installed_version.rc != 0 or obsidian_installed_version.stdout != obsidian_version
+
+- name: Install Obsidian .deb (resolves Electron dependencies via apt)
+  apt:
+    deb: "/tmp/obsidian_{{ obsidian_version }}_amd64.deb"
+    state: present
+  become: true
+  when: obsidian_installed_version.rc != 0 or obsidian_installed_version.stdout != obsidian_version
+
+- name: Deploy xvfb.service unit
+  template:
+    src: xvfb.service.j2
+    dest: /etc/systemd/system/xvfb.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: Reload systemd daemon
+
+- name: Deploy obsidian.service unit
+  template:
+    src: obsidian.service.j2
+    dest: /etc/systemd/system/obsidian.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: Reload systemd daemon
+
+- name: Flush handlers (daemon-reload before enabling services)
+  meta: flush_handlers
+
+- name: Enable and start xvfb.service
+  systemd:
+    name: xvfb
+    enabled: true
+    state: started
+  become: true
+
+- name: Enable and start obsidian.service
+  systemd:
+    name: obsidian
+    enabled: true
+    state: started
+  become: true
+
+- name: Display post-install instructions
+  debug:
+    msg:
+      - "=== Obsidian installed and services started ==="
+      - ""
+      - "obsidian.service will restart repeatedly until Obsidian Sync is configured."
+      - "This is expected. Complete the one-time login:"
+      - ""
+      - "  1. sudo systemctl stop obsidian"
+      - "  2. From MacBook: ssh -X {{ obsidian_user }}@voyager"
+      - "  3. /opt/Obsidian/obsidian --no-sandbox"
+      - "  4. Log into Obsidian Sync, open ~/wiki/ as vault"
+      - "  5. sudo systemctl start obsidian"
+      - ""
+      - "See roles/install_obsidian/README.md for full details."
