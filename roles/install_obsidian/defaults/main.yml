@@ -1,0 +1,12 @@
+---
+# install_obsidian role defaults
+
+# Obsidian version to install — pinned for idempotency.
+# To upgrade: bump this value and re-run the role.
+obsidian_version: "1.8.7"
+
+# User that owns and runs the Obsidian service
+obsidian_user: "{{ ansible_user }}"
+
+# Virtual display number used by Xvfb and Obsidian
+obsidian_display: ":99"
