@@ -1,0 +1,18 @@
+[Unit]
+Description=Obsidian
+After=xvfb.service
+Requires=xvfb.service
+
+[Service]
+Type=simple
+User={{ obsidian_user }}
+Group={{ obsidian_user }}
+Environment=DISPLAY={{ obsidian_display }}
+Environment=HOME=/home/{{ obsidian_user }}
+ExecStartPre=/bin/sleep 2
+ExecStart=/opt/Obsidian/obsidian --no-sandbox
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
