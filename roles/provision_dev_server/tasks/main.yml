@@ -585,17 +585,6 @@
   #   import_role:
   #     name: IronicBadger.figurine
 
-  - name: Deploy PIA WireGuard re-registration scripts
-    copy:
-      src: "{{ item.src }}"
-      dest: "/home/{{ user }}/.scripts/{{ item.dest }}"
-      owner: "{{ user }}"
-      group: admin
-      mode: "{{ item.mode }}"
-    loop:
-      - { src: pia-reregister.sh, dest: pia-reregister.sh, mode: "0755" }
-      - { src: pia-pfsense-update.php, dest: pia-pfsense-update.php, mode: "0644" }
-
   - name: create cron jobs
     block:
       - name: create github-backup job
@@ -604,14 +593,6 @@
           minute: "0"
           hour: "4"
           job: "github-backup KolinSmith -p {{ github_personal_access_token }} /home/{{ user }}/github_backups && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/0e28c1ba-2933-4981-96f3-5a8634c93f2c"
-        become_user: "{{ user }}"
-
-      - name: create pia-wireguard-reregister job
-        cron:
-          name: pia_wireguard_reregister
-          minute: "0"
-          hour: "2"
-          job: "/home/{{ user }}/.scripts/pia-reregister.sh >> /var/log/pia-reregister.log 2>&1"
         become_user: "{{ user }}"
 
       # - name: create piHoleUpdate job
