@@ -41,7 +41,7 @@ ansible_become_password=ubuntu
 ansible_python_interpreter=/usr/bin/python3
 
 [dmz_post_provision]
-dmz_post_provision ansible_host=129.146.141.62
+dmz_post_provision ansible_host=100.86.4.29
 
 [dmz_post_provision:vars]
 ansible_user={{ username | lower }}
