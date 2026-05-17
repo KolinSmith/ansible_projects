@@ -24,6 +24,8 @@ gemini_primary_secret_key: "{{ vault_gemini_primary_secret_key}}"
 
 github_personal_access_token: "{{ vault_github_personal_access_token }}"
 
+uptime_kuma_github_backup_push_url: "{{ vault_uptime_kuma_github_backup_push_url }}"
+
 prowl_api_key: "{{ vault_prowl_api_key }}"
 
 voyager_private_ssh_key: "{{ vault_voyager_private_ssh_key }}"
