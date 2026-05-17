@@ -1,0 +1,7 @@
+---
+- name: Install custom MOTD on DMZ server
+  hosts: dmz_post_provision
+  gather_facts: true
+  become: true
+  roles:
+    - role: install_custom_motd

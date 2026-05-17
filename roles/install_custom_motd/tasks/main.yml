@@ -128,7 +128,7 @@
     - /etc/update-motd.d/91-release-upgrade
     - /etc/update-motd.d/95-hwe-eol
   failed_when: false
-  when: is_ubuntu | default(false)
+  when: ansible_distribution == 'Ubuntu'
 
 - name: Remove static MOTD file if it exists
   file:
