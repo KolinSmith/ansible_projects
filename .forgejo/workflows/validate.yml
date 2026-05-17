@@ -1,0 +1,157 @@
+name: Validate
+
+on:
+  push:
+    branches-ignore:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  yaml-lint:
+    name: Lint YAML
+    runs-on: linux
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache yamllint git nodejs
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint all YAML files
+        run: |
+          find . \( -name "*.yml" -o -name "*.yaml" \) \
+            ! -path "./.git/*" \
+            ! -path "./group_vars/all/vault.yml" \
+            ! -path "./.forgejo/*" \
+            | sort | while read -r f; do
+              echo "Checking $f..."
+              yamllint -d '{extends: default, rules: {
+                line-length: disable,
+                comments: disable,
+                truthy: disable,
+                new-lines: disable,
+                document-start: disable,
+                braces: {forbid-non-empty-flow-mappings: false},
+                brackets: {forbid-non-empty-flow-sequences: false}
+              }}' "$f" || exit 1
+            done
+
+  ansible-lint:
+    name: Ansible lint
+    runs-on: linux
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache python-3 py3-pip git nodejs
+
+      - name: Install ansible-lint
+        run: pip install --quiet "ansible-lint[community]"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run ansible-lint
+        run: ansible-lint --exclude group_vars/all/vault.yml
+
+  checkov:
+    name: Checkov IaC scan
+    runs-on: linux
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache python-3 py3-pip git nodejs
+
+      - name: Install checkov
+        run: pip install --quiet checkov
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run checkov
+        run: checkov -d . --framework ansible --quiet --compact
+
+  secrets-scan:
+    name: Scan for secrets
+    runs-on: linux
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache git nodejs gitleaks
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for secrets
+        run: gitleaks detect --source . --no-git --config .gitleaks.toml
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: linux
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache shellcheck git nodejs
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        run: |
+          find . -name "*.sh" ! -path "./.git/*" | sort | while read -r f; do
+            echo "Checking $f..."
+            shellcheck "$f" || exit 1
+          done
+
+  ruff:
+    name: Ruff Python lint
+    runs-on: linux
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache python-3 py3-pip git nodejs
+
+      - name: Install ruff
+        run: pip install --quiet ruff
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run ruff
+        run: |
+          find . -name "*.py" ! -path "./.git/*" | sort | while read -r f; do
+            echo "Checking $f..."
+            ruff check "$f" || exit 1
+          done
+
+  scc:
+    name: Code stats (informational)
+    runs-on: linux
+    continue-on-error: true
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache git nodejs wget
+
+      - name: Install scc
+        run: |
+          wget -qO /tmp/scc.tar.gz \
+            https://github.com/boyter/scc/releases/download/v3.3.4/scc_Linux_x86_64.tar.gz
+          tar -xzf /tmp/scc.tar.gz -C /usr/local/bin scc
+          chmod +x /usr/local/bin/scc
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Count lines of code
+        run: scc --no-complexity .
