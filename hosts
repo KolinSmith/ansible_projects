@@ -44,7 +44,7 @@ ansible_python_interpreter=/usr/bin/python3
 dmz_post_provision ansible_host=100.86.4.29
 
 [dmz_post_provision:vars]
-ansible_user={{ username | lower }}
+ansible_user={{ dmz_username | lower }}
 ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 
 [printer]
