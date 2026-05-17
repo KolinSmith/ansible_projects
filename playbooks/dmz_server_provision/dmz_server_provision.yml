@@ -14,6 +14,7 @@
         deploy_docker_services_for: dmz
     - role: import_dotfiles
     - role: install_rsyslog_client
+    - role: install_custom_motd
     - role: setup_oracle_vps
 
 - name: post server post provision
