@@ -480,7 +480,7 @@
     become: yes
 
   - name: Install github-backup using pipx
-    command: pipx install git+https://github.com/clockfort/GitHub-Backup
+    command: pipx install github-backup
     become_user: "{{ user }}"
     become: yes
 
@@ -603,7 +603,7 @@
           name: github_backup
           minute: "0"
           hour: "4"
-          job: "github-backup KolinSmith -p {{ github_personal_access_token }} /home/{{ user }}/github_backups && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/0e28c1ba-2933-4981-96f3-5a8634c93f2c"
+          job: "github-backup KolinSmith -f {{ github_personal_access_token }} -o /home/{{ user }}/github_backups --repositories && curl -fsS -m 10 --retry 5 -o /dev/null 192.168.3.7:8013/ping/0e28c1ba-2933-4981-96f3-5a8634c93f2c"
         become_user: "{{ user }}"
 
       - name: create pia-wireguard-reregister job
