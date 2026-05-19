@@ -6,7 +6,7 @@
   vars_files:
     - vars/deploy_rtmp_server_vars.yml
   roles:
-    - role: check_if_raspberry_pi
+    - role: check_if_pi
   tasks:
     - name: "update repo cache (Debian)"
       tags: always

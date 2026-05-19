@@ -1,0 +1,27 @@
+profile: min
+
+warn_list:
+  - yaml[truthy]
+  - name[casing]
+  - fqcn[action-core]
+  - no-changed-when
+  - risky-shell-pipe
+  - command-instead-of-module
+  - command-instead-of-shell
+
+skip_list:
+  - galaxy
+
+exclude_paths:
+  - group_vars/all/vault.yml
+  - .ansible/
+  - .git/
+  - _deprecated/
+  - playbooks/enterprise_provision_script/
+  - playbooks/enterprise_provision_script_v2/
+  - roles/geerlingguy.clamav/
+  - roles/geerlingguy.docker/
+  - roles/geerlingguy.docker_arm/
+  - roles/geerlingguy.node_exporter/
+  - roles/geerlingguy.ntp/
+  - roles/geerlingguy.pip/

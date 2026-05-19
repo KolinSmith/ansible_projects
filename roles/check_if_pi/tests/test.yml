@@ -2,4 +2,4 @@
 - hosts: localhost
   remote_user: root
   roles:
-    - check_if_raspberry_pi
+    - check_if_pi

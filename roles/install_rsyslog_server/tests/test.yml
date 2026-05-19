@@ -2,4 +2,4 @@
 - hosts: localhost
   remote_user: root
   roles:
-    - install_ryslog_server
+    - install_rsyslog_server

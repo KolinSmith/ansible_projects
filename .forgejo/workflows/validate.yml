@@ -24,6 +24,7 @@ jobs:
         run: |
           find . \( -name "*.yml" -o -name "*.yaml" \) \
             ! -path "./.git/*" \
+            ! -path "./.ansible/*" \
             ! -path "./group_vars/all/vault.yml" \
             ! -path "./.forgejo/*" \
             | sort | while read -r f; do
@@ -33,9 +34,7 @@ jobs:
                 comments: disable,
                 truthy: disable,
                 new-lines: disable,
-                document-start: disable,
-                braces: {forbid-non-empty-flow-mappings: false},
-                brackets: {forbid-non-empty-flow-sequences: false}
+                document-start: disable
               }}' "$f" || exit 1
             done
 
@@ -55,7 +54,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run ansible-lint
-        run: ansible-lint --exclude group_vars/all/vault.yml
+        run: ansible-lint --exclude group_vars/all/vault.yml --exclude .ansible/
 
   checkov:
     name: Checkov IaC scan
