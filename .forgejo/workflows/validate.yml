@@ -22,11 +22,10 @@ jobs:
 
       - name: Lint all YAML files
         run: |
-          find . \( -name "*.yml" -o -name "*.yaml" \) \
-            ! -path "./.git/*" \
-            ! -path "./.ansible/*" \
-            ! -path "./group_vars/all/vault.yml" \
-            ! -path "./.forgejo/*" \
+          find . \( -path './.git' -o -path './.ansible' -o -path './.forgejo' \) -prune \
+            -o \( -name "*.yml" -o -name "*.yaml" \) \
+            ! -name "vault.yml" \
+            -print \
             | sort | while read -r f; do
               echo "Checking $f..."
               yamllint -d '{extends: default, rules: {
