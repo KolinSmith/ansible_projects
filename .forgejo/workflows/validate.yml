@@ -204,7 +204,7 @@ jobs:
       - name: Install scc
         run: |
           wget -qO /tmp/scc.tar.gz \
-            https://github.com/boyter/scc/releases/download/v3.3.4/scc_Linux_x86_64.tar.gz
+            https://github.com/boyter/scc/releases/download/v3.3.4/scc_Linux_arm64.tar.gz
           tar -xzf /tmp/scc.tar.gz -C /usr/local/bin scc
           chmod +x /usr/local/bin/scc
 
