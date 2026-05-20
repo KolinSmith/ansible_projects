@@ -138,7 +138,7 @@ jobs:
           wget -qO /tmp/shellcheck.tar.xz \
             https://github.com/koalaman/shellcheck/releases/download/v0.10.0/shellcheck-v0.10.0.linux.aarch64.tar.xz
           tar -xJf /tmp/shellcheck.tar.xz -C /tmp
-          find /tmp -name shellcheck -type f -exec install -m 755 {} /usr/local/bin/shellcheck \;
+          find /tmp -name shellcheck -type f -exec install -m 755 {} /usr/bin/shellcheck \;
           rm -rf /tmp/shellcheck*
 
       - name: Checkout
@@ -205,8 +205,8 @@ jobs:
         run: |
           wget -qO /tmp/scc.tar.gz \
             https://github.com/boyter/scc/releases/download/v3.3.4/scc_Linux_arm64.tar.gz
-          tar -xzf /tmp/scc.tar.gz -C /usr/local/bin scc
-          chmod +x /usr/local/bin/scc
+          tar -xzf /tmp/scc.tar.gz -C /tmp scc
+          install -m 755 /tmp/scc /usr/bin/scc
 
       - name: Checkout
         uses: actions/checkout@v4
