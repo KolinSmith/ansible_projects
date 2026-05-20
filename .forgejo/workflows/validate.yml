@@ -167,10 +167,15 @@ jobs:
       image: cgr.dev/chainguard/wolfi-base:latest
     steps:
       - name: Install dependencies
-        run: apk add --no-cache python-3 py3-pip git nodejs
+        run: apk add --no-cache python-3 git nodejs
 
       - name: Install ruff
-        run: pip install --quiet --root-user-action=ignore ruff
+        run: |
+          wget -qO /tmp/ruff.tar.gz \
+            https://github.com/astral-sh/ruff/releases/download/0.15.13/ruff-aarch64-unknown-linux-musl.tar.gz
+          tar -xzf /tmp/ruff.tar.gz -C /tmp
+          find /tmp -name ruff -type f -exec install -m 755 {} /usr/bin/ruff \;
+          rm -rf /tmp/ruff*
 
       - name: Checkout
         uses: actions/checkout@v4
