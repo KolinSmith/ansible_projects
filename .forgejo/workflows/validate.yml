@@ -17,29 +17,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Lint all YAML files
+      - name: Lint changed YAML files
         run: |
-          find . \( -path './.git' -o -path './.ansible' -o -path './.forgejo' -o -path './_deprecated' \) -prune \
-            -o \( -name "*.yml" -o -name "*.yaml" \) \
-            ! -name "vault.yml" \
-            -print \
-            | sort | while read -r f; do
-              echo "Checking $f..."
-              yamllint -d '{extends: default, rules: {
-                line-length: disable,
-                comments: disable,
-                comments-indentation: disable,
-                truthy: disable,
-                new-lines: disable,
-                new-line-at-end-of-file: disable,
-                document-start: disable,
-                indentation: disable,
-                trailing-spaces: disable,
-                braces: disable,
-                empty-lines: disable,
-                colons: disable
-              }}' "$f" || exit 1
-            done
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep -E '\.(yml|yaml)$' \
+            | grep -v 'vault\.yml' \
+            | grep -vE '^(\.ansible/|\.forgejo/|_deprecated/)' \
+            || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No YAML files changed, skipping."
+            exit 0
+          fi
+          echo "$CHANGED" | while read -r f; do
+            echo "Checking $f..."
+            yamllint -d '{extends: default, rules: {
+              line-length: disable,
+              comments: disable,
+              comments-indentation: disable,
+              truthy: disable,
+              new-lines: disable,
+              new-line-at-end-of-file: disable,
+              document-start: disable,
+              indentation: disable,
+              trailing-spaces: disable,
+              braces: disable,
+              empty-lines: disable,
+              colons: disable
+            }}' "$f" || exit 1
+          done
 
   ansible-lint:
     name: Ansible lint
@@ -56,8 +62,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run ansible-lint
-        run: ansible-lint --exclude group_vars/all/vault.yml --exclude .ansible/
+      - name: Lint changed Ansible files
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep -E '\.(yml|yaml)$' \
+            | grep -v 'vault\.yml' \
+            | grep -vE '^(\.ansible/|_deprecated/)' \
+            || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No Ansible files changed, skipping."
+            exit 0
+          fi
+          ansible-lint --exclude group_vars/all/vault.yml --exclude .ansible/ $CHANGED
 
   checkov:
     name: Checkov IaC scan
@@ -74,8 +91,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run checkov
-        run: checkov -d . --framework ansible --quiet --compact
+      - name: Scan changed files
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep -E '\.(yml|yaml)$' \
+            | grep -vE '^(\.ansible/|_deprecated/)' \
+            || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No files to scan, skipping."
+            exit 0
+          fi
+          checkov -d . --framework ansible --quiet --compact
 
   secrets-scan:
     name: Scan for secrets
@@ -91,8 +118,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Scan for secrets
-        run: gitleaks detect --source . --no-git --config .gitleaks.toml
+      - name: Scan PR commits for secrets
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          gitleaks detect --source . --config .gitleaks.toml \
+            --log-opts "origin/${{ github.base_ref }}..HEAD"
 
   shellcheck:
     name: ShellCheck
@@ -106,14 +136,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run ShellCheck
+      - name: Check changed shell scripts
         run: |
-          find . \( -path './.git' -o -path './.ansible' -o -path './_deprecated' \) -prune \
-            -o -name "*.sh" -print \
-            | sort | while read -r f; do
-              echo "Checking $f..."
-              shellcheck "$f" || exit 1
-            done
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep '\.sh$' \
+            | grep -vE '^(\.ansible/|_deprecated/)' \
+            || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No shell scripts changed, skipping."
+            exit 0
+          fi
+          echo "$CHANGED" | while read -r f; do
+            echo "Checking $f..."
+            shellcheck "$f" || exit 1
+          done
 
   ruff:
     name: Ruff Python lint
@@ -130,14 +167,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run ruff
+      - name: Check changed Python files
         run: |
-          find . \( -path './.git' -o -path './.ansible' -o -path './_deprecated' \) -prune \
-            -o -name "*.py" -print \
-            | sort | while read -r f; do
-              echo "Checking $f..."
-              ruff check "$f" || exit 1
-            done
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep '\.py$' \
+            | grep -vE '^(\.ansible/|_deprecated/)' \
+            || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No Python files changed, skipping."
+            exit 0
+          fi
+          echo "$CHANGED" | while read -r f; do
+            echo "Checking $f..."
+            ruff check "$f" || exit 1
+          done
 
   scc:
     name: Code stats (informational)
