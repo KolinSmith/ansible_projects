@@ -204,7 +204,7 @@ jobs:
       image: cgr.dev/chainguard/wolfi-base:latest
     steps:
       - name: Install dependencies
-        run: apk add --no-cache git nodejs wget
+        run: apk add --no-cache python-3 git nodejs wget
 
       - name: Install scc
         run: |
@@ -217,4 +217,43 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Count lines of code
-        run: scc --no-complexity .
+        run: scc --no-complexity . | tee /tmp/scc_output.txt
+
+      - name: Post stats comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          API_BASE: ${{ github.server_url }}/api/v1
+        run: |
+          python3 << 'PYEOF'
+          import json, os, urllib.request, urllib.error
+
+          MARKER = "<!-- scc-stats -->"
+
+          with open("/tmp/scc_output.txt") as f:
+              stats = f.read().strip()
+
+          body = f"{MARKER}\n## Code stats\n\n```\n{stats}\n```"
+          token = os.environ["GH_TOKEN"]
+          api   = os.environ["API_BASE"]
+          repo  = os.environ["REPO"]
+          pr    = os.environ["PR_NUMBER"]
+          hdrs  = {"Authorization": f"token {token}", "Content-Type": "application/json"}
+
+          def req(method, url, data=None):
+              r = urllib.request.Request(url, data=data, headers=hdrs, method=method)
+              return json.loads(urllib.request.urlopen(r).read())
+
+          comments = req("GET", f"{api}/repos/{repo}/issues/{pr}/comments")
+          existing = next((c for c in comments if MARKER in c["body"]), None)
+
+          if existing:
+              req("PATCH", f"{api}/repos/{repo}/issues/comments/{existing['id']}",
+                  json.dumps({"body": body}).encode())
+              print(f"Updated stats comment #{existing['id']}")
+          else:
+              req("POST", f"{api}/repos/{repo}/issues/{pr}/comments",
+                  json.dumps({"body": body}).encode())
+              print(f"Posted stats comment to PR #{pr}")
+          PYEOF
