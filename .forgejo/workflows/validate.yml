@@ -167,7 +167,7 @@ jobs:
       image: cgr.dev/chainguard/wolfi-base:latest
     steps:
       - name: Install dependencies
-        run: apk add --no-cache python-3 git nodejs
+        run: apk add --no-cache python-3 git nodejs wget
 
       - name: Install ruff
         run: |
