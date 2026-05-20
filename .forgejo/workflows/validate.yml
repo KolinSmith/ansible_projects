@@ -57,7 +57,7 @@ jobs:
         run: apk add --no-cache python-3 py3-pip git nodejs
 
       - name: Install ansible-lint
-        run: pip install --quiet "ansible-lint[community]"
+        run: pip install --quiet --root-user-action=ignore "ansible-lint[community]"
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -86,7 +86,7 @@ jobs:
         run: apk add --no-cache python-3 py3-pip git nodejs
 
       - name: Install checkov
-        run: pip install --quiet checkov
+        run: pip install --quiet --root-user-action=ignore checkov
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -162,7 +162,7 @@ jobs:
         run: apk add --no-cache python-3 py3-pip git nodejs
 
       - name: Install ruff
-        run: pip install --quiet ruff
+        run: pip install --quiet --root-user-action=ignore ruff
 
       - name: Checkout
         uses: actions/checkout@v4
