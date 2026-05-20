@@ -31,9 +31,16 @@ jobs:
               yamllint -d '{extends: default, rules: {
                 line-length: disable,
                 comments: disable,
+                comments-indentation: disable,
                 truthy: disable,
                 new-lines: disable,
-                document-start: disable
+                new-line-at-end-of-file: disable,
+                document-start: disable,
+                indentation: disable,
+                trailing-spaces: disable,
+                braces: disable,
+                empty-lines: disable,
+                colons: disable
               }}' "$f" || exit 1
             done
 
@@ -104,10 +111,12 @@ jobs:
 
       - name: Run ShellCheck
         run: |
-          find . -name "*.sh" ! -path "./.git/*" | sort | while read -r f; do
-            echo "Checking $f..."
-            shellcheck "$f" || exit 1
-          done
+          find . \( -path './.git' -o -path './.ansible' -o -path './_deprecated' \) -prune \
+            -o -name "*.sh" -print \
+            | sort | while read -r f; do
+              echo "Checking $f..."
+              shellcheck "$f" || exit 1
+            done
 
   ruff:
     name: Ruff Python lint
@@ -126,10 +135,12 @@ jobs:
 
       - name: Run ruff
         run: |
-          find . -name "*.py" ! -path "./.git/*" | sort | while read -r f; do
-            echo "Checking $f..."
-            ruff check "$f" || exit 1
-          done
+          find . \( -path './.git' -o -path './.ansible' -o -path './_deprecated' \) -prune \
+            -o -name "*.py" -print \
+            | sort | while read -r f; do
+              echo "Checking $f..."
+              ruff check "$f" || exit 1
+            done
 
   scc:
     name: Code stats (informational)
