@@ -131,7 +131,15 @@ jobs:
       image: cgr.dev/chainguard/wolfi-base:latest
     steps:
       - name: Install dependencies
-        run: apk add --no-cache shellcheck git nodejs
+        run: apk add --no-cache git nodejs wget
+
+      - name: Install shellcheck
+        run: |
+          wget -qO /tmp/shellcheck.tar.xz \
+            https://github.com/koalaman/shellcheck/releases/download/v0.10.0/shellcheck-v0.10.0.linux.aarch64.tar.xz
+          tar -xJf /tmp/shellcheck.tar.xz -C /tmp
+          mv /tmp/shellcheck-v0.10.0/shellcheck /usr/local/bin/
+          rm -rf /tmp/shellcheck*
 
       - name: Checkout
         uses: actions/checkout@v4
