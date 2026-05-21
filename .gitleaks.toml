@@ -1,0 +1,5 @@
+[allowlist]
+  description = "Exclude Ansible vault (encrypted ciphertext, not plaintext secrets)"
+  paths = [
+    "group_vars/all/vault.yml"
+  ]

@@ -12,7 +12,7 @@
     obsidian_vault_git_branch: "main"
     
   roles:
-    - obsidian
+    - install_obsidian_vault
 
   post_tasks:
     - name: Set up git config for future commits

@@ -1,0 +1,259 @@
+name: Validate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  yaml-lint:
+    name: Lint YAML
+    runs-on: linux
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache yamllint git nodejs
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint changed YAML files
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep -E '\.(yml|yaml)$' \
+            | grep -v 'vault\.yml' \
+            | grep -vE '^(\.ansible/|\.forgejo/|_deprecated/)' \
+            || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No YAML files changed, skipping."
+            exit 0
+          fi
+          echo "$CHANGED" | while read -r f; do
+            echo "Checking $f..."
+            yamllint -d '{extends: default, rules: {
+              line-length: disable,
+              comments: disable,
+              comments-indentation: disable,
+              truthy: disable,
+              new-lines: disable,
+              new-line-at-end-of-file: disable,
+              document-start: disable,
+              indentation: disable,
+              trailing-spaces: disable,
+              braces: disable,
+              empty-lines: disable,
+              colons: disable
+            }}' "$f" || exit 1
+          done
+
+  ansible-lint:
+    name: Ansible lint
+    runs-on: linux
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache python-3 py3-pip git nodejs
+
+      - name: Install ansible-lint
+        run: pip install --quiet --root-user-action=ignore "ansible-lint[community]"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint changed Ansible files
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep -E '\.(yml|yaml)$' \
+            | grep -v 'vault\.yml' \
+            | grep -vE '^(\.ansible/|_deprecated/)' \
+            || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No Ansible files changed, skipping."
+            exit 0
+          fi
+          ansible-lint --exclude group_vars/all/vault.yml --exclude .ansible/ $CHANGED
+
+  checkov:
+    name: Checkov IaC scan
+    runs-on: linux
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache python-3 py3-pip git nodejs
+
+      - name: Install checkov
+        run: pip install --quiet --root-user-action=ignore checkov
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Scan changed files
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep -E '\.(yml|yaml)$' \
+            | grep -vE '^(\.ansible/|_deprecated/)' \
+            || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No files to scan, skipping."
+            exit 0
+          fi
+          checkov -d . --framework ansible --quiet --compact
+
+  secrets-scan:
+    name: Scan for secrets
+    runs-on: linux
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache git nodejs gitleaks
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan PR commits for secrets
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          gitleaks detect --source . --config .gitleaks.toml \
+            --log-opts "origin/${{ github.base_ref }}..HEAD"
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: linux
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache git nodejs wget
+
+      - name: Install shellcheck
+        run: |
+          wget -qO /tmp/shellcheck.tar.xz \
+            https://github.com/koalaman/shellcheck/releases/download/v0.10.0/shellcheck-v0.10.0.linux.aarch64.tar.xz
+          tar -xJf /tmp/shellcheck.tar.xz -C /tmp
+          find /tmp -name shellcheck -type f -exec install -m 755 {} /usr/bin/shellcheck \;
+          rm -rf /tmp/shellcheck*
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check changed shell scripts
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep '\.sh$' \
+            | grep -vE '^(\.ansible/|_deprecated/)' \
+            || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No shell scripts changed, skipping."
+            exit 0
+          fi
+          echo "$CHANGED" | while read -r f; do
+            echo "Checking $f..."
+            shellcheck "$f" || exit 1
+          done
+
+  ruff:
+    name: Ruff Python lint
+    runs-on: linux
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache python-3 git nodejs wget
+
+      - name: Install ruff
+        run: |
+          wget -qO /tmp/ruff.tar.gz \
+            https://github.com/astral-sh/ruff/releases/download/0.15.13/ruff-aarch64-unknown-linux-musl.tar.gz
+          tar -xzf /tmp/ruff.tar.gz -C /tmp
+          find /tmp -name ruff -type f -exec install -m 755 {} /usr/bin/ruff \;
+          rm -rf /tmp/ruff*
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check changed Python files
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep '\.py$' \
+            | grep -vE '^(\.ansible/|_deprecated/)' \
+            || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No Python files changed, skipping."
+            exit 0
+          fi
+          echo "$CHANGED" | while read -r f; do
+            echo "Checking $f..."
+            ruff check "$f" || exit 1
+          done
+
+  scc:
+    name: Code stats (informational)
+    runs-on: linux
+    continue-on-error: true
+    container:
+      image: cgr.dev/chainguard/wolfi-base:latest
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache python-3 git nodejs wget
+
+      - name: Install scc
+        run: |
+          wget -qO /tmp/scc.tar.gz \
+            https://github.com/boyter/scc/releases/download/v3.3.4/scc_Linux_arm64.tar.gz
+          tar -xzf /tmp/scc.tar.gz -C /tmp scc
+          install -m 755 /tmp/scc /usr/bin/scc
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Count lines of code
+        run: scc --no-complexity . | tee /tmp/scc_output.txt
+
+      - name: Post stats comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          API_BASE: ${{ github.server_url }}/api/v1
+        run: |
+          python3 << 'PYEOF'
+          import json, os, urllib.request, urllib.error
+
+          MARKER = "<!-- scc-stats -->"
+
+          with open("/tmp/scc_output.txt") as f:
+              stats = f.read().strip()
+
+          body = f"{MARKER}\n## Code stats\n\n```\n{stats}\n```"
+          token = os.environ["GH_TOKEN"]
+          api   = os.environ["API_BASE"]
+          repo  = os.environ["REPO"]
+          pr    = os.environ["PR_NUMBER"]
+          hdrs  = {"Authorization": f"token {token}", "Content-Type": "application/json"}
+
+          def req(method, url, data=None):
+              r = urllib.request.Request(url, data=data, headers=hdrs, method=method)
+              return json.loads(urllib.request.urlopen(r).read())
+
+          comments = req("GET", f"{api}/repos/{repo}/issues/{pr}/comments")
+          existing = next((c for c in comments if MARKER in c["body"]), None)
+
+          if existing:
+              req("PATCH", f"{api}/repos/{repo}/issues/comments/{existing['id']}",
+                  json.dumps({"body": body}).encode())
+              print(f"Updated stats comment #{existing['id']}")
+          else:
+              req("POST", f"{api}/repos/{repo}/issues/{pr}/comments",
+                  json.dumps({"body": body}).encode())
+              print(f"Posted stats comment to PR #{pr}")
+          PYEOF

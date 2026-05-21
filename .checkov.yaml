@@ -1,0 +1,4 @@
+skip-check:
+  - CKV_ANSIBLE_6    # force: true in geerlingguy.docker_arm (3rd party role)
+  - CKV2_ANSIBLE_1   # HTTP uri in geerlingguy.node_exporter (internal, not external)
+  - CKV2_ANSIBLE_3   # block without rescue - legacy pattern throughout codebase

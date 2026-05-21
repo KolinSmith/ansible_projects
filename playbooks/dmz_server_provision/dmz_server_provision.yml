@@ -7,7 +7,7 @@
     - vars/dmz_server_provision_vars.yml
   roles:
     - role: bootstrap_python
-    - role: check_if_raspberry_pi
+    - role: check_if_pi
     - role: geerlingguy.docker
     - role: deploy_docker_env
       vars:
