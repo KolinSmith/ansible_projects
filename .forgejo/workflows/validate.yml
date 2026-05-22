@@ -123,6 +123,7 @@ jobs:
           git fetch origin ${{ github.base_ref }}
           gitleaks detect --source . --config .gitleaks.toml \
             --log-opts "origin/${{ github.base_ref }}..HEAD"
+          echo "No secrets detected in PR commits."
 
   shellcheck:
     name: ShellCheck
