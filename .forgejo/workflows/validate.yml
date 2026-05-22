@@ -244,17 +244,23 @@ jobs:
 
           def req(method, url, data=None):
               r = urllib.request.Request(url, data=data, headers=hdrs, method=method)
-              return json.loads(urllib.request.urlopen(r).read())
+              try:
+                  return json.loads(urllib.request.urlopen(r).read())
+              except urllib.error.HTTPError as e:
+                  print(f"Warning: API call failed ({method} {url}): HTTP {e.code} {e.reason}")
+                  return None
 
           comments = req("GET", f"{api}/repos/{repo}/issues/{pr}/comments")
-          existing = next((c for c in comments if MARKER in c["body"]), None)
-
-          if existing:
-              req("PATCH", f"{api}/repos/{repo}/issues/comments/{existing['id']}",
-                  json.dumps({"body": body}).encode())
-              print(f"Updated stats comment #{existing['id']}")
+          if comments is None:
+              print("Could not fetch comments — skipping post.")
           else:
-              req("POST", f"{api}/repos/{repo}/issues/{pr}/comments",
-                  json.dumps({"body": body}).encode())
-              print(f"Posted stats comment to PR #{pr}")
+              existing = next((c for c in comments if MARKER in c["body"]), None)
+              if existing:
+                  req("PATCH", f"{api}/repos/{repo}/issues/comments/{existing['id']}",
+                      json.dumps({"body": body}).encode())
+                  print(f"Updated stats comment #{existing['id']}")
+              else:
+                  req("POST", f"{api}/repos/{repo}/issues/{pr}/comments",
+                      json.dumps({"body": body}).encode())
+                  print(f"Posted stats comment to PR #{pr}")
           PYEOF
