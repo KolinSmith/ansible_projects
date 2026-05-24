@@ -1,7 +1,5 @@
 ---
-pfsense_backup_host: "pfsense.internal.homelab.gg"
 pfsense_backup_config_remote_path: "/cf/conf/config.xml"
-pfsense_backup_forgejo_repo: "git@git.hiddenba.se:dax/pfsense-backups.git"
 
 pfsense_backup_script_path: "/home/{{ ansible_user }}/bin/pfsense-backup.sh"
 pfsense_backup_repo_path: "/home/{{ ansible_user }}/pfsense-backups"
