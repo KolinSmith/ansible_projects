@@ -41,3 +41,6 @@ username: "{{ vault_username }}"
 dmz_username: "{{ vault_dmz_username }}"
 
 tailscale_auth_key: "{{ vault_tailscale_auth_key }}"
+
+pfsense_backup_ssh_user: "{{ vault_pfsense_backup_ssh_user }}"
+uptime_kuma_pfsense_push_url: "{{ vault_uptime_kuma_pfsense_push_url }}"
