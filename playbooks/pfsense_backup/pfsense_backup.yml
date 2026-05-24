@@ -1,0 +1,7 @@
+---
+- name: Deploy pfSense config backup to Voyager
+  hosts: voyager
+  gather_facts: true
+  become: false
+  roles:
+    - role: deploy_pfsense_backup
