@@ -4,9 +4,9 @@
   # Need to run this first or else it errors
 - name: Add Forgejo to known_hosts
   known_hosts:
-    name: "[100.86.4.29]:222"
+    name: "{{ vault_forgejo_ssh_known_hosts_entry.split()[0] }}"
     path: "/home/{{ obsidian_user }}/.ssh/known_hosts"
-    key: "[100.86.4.29]:222 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID8eqbN/vQ4TWPCpjhoKzeeNoX4mXeE+fQ3jpfAM8eJj"
+    key: "{{ vault_forgejo_ssh_known_hosts_entry }}"
     state: present
   become: yes
   when: obsidian_vault_git_repo is defined and ('git@' in obsidian_vault_git_repo or obsidian_vault_git_repo.startswith('ssh://'))

@@ -9,7 +9,7 @@ obsidian_create_vault: true
 obsidian_vault_path: "/home/{{ obsidian_user }}/wiki/"
 
 # Git sync options (configure for GitHub sync)
-obsidian_vault_git_repo: "ssh://git@100.86.4.29:222/dax/obsidian-vault.git"
+obsidian_vault_git_repo: "{{ vault_forgejo_ssh_url }}/dax/obsidian-vault.git"
 obsidian_vault_git_branch: "main"
 obsidian_vault_git_force: false
 
