@@ -1,0 +1,63 @@
+---
+- name: Ensure ~/.secrets directory exists
+  file:
+    path: "/home/{{ ansible_user }}/.secrets"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0700'
+
+- name: Deploy pfsense_backup secrets file
+  template:
+    src: pfsense_backup.env.j2
+    dest: "{{ pfsense_backup_secrets_path }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+
+- name: Ensure ~/bin directory exists
+  file:
+    path: "/home/{{ ansible_user }}/bin"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+
+- name: Ensure ~/logs directory exists
+  file:
+    path: "/home/{{ ansible_user }}/logs"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+
+- name: Deploy pfsense-backup.sh script
+  template:
+    src: pfsense_backup.sh.j2
+    dest: "{{ pfsense_backup_script_path }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0750'
+
+- name: Add pfSense host key to known_hosts
+  known_hosts:
+    name: "{{ pfsense_backup_host }}"
+    key: "{{ lookup('pipe', 'ssh-keyscan -H ' + pfsense_backup_host + ' 2>/dev/null') }}"
+    path: "/home/{{ ansible_user }}/.ssh/known_hosts"
+    state: present
+
+- name: Clone pfsense-backups Forgejo repo (if not already present)
+  git:
+    repo: "{{ pfsense_backup_forgejo_repo }}"
+    dest: "{{ pfsense_backup_repo_path }}"
+    accept_hostkey: true
+    update: false
+  become: false
+
+- name: Schedule daily pfSense backup cron job
+  cron:
+    name: "pfSense config backup"
+    hour: "{{ pfsense_backup_cron_hour }}"
+    minute: "{{ pfsense_backup_cron_minute }}"
+    job: "{{ pfsense_backup_script_path }} >> {{ pfsense_backup_log_path }} 2>&1"
+    user: "{{ ansible_user }}"
