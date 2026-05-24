@@ -2,14 +2,14 @@
 # Obsidian Vault Sync (No App Installation)
 
   # Need to run this first or else it errors
-- name: Add GitHub to known_hosts
+- name: Add Forgejo to known_hosts
   known_hosts:
-    name: github.com
+    name: "{{ vault_forgejo_ssh_known_hosts_entry.split()[0] }}"
     path: "/home/{{ obsidian_user }}/.ssh/known_hosts"
-    key: "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
+    key: "{{ vault_forgejo_ssh_known_hosts_entry }}"
     state: present
   become: yes
-  when: obsidian_vault_git_repo is defined and obsidian_vault_git_repo.startswith('git@')
+  when: obsidian_vault_git_repo is defined and ('git@' in obsidian_vault_git_repo or obsidian_vault_git_repo.startswith('ssh://'))
   # tags: ['obsidian', 'git', 'ssh']
 
 - name: Clone Obsidian vault from GitHub
@@ -75,7 +75,7 @@
     msg:
       - "=== Obsidian Vault Sync Complete ==="
       - "Vault location: {{ obsidian_vault_path }}"
-      - "Vault source: {{ 'GitHub: ' + obsidian_vault_git_repo if obsidian_vault_git_repo is defined else 'New vault created' }}"
+      - "Vault source: {{ 'Forgejo: ' + obsidian_vault_git_repo if obsidian_vault_git_repo is defined else 'New vault created' }}"
       - "Git sync: {{ 'Enabled (nightly at ' + obsidian_git_sync_hour | default('4') + ':' + obsidian_git_sync_minute | default('00') + ')' if obsidian_vault_git_repo is defined and obsidian_auto_git_sync | default(true) else 'Disabled' }}"
       - ""
       - "Your vault files are ready!"
