@@ -4,7 +4,6 @@
     path: "/home/{{ ansible_user }}/.secrets"
     state: directory
     owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
     mode: '0700'
 
 - name: Deploy pfsense_backup secrets file
@@ -12,7 +11,6 @@
     src: pfsense_backup.env.j2
     dest: "{{ pfsense_backup_secrets_path }}"
     owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
     mode: '0600'
 
 - name: Ensure ~/bin directory exists
@@ -20,7 +18,6 @@
     path: "/home/{{ ansible_user }}/bin"
     state: directory
     owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
     mode: '0755'
 
 - name: Ensure ~/logs directory exists
@@ -28,7 +25,6 @@
     path: "/home/{{ ansible_user }}/logs"
     state: directory
     owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
     mode: '0755'
 
 - name: Deploy pfsense-backup.sh script
@@ -36,7 +32,6 @@
     src: pfsense_backup.sh.j2
     dest: "{{ pfsense_backup_script_path }}"
     owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
     mode: '0750'
 
 - name: Add pfSense host key to known_hosts
