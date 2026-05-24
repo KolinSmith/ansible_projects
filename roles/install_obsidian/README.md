@@ -4,6 +4,9 @@ Installs Obsidian headlessly on Ubuntu 24.04 using Xvfb as a virtual framebuffer
 Creates two systemd services (`xvfb.service` + `obsidian.service`) so Obsidian
 runs permanently and Obsidian Sync keeps `~/wiki/` up to date.
 
+Obsidian Sync credentials are restored from a vault-encrypted config backup
+(`files/obsidian-config.tar.gz`) — **no manual login required on re-provision**.
+
 ## How It Works
 
 Obsidian is an Electron app that normally requires a display. On a headless server
@@ -41,7 +44,16 @@ after it recovers. Both services are set to `Restart=always`.
 3. Drops `/etc/systemd/system/xvfb.service` and `obsidian.service`
 4. Enables and starts both services
 
-## First-Time Login (Required after initial deploy)
+## First-Time Login (Fallback only — not required on normal re-provision)
+
+On re-provision, Obsidian Sync credentials are restored automatically from the
+vault-encrypted backup in `files/obsidian-config.tar.gz`. The service should
+connect to Sync without any manual steps.
+
+Only follow this procedure if Sync fails to connect after re-provision (e.g. the
+auth token expired) or if you're setting up a brand-new Obsidian account.
+
+After completing the login, **update the backup** — see "Updating the Config Backup" below.
 
 After the role runs, `obsidian.service` will start but Obsidian has no Sync config
 yet — it will sit idle or restart. You need to log into Obsidian Sync once using
@@ -95,7 +107,36 @@ journalctl -u obsidian -n 10 --no-pager
 
 After this one-time step, `obsidian.service` runs permanently. Obsidian Sync
 keeps `~/wiki/` updated, and the nightly git cron (from `install_obsidian_vault`)
-pushes changes to GitHub at 4 AM.
+pushes changes to Forgejo at 4 AM.
+
+## Updating the Config Backup
+
+Run this on Voyager whenever you re-authenticate Obsidian Sync (token refresh,
+new account login, etc.) to keep the backup current:
+
+```bash
+# 1. Create a fresh tarball of the Obsidian config
+tar -czf /tmp/obsidian-config.tar.gz \
+  -C ~/.config/obsidian \
+  IndexedDB \
+  'Local Storage' \
+  obsidian.json \
+  816a4707fd9fb235.json
+
+# 2. Encrypt it into the role's files directory
+ansible-vault encrypt /tmp/obsidian-config.tar.gz \
+  --output ~/code_base/ansible_projects/roles/install_obsidian/files/obsidian-config.tar.gz
+
+# 3. Destroy the plaintext tarball
+shred -u /tmp/obsidian-config.tar.gz
+
+# 4. Commit and push on a new branch (opens a PR — don't push directly to master)
+cd ~/code_base/ansible_projects
+git checkout -b feat/obsidian-config-backup-refresh
+git add roles/install_obsidian/files/obsidian-config.tar.gz
+git commit -m "chore: refresh obsidian sync config backup"
+git push -u origin feat/obsidian-config-backup-refresh
+```
 
 ## Troubleshooting
 
