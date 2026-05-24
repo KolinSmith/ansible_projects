@@ -1,8 +1,8 @@
 ---
 # Install Obsidian headlessly on Ubuntu using Xvfb as a virtual display.
 # Two systemd services are created: xvfb.service and obsidian.service.
-# After this role runs, complete first-time Obsidian Sync login via:
-#   ssh -X dax@voyager && /opt/Obsidian/obsidian --no-sandbox
+# Obsidian Sync credentials are restored from files/obsidian-config.tar.gz
+# (vault-encrypted) — no manual login required on re-provision.
 
 - name: Install Xvfb and Electron runtime dependencies
   apt:
@@ -57,6 +57,47 @@
 - name: Flush handlers (daemon-reload before enabling services)
   meta: flush_handlers
 
+- name: Check for existing Obsidian auth data (IndexedDB)
+  stat:
+    path: "/home/{{ obsidian_user }}/.config/obsidian/IndexedDB"
+  register: obsidian_indexeddb
+  become: true
+
+- name: Restore Obsidian config from vault backup
+  when: not obsidian_indexeddb.stat.exists
+  block:
+    - name: Ensure obsidian config directory exists
+      file:
+        path: "/home/{{ obsidian_user }}/.config/obsidian"
+        state: directory
+        owner: "{{ obsidian_user }}"
+        group: "{{ obsidian_user }}"
+        mode: '0755'
+      become: true
+
+    - name: Copy vault-encrypted config tarball to target
+      copy:
+        src: obsidian-config.tar.gz
+        dest: "/tmp/obsidian-config.tar.gz"
+        owner: "{{ obsidian_user }}"
+        mode: '0600'
+      become: true
+
+    - name: Extract obsidian config
+      unarchive:
+        src: "/tmp/obsidian-config.tar.gz"
+        dest: "/home/{{ obsidian_user }}/.config/obsidian/"
+        owner: "{{ obsidian_user }}"
+        group: "{{ obsidian_user }}"
+        remote_src: true
+      become: true
+
+    - name: Remove config tarball from target
+      file:
+        path: /tmp/obsidian-config.tar.gz
+        state: absent
+      become: true
+
 - name: Enable and start xvfb.service
   systemd:
     name: xvfb
@@ -76,13 +117,14 @@
     msg:
       - "=== Obsidian installed and services started ==="
       - ""
-      - "obsidian.service will restart repeatedly until Obsidian Sync is configured."
-      - "This is expected. Complete the one-time login:"
+      - "Obsidian config restored from vault backup — Sync should connect automatically."
+      - "Verify: sudo systemctl status obsidian && journalctl -u obsidian -n 20 --no-pager"
       - ""
+      - "If Sync does not connect (e.g. auth token expired), do the one-time login:"
       - "  1. sudo systemctl stop obsidian"
       - "  2. From MacBook: ssh -X {{ obsidian_user }}@voyager"
       - "  3. /opt/Obsidian/obsidian --no-sandbox"
-      - "  4. Log into Obsidian Sync, open ~/wiki/ as vault"
-      - "  5. sudo systemctl start obsidian"
+      - "  4. Log in and reconnect Sync, then: sudo systemctl start obsidian"
+      - "  5. Re-run: make -C roles/install_obsidian backup  (or see README)"
       - ""
       - "See roles/install_obsidian/README.md for full details."
