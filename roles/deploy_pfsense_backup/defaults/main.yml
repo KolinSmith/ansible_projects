@@ -1,0 +1,10 @@
+---
+pfsense_backup_config_remote_path: "/cf/conf/config.xml"
+
+pfsense_backup_script_path: "/home/{{ ansible_user }}/bin/pfsense-backup.sh"
+pfsense_backup_repo_path: "/home/{{ ansible_user }}/pfsense-backups"
+pfsense_backup_log_path: "/home/{{ ansible_user }}/logs/pfsense-backup.log"
+pfsense_backup_secrets_path: "/home/{{ ansible_user }}/.secrets/pfsense_backup.env"
+
+pfsense_backup_cron_hour: "2"
+pfsense_backup_cron_minute: "0"
