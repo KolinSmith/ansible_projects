@@ -41,3 +41,4 @@
       - role: geerlingguy.ntp
       # - role: geerlingguy.node_exporter
       - role: geerlingguy.clamav
+      - role: deploy_pfsense_backup

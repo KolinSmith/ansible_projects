@@ -1,0 +1,92 @@
+#!/bin/bash
+# pfSense config.xml backup — managed by Ansible (deploy_pfsense_backup role)
+set -euo pipefail
+
+SECRETS_FILE="{{ pfsense_backup_secrets_path }}"
+PFSENSE_HOST="{{ pfsense_backup_host }}"
+REMOTE_CONFIG="{{ pfsense_backup_config_remote_path }}"
+BACKUP_REPO="{{ pfsense_backup_repo_path }}"
+
+log()  { echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] $*"; }
+fail() { echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] ERROR: $*" >&2; exit 1; }
+
+# Load secrets (PFSENSE_USER, UPTIME_KUMA_PUSH_URL)
+if [[ ! -f "${SECRETS_FILE}" ]]; then
+    fail "Secrets file not found: ${SECRETS_FILE}"
+fi
+# shellcheck source=/dev/null
+source "${SECRETS_FILE}"
+
+log "Starting pfSense config backup from ${PFSENSE_HOST}"
+
+# --- Step 1: DNS resolution ---
+log "Resolving ${PFSENSE_HOST}..."
+if ! getent hosts "${PFSENSE_HOST}" > /dev/null 2>&1; then
+    fail "DNS resolution failed for ${PFSENSE_HOST} — is the internal DNS up?"
+fi
+log "DNS OK"
+
+# --- Step 2: SSH connectivity ---
+log "Checking SSH connectivity to ${PFSENSE_USER}@${PFSENSE_HOST}..."
+if ! ssh \
+        -o ConnectTimeout=10 \
+        -o BatchMode=yes \
+        -o StrictHostKeyChecking=yes \
+        "${PFSENSE_USER}@${PFSENSE_HOST}" \
+        'echo ok' > /dev/null 2>&1; then
+    fail "SSH connection failed to ${PFSENSE_USER}@${PFSENSE_HOST} — check key auth and SSH service"
+fi
+log "SSH OK"
+
+# --- Step 3: Download config.xml ---
+TMPFILE=$(mktemp /tmp/pfsense-config-XXXXXX.xml)
+trap 'rm -f "${TMPFILE}"' EXIT
+
+log "Downloading ${REMOTE_CONFIG}..."
+if ! scp \
+        -o ConnectTimeout=10 \
+        -o BatchMode=yes \
+        -o StrictHostKeyChecking=yes \
+        "${PFSENSE_USER}@${PFSENSE_HOST}:${REMOTE_CONFIG}" \
+        "${TMPFILE}" 2>&1; then
+    fail "SCP failed — could not download ${REMOTE_CONFIG} from ${PFSENSE_HOST}"
+fi
+
+# --- Step 4: Validate downloaded file ---
+if [[ ! -s "${TMPFILE}" ]]; then
+    fail "Downloaded config.xml is empty"
+fi
+if ! grep -q '<pfsense' "${TMPFILE}"; then
+    fail "Downloaded file does not look like a pfSense config (missing <pfsense element)"
+fi
+log "config.xml validated ($(wc -c < "${TMPFILE}") bytes)"
+
+# --- Step 5: Commit to git repo ---
+cp "${TMPFILE}" "${BACKUP_REPO}/config.xml"
+cd "${BACKUP_REPO}"
+
+git add config.xml
+if git diff --staged --quiet; then
+    log "No changes to config.xml since last backup — skipping commit"
+else
+    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    if ! git commit -m "pfSense config backup ${TIMESTAMP}" 2>&1; then
+        fail "git commit failed"
+    fi
+    log "Committed changes"
+fi
+
+# --- Step 6: Push to Forgejo ---
+log "Pushing to Forgejo..."
+if ! git push 2>&1; then
+    fail "git push to Forgejo failed — check SSH key and remote connectivity"
+fi
+log "Push OK"
+
+# --- Step 7: Ping Uptime Kuma ---
+log "Pinging Uptime Kuma healthcheck..."
+if ! curl -fsS --max-time 10 "${UPTIME_KUMA_PUSH_URL}" > /dev/null 2>&1; then
+    fail "Uptime Kuma ping failed — backup complete but healthcheck not confirmed (check ${UPTIME_KUMA_PUSH_URL})"
+fi
+
+log "Backup complete — config committed, pushed, and healthcheck sent"
