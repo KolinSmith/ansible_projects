@@ -123,7 +123,7 @@ PIA_USER=$("${_VAULT[@]}" | awk '/^vault_pia_user:/{print $2}') \
     || die "Failed to read vault_pia_user from vault"
 PIA_PASS=$("${_VAULT[@]}" | awk "/^vault_pia_pass:/{gsub(/^'|'\$/, \"\", \$2); print \$2}") \
     || die "Failed to read vault_pia_pass from vault"
-UPTIME_KUMA_URL=$("${_VAULT[@]}" | awk '/^vault_uptime_kuma_pia_push_url:/{print $2}') \
+UPTIME_KUMA_URL=$("${_VAULT[@]}" | awk '/^vault_uptime_kuma_pia_push_url:/{gsub(/^"|"$/, "", $2); print $2}') \
     || die "Failed to read vault_uptime_kuma_pia_push_url from vault"
 
 [[ -n "${PIA_USER}" ]]         || die "vault_pia_user is empty"
