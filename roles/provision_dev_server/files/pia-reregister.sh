@@ -34,10 +34,13 @@
 #      from /usr/local/etc/wireguard/tun_wg0.conf on pfSense)
 #   4. SCP a PHP script to pfSense and run it to update config.xml in-place
 #      (updating the peer's public key and the interface's tunnel IP)
-#   5. Run `wg set` on pfSense to sync the live WireGuard kernel state
+#   5. Run `wg set` on pfSense to sync the live WireGuard peer state
 #      WITHOUT restarting the interface (see CRITICAL NOTE below)
-#   6. Verify the tunnel by polling `wg show` for a fresh handshake
-#   7. Ping Uptime Kuma on success; absence of ping = Kuma alerts on failure
+#   6. Update the live interface inet address on pfSense to match peer_ip
+#      (`wg set` updates the peer but not the interface IP — if peer_ip changed,
+#      PIA routes return traffic to the new IP, not the old one on the interface)
+#   7. Verify the tunnel by polling `wg show` for a fresh handshake
+#   8. Ping Uptime Kuma on success; absence of ping = Kuma alerts on failure
 #
 # CRITICAL NOTE: rc.newwanip MUST NOT BE CALLED
 # ----------------------------------------------
@@ -80,6 +83,7 @@ readonly GET_TOKEN_SCRIPT="${PIA_MANUAL_CONNECTIONS_DIR}/get_token.sh"
 readonly PFSENSE_WG_PUBKEY="4NeVHk1cLDWfE+ahM61GfwgdMF+iNurOduFs4f4aoHE="
 readonly PFSENSE_HOST="kolin@192.168.3.1"
 readonly PFSENSE_WG_IFACE="tun_wg0"
+readonly PFSENSE_GW_MONITOR_IP="1.1.1.1"
 readonly TOKEN_FILE="/opt/piavpn-manual/token"
 
 # Handshake verification: poll every 5s, up to 12 tries (60s total)
@@ -245,6 +249,47 @@ ssh "${PFSENSE_HOST}" "sudo wg set ${PFSENSE_WG_IFACE} \
     || die "wg set on pfSense failed"
 
 log "wg set completed"
+
+# ---------------------------------------------------------------------------
+# Step 6b: Update live interface IP on pfSense
+#
+# `wg set` updates the WireGuard peer (public key, endpoint, allowed IPs) but
+# does NOT update the inet address on tun_wg0. If peer_ip changed between
+# re-registrations, the interface keeps the old IP. PIA assigns return traffic
+# to the new peer_ip — packets leave pfSense fine but responses are dropped
+# because the old IP is no longer the registered address for this peer key.
+#
+# We also update the gateway monitor's host route for PFSENSE_GW_MONITOR_IP
+# to use the new interface IP as its gateway. Deleting the route is avoided
+# because dpinger (in "down" state) may not re-add it, causing a chicken-and-
+# egg situation where pings can't flow without the route to add the route.
+# ---------------------------------------------------------------------------
+
+log "Updating live interface IP on pfSense (${PFSENSE_WG_IFACE} -> ${PEER_IP})"
+
+ssh "${PFSENSE_HOST}" /bin/sh <<EOF || die "ifconfig update on pfSense failed"
+CURR=\$(ifconfig ${PFSENSE_WG_IFACE} | awk '/inet /{print \$2; exit}')
+if [ "\${CURR}" = "${PEER_IP}" ]; then
+    echo "Interface IP already ${PEER_IP} -- no update needed"
+else
+    echo "Updating interface IP: \${CURR} -> ${PEER_IP}"
+    [ -n "\${CURR}" ] && sudo ifconfig ${PFSENSE_WG_IFACE} inet "\${CURR}" delete
+    sudo ifconfig ${PFSENSE_WG_IFACE} inet "${PEER_IP}" netmask 0xffffffff
+    sudo route -q change -host ${PFSENSE_GW_MONITOR_IP} ${PEER_IP} 2>/dev/null || \
+        sudo route -q add -host ${PFSENSE_GW_MONITOR_IP} ${PEER_IP} 2>/dev/null || true
+    OLD_PID_FILE="/var/run/dpinger_PIA_OVER_WIREGUARD~\${CURR}~${PFSENSE_GW_MONITOR_IP}.pid"
+    [ -f "\${OLD_PID_FILE}" ] && sudo kill "\$(cat \${OLD_PID_FILE})" 2>/dev/null || true
+    sudo /usr/local/bin/dpinger -S -r 0 -i PIA_OVER_WIREGUARD \
+        -B "${PEER_IP}" \
+        -p "/var/run/dpinger_PIA_OVER_WIREGUARD~${PEER_IP}~${PFSENSE_GW_MONITOR_IP}.pid" \
+        -u "/var/run/dpinger_PIA_OVER_WIREGUARD~${PEER_IP}~${PFSENSE_GW_MONITOR_IP}.sock" \
+        -C /etc/rc.gateway_alarm \
+        -d 1 -s 500 -l 2000 -t 60000 -A 1000 -D 500 -L 20 \
+        "${PFSENSE_GW_MONITOR_IP}"
+fi
+EOF
+
+log "Interface IP update complete"
 
 # ---------------------------------------------------------------------------
 # Step 7: Verify WireGuard handshake within 60s
