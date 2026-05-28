@@ -277,6 +277,15 @@ else
     sudo ifconfig ${PFSENSE_WG_IFACE} inet "${PEER_IP}" netmask 0xffffffff
     sudo route -q change -host ${PFSENSE_GW_MONITOR_IP} ${PEER_IP} 2>/dev/null || \
         sudo route -q add -host ${PFSENSE_GW_MONITOR_IP} ${PEER_IP} 2>/dev/null || true
+    OLD_PID_FILE="/var/run/dpinger_PIA_OVER_WIREGUARD~\${CURR}~${PFSENSE_GW_MONITOR_IP}.pid"
+    [ -f "\${OLD_PID_FILE}" ] && sudo kill "\$(cat \${OLD_PID_FILE})" 2>/dev/null || true
+    sudo /usr/local/bin/dpinger -S -r 0 -i PIA_OVER_WIREGUARD \
+        -B "${PEER_IP}" \
+        -p "/var/run/dpinger_PIA_OVER_WIREGUARD~${PEER_IP}~${PFSENSE_GW_MONITOR_IP}.pid" \
+        -u "/var/run/dpinger_PIA_OVER_WIREGUARD~${PEER_IP}~${PFSENSE_GW_MONITOR_IP}.sock" \
+        -C /etc/rc.gateway_alarm \
+        -d 1 -s 500 -l 2000 -t 60000 -A 1000 -D 500 -L 20 \
+        "${PFSENSE_GW_MONITOR_IP}"
 fi
 EOF
 
