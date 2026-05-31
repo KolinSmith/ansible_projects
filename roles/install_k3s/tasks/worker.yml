@@ -26,4 +26,5 @@
   register: nodes_check
   retries: 20
   delay: 10
-  until: "'{{ inventory_hostname }}' in nodes_check.stdout"
+  until: inventory_hostname in nodes_check.stdout
+  changed_when: false
