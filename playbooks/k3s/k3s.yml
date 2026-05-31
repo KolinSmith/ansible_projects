@@ -1,0 +1,16 @@
+---
+- name: Install k3s control plane
+  hosts: k3s_control
+  become: true
+  vars:
+    k3s_role: control
+  roles:
+    - role: install_k3s
+
+- name: Install k3s workers
+  hosts: k3s_workers
+  become: true
+  vars:
+    k3s_role: worker
+  roles:
+    - role: install_k3s

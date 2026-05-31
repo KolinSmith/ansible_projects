@@ -1,0 +1,29 @@
+---
+- name: Download k3s install script
+  get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s-install.sh
+    mode: '0755'
+
+- name: Get node token from control plane
+  command: cat /var/lib/rancher/k3s/server/node-token
+  delegate_to: "{{ k3s_control_ip }}"
+  register: k3s_node_token
+  changed_when: false
+
+- name: Install k3s agent
+  command: /tmp/k3s-install.sh
+  environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+    K3S_URL: "https://{{ k3s_control_ip }}:6443"
+    K3S_TOKEN: "{{ k3s_node_token.stdout }}"
+  args:
+    creates: /usr/local/bin/k3s
+
+- name: Wait for agent to register
+  command: k3s kubectl get nodes
+  delegate_to: "{{ k3s_control_ip }}"
+  register: nodes_check
+  retries: 20
+  delay: 10
+  until: "'{{ inventory_hostname }}' in nodes_check.stdout"
