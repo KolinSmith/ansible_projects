@@ -65,23 +65,29 @@ log "config.xml validated ($(wc -c < "${TMPFILE}") bytes)"
 cp "${TMPFILE}" "${BACKUP_REPO}/config.xml"
 cd "${BACKUP_REPO}"
 
+COMMITTED=false
 git add config.xml
 if git diff --staged --quiet; then
-    log "No changes to config.xml since last backup — skipping commit"
+    log "No changes to config.xml since last backup — skipping commit and push"
 else
     TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     if ! git commit -m "pfSense config backup ${TIMESTAMP}" 2>&1; then
         fail "git commit failed"
     fi
     log "Committed changes"
+    COMMITTED=true
 fi
 
-# --- Step 6: Push to Forgejo ---
-log "Pushing to Forgejo..."
-if ! git push 2>&1; then
-    fail "git push to Forgejo failed — check SSH key and remote connectivity"
+# --- Step 6: Push to Forgejo (only if config changed) ---
+if [[ "${COMMITTED}" == "true" ]]; then
+    log "Pushing to Forgejo..."
+    if ! git push 2>&1; then
+        fail "git push to Forgejo failed — check SSH key and remote connectivity"
+    fi
+    log "Push OK"
+else
+    log "No new commit — skipping push"
 fi
-log "Push OK"
 
 # --- Step 7: Ping Uptime Kuma ---
 log "Pinging Uptime Kuma healthcheck..."
@@ -89,4 +95,8 @@ if ! curl -fsS --max-time 10 "${UPTIME_KUMA_PUSH_URL}" > /dev/null 2>&1; then
     fail "Uptime Kuma ping failed — backup complete but healthcheck not confirmed (check ${UPTIME_KUMA_PUSH_URL})"
 fi
 
-log "Backup complete — config committed, pushed, and healthcheck sent"
+if [[ "${COMMITTED}" == "true" ]]; then
+    log "Backup complete — config changed, committed, pushed, and healthcheck sent"
+else
+    log "Backup complete — no config change, healthcheck sent"
+fi
