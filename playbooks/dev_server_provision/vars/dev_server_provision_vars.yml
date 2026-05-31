@@ -65,6 +65,7 @@ necessary_packages:
   - samba
   - sshpass # for ansible use
   - ansible-lint
+  - terraform
   - expect
   - gh
   - xdg-utils     #needed to open browser from dev container when prompted in code  
