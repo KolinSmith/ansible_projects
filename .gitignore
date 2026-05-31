@@ -1,2 +1,3 @@
 ansible.log
 .claude/
+k3s-hosts.ini

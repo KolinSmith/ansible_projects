@@ -1,0 +1,8 @@
+---
+- name: Install k3s (control plane tasks)
+  import_tasks: control.yml
+  when: k3s_role == 'control'
+
+- name: Install k3s (worker tasks)
+  import_tasks: worker.yml
+  when: k3s_role == 'worker'
