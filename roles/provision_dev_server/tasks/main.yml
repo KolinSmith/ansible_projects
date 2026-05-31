@@ -48,6 +48,29 @@
       state: present
       filename: hashicorp
 
+  - name: add Kubernetes GPG keyring directory
+    file:
+      path: /etc/apt/keyrings
+      state: directory
+      mode: '0755'
+
+  - name: download Kubernetes apt signing key
+    ansible.builtin.get_url:
+      url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
+      dest: /tmp/kubernetes.gpg
+      mode: '0644'
+
+  - name: dearmor Kubernetes GPG key
+    ansible.builtin.shell:
+      cmd: gpg --batch --yes --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes.gpg
+      creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+  - name: add Kubernetes apt repository
+    ansible.builtin.apt_repository:
+      repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
+      state: present
+      filename: kubernetes
+
   - name: add packages I want
     apt:
       name: "{{ necessary_packages }}"
