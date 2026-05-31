@@ -68,7 +68,8 @@ necessary_packages:
   - terraform
   - expect
   - gh
-  - xdg-utils     #needed to open browser from dev container when prompted in code  
+  - xdg-utils     #needed to open browser from dev container when prompted in code
+  - kubectl
 
 
 
