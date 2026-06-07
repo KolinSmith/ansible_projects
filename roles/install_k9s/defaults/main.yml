@@ -1,2 +1,4 @@
 ---
-k3s_control_ip: "192.168.9.20"
+# Resolved from [k3s_control] inventory group at runtime.
+# Run provision_dev_server with: -i hosts -i k3s-hosts.ini
+k3s_control_ip: "{{ groups['k3s_control'][0] }}"
