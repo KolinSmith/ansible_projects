@@ -3,9 +3,9 @@ collections:
   - name: community.docker
   - name: community.general
   - name: ansible.posix
+  - name: artis3n.tailscale
 
 roles:
-  - name: artis3n.tailscale
   - name: geerlingguy.docker
   - name: geerlingguy.docker_arm
   - name: geerlingguy.pip
