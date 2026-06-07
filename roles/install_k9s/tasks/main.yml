@@ -49,3 +49,30 @@
     - /tmp/k9s.tar.gz
     - /tmp/k9s
   when: not k9s_binary.stat.exists
+
+- name: Create ~/.kube directory
+  file:
+    path: "/home/{{ ansible_user }}/.kube"
+    state: directory
+    owner: "{{ ansible_user }}"
+    mode: '0700'
+
+- name: Check if kubeconfig already exists
+  stat:
+    path: "/home/{{ ansible_user }}/.kube/config"
+  register: kubeconfig_stat
+
+- name: Fetch kubeconfig from k3s control plane
+  slurp:
+    src: /etc/rancher/k3s/k3s.yaml
+  delegate_to: "{{ k3s_control_ip }}"
+  register: k3s_kubeconfig_raw
+  when: not kubeconfig_stat.stat.exists
+
+- name: Write kubeconfig to ~/.kube/config
+  copy:
+    content: "{{ k3s_kubeconfig_raw.content | b64decode | replace('127.0.0.1', k3s_control_ip) }}"
+    dest: "/home/{{ ansible_user }}/.kube/config"
+    owner: "{{ ansible_user }}"
+    mode: '0600'
+  when: not kubeconfig_stat.stat.exists
