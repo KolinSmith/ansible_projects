@@ -87,3 +87,11 @@
     group: "{{ ansible_user }}"
     mode: '0644'
   when: deploy_docker_services_for == 'operator'
+
+- name: Login Docker daemon to Forgejo registry (operator only)
+  shell: >
+    echo "{{ vault_forgejo_api_token }}" |
+    sudo docker login {{ vault_forgejo_internal_url | regex_replace('^https?://', '') }}
+    -u {{ vault_username }} --password-stdin
+  no_log: true
+  when: deploy_docker_services_for == 'operator'
