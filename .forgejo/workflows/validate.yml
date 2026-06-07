@@ -70,6 +70,9 @@ jobs:
             touch /home/dax/.ansible_password
           fi
 
+      - name: Install Ansible collections and roles
+        run: ansible-galaxy install -r requirements.yml --ignore-errors
+
       - name: Lint changed Ansible files
         run: |
           git fetch origin ${{ github.base_ref }}
