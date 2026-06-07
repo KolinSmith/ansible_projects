@@ -52,3 +52,20 @@
   loop: "{{ forgejo_ci_repos }}"
   no_log: true
   delegate_to: localhost
+
+- name: Set FORGEJO_API_URL CI secret in Forgejo repos
+  uri:
+    url: "{{ vault_forgejo_instance_url }}/api/v1/repos/{{ item }}/actions/secrets/FORGEJO_API_URL"
+    method: PUT
+    headers:
+      Authorization: "token {{ vault_forgejo_api_token }}"
+      Content-Type: application/json
+    body_format: json
+    body:
+      data: "{{ vault_forgejo_internal_url }}/api/v1"
+    status_code: [201, 204]
+    validate_certs: true
+  loop: "{{ forgejo_ci_repos }}"
+  no_log: true
+  delegate_to: localhost
+  when: vault_forgejo_internal_url is defined

@@ -205,7 +205,7 @@ jobs:
           GH_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
-          API_BASE: ${{ github.server_url }}/api/v1
+          API_BASE: ${{ secrets.FORGEJO_API_URL || format('{0}/api/v1', github.server_url) }}
         run: |
           python3 << 'PYEOF'
           import json, os, urllib.request, urllib.error
