@@ -46,3 +46,14 @@
 
   # Service-specific tasks moved to respective roles
   # (e.g., tor-relay status alias now in deploy_docker_env role)
+
+- name: Configure Forgejo CI secrets
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server_provision_script_vars.yml
+    - ../../group_vars/all/vars.yml
+    - ../../group_vars/all/vault.yml
+    - ../../group_vars/all/docker_vars.yml
+  roles:
+    - role: configure_forgejo_ci

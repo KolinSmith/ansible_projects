@@ -1,0 +1,22 @@
+---
+- name: Read vault password from controller
+  set_fact:
+    _forgejo_ci_vault_password: "{{ lookup('file', forgejo_ci_vault_password_file) }}"
+  no_log: true
+  delegate_to: localhost
+
+- name: Set ANSIBLE_VAULT_PASSWORD CI secret in Forgejo repos
+  uri:
+    url: "{{ vault_forgejo_instance_url }}/api/v1/repos/{{ item }}/actions/secrets/ANSIBLE_VAULT_PASSWORD"
+    method: PUT
+    headers:
+      Authorization: "token {{ vault_forgejo_api_token }}"
+      Content-Type: application/json
+    body_format: json
+    body:
+      data: "{{ _forgejo_ci_vault_password }}"
+    status_code: [201, 204]
+    validate_certs: true
+  loop: "{{ forgejo_ci_repos }}"
+  no_log: true
+  delegate_to: localhost

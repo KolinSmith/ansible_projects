@@ -1,0 +1,9 @@
+---
+# Forgejo repos to configure CI secrets for.
+# Format: "owner/repo"
+forgejo_ci_repos:
+  - "{{ vault_username }}/ansible_projects"
+  - "{{ vault_username }}/docker_projects"
+
+# Path to the Ansible vault password file on the controller
+forgejo_ci_vault_password_file: "/home/{{ vault_username }}/.ansible_password"

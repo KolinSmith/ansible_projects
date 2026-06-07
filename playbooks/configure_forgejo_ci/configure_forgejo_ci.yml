@@ -1,0 +1,13 @@
+---
+# Run this playbook to provision CI secrets in Forgejo repos.
+# Also runs automatically as part of server_provision_script when deploying the forgejo-runner host.
+#
+# Usage: ansible-playbook playbooks/configure_forgejo_ci/configure_forgejo_ci.yml --ask-vault-pass
+- name: Configure Forgejo CI secrets
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - ../../group_vars/all/vars.yml
+    - ../../group_vars/all/vault.yml
+  roles:
+    - role: configure_forgejo_ci
