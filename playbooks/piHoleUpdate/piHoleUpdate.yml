@@ -1,16 +1,23 @@
 ---
-  - name: piHoleUpdate
-    hosts: dns_servers
-    gather_facts: yes
-    #become_user: {{ ansible_user }}
-    become: yes
-    tasks:
-      - name: Update and upgrade apt packages
-        apt:
-          upgrade: yes
-          update_cache: yes
-          cache_valid_time: 86400 #One day
-          
-      - name: update pihole
-        #I had to use this instead of the normal "pihole -up" because of the way I have DNS setup
-        shell: "PIHOLE_SKIP_OS_CHECK=true sudo -E pihole -up"
+- name: piHoleUpdate
+  hosts: dns_servers
+  gather_facts: yes
+  become: yes
+  vars_files:
+    - ../../group_vars/all/vars.yml
+  tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+
+    - name: Pull latest Pi-hole image
+      command: docker compose pull
+      args:
+        chdir: "/home/{{ ansible_user }}/docker"
+
+    - name: Restart Pi-hole with new image
+      command: docker compose up -d --force-recreate
+      args:
+        chdir: "/home/{{ ansible_user }}/docker"

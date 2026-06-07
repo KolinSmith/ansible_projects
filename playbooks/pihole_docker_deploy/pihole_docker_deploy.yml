@@ -1,0 +1,32 @@
+---
+# Deploy Pi-hole via Docker Compose on dns_servers (ds9, defiant)
+# Run: ansible-playbook -i hosts playbooks/pihole_docker_deploy/pihole_docker_deploy.yml --ask-vault-pass
+# Limit to one host: add --limit defiant (do defiant first — it's the secondary)
+
+- name: Deploy Pi-hole Docker stack on DNS servers
+  hosts: dns_servers
+  gather_facts: true
+  become: true
+  vars_files:
+    - ../../group_vars/all/vars.yml
+    - ../../group_vars/all/docker_vars.yml
+  vars:
+    docker_users:
+      - "{{ username }}"
+    deploy_docker_services_for: "{{ inventory_hostname }}"
+    pihole_container_name: "pihole-{{ inventory_hostname | lower }}"
+
+  roles:
+    - role: geerlingguy.docker_arm
+    - role: deploy_docker_env
+
+  tasks:
+    - name: Start Pi-hole container
+      community.docker.docker_compose_v2:
+        project_src: "/home/{{ ansible_user }}/docker"
+        state: present
+
+    - name: Configure Pi-hole whitelist and blacklist
+      include_role:
+        name: deploy_pihole
+        tasks_from: configure_pihole_docker.yml
