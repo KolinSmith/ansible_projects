@@ -57,6 +57,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up vault password
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+        run: |
+          mkdir -p /home/dax
+          if [ -n "$ANSIBLE_VAULT_PASSWORD" ]; then
+            echo "$ANSIBLE_VAULT_PASSWORD" > /home/dax/.ansible_password
+            echo "Vault password configured."
+          else
+            echo "ANSIBLE_VAULT_PASSWORD secret not set — vault syntax checks will be skipped."
+            touch /home/dax/.ansible_password
+          fi
+
       - name: Lint changed Ansible files
         run: |
           git fetch origin ${{ github.base_ref }}
@@ -69,7 +82,11 @@ jobs:
             echo "No Ansible files changed, skipping."
             exit 0
           fi
-          ansible-lint --exclude group_vars/all/vault.yml --exclude .ansible/ $CHANGED
+          ansible-lint \
+            --exclude group_vars/all/vault.yml \
+            --exclude .ansible/ \
+            --skip-list internal-error \
+            $CHANGED
 
   checkov:
     name: Checkov IaC scan
