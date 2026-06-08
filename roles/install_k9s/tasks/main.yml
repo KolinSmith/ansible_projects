@@ -1,0 +1,78 @@
+---
+- name: Check if k9s is already installed
+  stat:
+    path: /usr/local/bin/k9s
+  register: k9s_binary
+
+- name: Get latest k9s release version
+  uri:
+    url: https://api.github.com/repos/derailed/k9s/releases/latest
+    return_content: true
+  register: k9s_release
+  when: not k9s_binary.stat.exists
+
+- name: Download k9s tarball
+  get_url:
+    url: "{{ k9s_release.json.assets | selectattr('name', 'equalto', 'k9s_Linux_amd64.tar.gz') | map(attribute='browser_download_url') | first }}"
+    dest: /tmp/k9s.tar.gz
+    mode: '0644'
+  when:
+    - not k9s_binary.stat.exists
+    - ansible_machine == "x86_64"
+
+- name: Extract k9s binary
+  unarchive:
+    src: /tmp/k9s.tar.gz
+    dest: /tmp
+    remote_src: yes
+    include:
+      - k9s
+  when:
+    - not k9s_binary.stat.exists
+    - ansible_machine == "x86_64"
+
+- name: Install k9s to /usr/local/bin
+  copy:
+    src: /tmp/k9s
+    dest: /usr/local/bin/k9s
+    mode: '0755'
+    remote_src: yes
+  when:
+    - not k9s_binary.stat.exists
+    - ansible_machine == "x86_64"
+
+- name: Clean up k9s temp files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/k9s.tar.gz
+    - /tmp/k9s
+  when: not k9s_binary.stat.exists
+
+- name: Create ~/.kube directory
+  file:
+    path: "/home/{{ ansible_user }}/.kube"
+    state: directory
+    owner: "{{ ansible_user }}"
+    mode: '0700'
+
+- name: Check if kubeconfig already exists
+  stat:
+    path: "/home/{{ ansible_user }}/.kube/config"
+  register: kubeconfig_stat
+
+- name: Fetch kubeconfig from k3s control plane
+  slurp:
+    src: /etc/rancher/k3s/k3s.yaml
+  delegate_to: "{{ k3s_control_ip }}"
+  register: k3s_kubeconfig_raw
+  when: not kubeconfig_stat.stat.exists
+
+- name: Write kubeconfig to ~/.kube/config
+  copy:
+    content: "{{ k3s_kubeconfig_raw.content | b64decode | replace('127.0.0.1', k3s_control_ip) }}"
+    dest: "/home/{{ ansible_user }}/.kube/config"
+    owner: "{{ ansible_user }}"
+    mode: '0600'
+  when: not kubeconfig_stat.stat.exists
