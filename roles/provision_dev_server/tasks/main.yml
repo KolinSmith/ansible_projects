@@ -362,11 +362,6 @@
     ignore_errors: true
     when:  (ansible_machine == "x86_64") or (ansible_machine == "armv7l")
 
-  - name: import the install_k9s role
-    import_role:
-      name: install_k9s
-    when: ansible_machine == "x86_64"
-
   # - name: import the import_dotfiles role
   #   import_role:
   #     name: import_dotfiles
