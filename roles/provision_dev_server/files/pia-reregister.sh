@@ -335,7 +335,42 @@ if [[ "${HANDSHAKE_OK}" != "true" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Step 8: Ping Uptime Kuma healthcheck
+# Step 8: Reload pfSense pf rules
+#
+# `wg set` and `ifconfig` update live kernel state but do NOT cause pfSense
+# to regenerate its pf ruleset. Policy-based routing rules use `route-to
+# (tun_wg0 <peer_ip>)` — if peer_ip changed, or if the rules were generated
+# while the gateway was down (omitting route-to entirely), hosts in
+# pia_redirect_group silently fall back to WAN despite the tunnel being up.
+#
+# filter_configure_sync reloads pf rules from config.xml without touching
+# the WireGuard interface (no rc.newwanip, no kernel panic).
+#
+# We also flush states for pia_redirect_group so existing WAN-pinned
+# connections immediately re-route through the tunnel on reconnect.
+# ---------------------------------------------------------------------------
+
+log "Reloading pfSense pf rules (filter_configure_sync)"
+
+ssh "${PFSENSE_HOST}" "sudo /etc/rc.filter_configure_sync" \
+    || log "WARN: filter_configure_sync failed — policy routing may be stale until next pfSense rule save"
+
+log "Flushing pf states for pia_redirect_group"
+
+# Flush states for each host in the alias so they re-route through PIA immediately.
+# pfctl -k <addr> kills all states where addr is the source — brief TCP disruption
+# is acceptable since connections will re-establish over the tunnel.
+while IFS= read -r host; do
+    [[ -n "${host}" ]] || continue
+    log "  Flushing states for ${host}"
+    ssh "${PFSENSE_HOST}" "sudo pfctl -k ${host}" 2>/dev/null \
+        || log "  WARN: pfctl -k ${host} failed (non-fatal)"
+done < <(ssh "${PFSENSE_HOST}" "sudo pfctl -t pia_redirect_group -T show" 2>/dev/null)
+
+log "pf rules reloaded and states flushed"
+
+# ---------------------------------------------------------------------------
+# Step 9: Ping Uptime Kuma healthcheck
 #
 # The Uptime Kuma push monitor expects a heartbeat within its configured
 # window (set to 26h to give the 2 AM cron a 2h grace period). A missing
