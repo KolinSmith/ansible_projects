@@ -21,6 +21,8 @@
     roles:
       - role: check_if_pi
       - role: remove_default_user
-      - role: deploy_pihole
+      # deploy_pihole (traditional) removed — Pi-hole now runs via Docker Compose.
+      # After this playbook completes, move host to dns_servers group and run:
+      #   ansible-playbook -i hosts playbooks/pihole_docker_deploy/pihole_docker_deploy.yml --limit <host>
       # - role: artis3n.tailscale  #not working currently
       # - role: IronicBadger.figurine
