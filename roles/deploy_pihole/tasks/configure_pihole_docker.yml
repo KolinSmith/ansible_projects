@@ -23,17 +23,17 @@
     blacklist_domains: "{{ lookup('file', 'blacklist.txt').split('\n') | reject('match', '^#.*') | reject('match', '^\\s*$') | list }}"
 
 - name: Add whitelisted domains to Docker Pi-hole
-  command: "docker exec {{ pihole_container_name }} pihole -w {{ item }}"
+  command: "docker exec {{ pihole_container_name }} pihole allow {{ item }}"
   with_items: "{{ whitelist_domains }}"
   register: whitelist_result
-  changed_when: "'Already whitelisted' not in whitelist_result.stdout"
+  changed_when: "'Added' in whitelist_result.stdout"
   failed_when: false
 
 - name: Add blacklisted domains to Docker Pi-hole
-  command: "docker exec {{ pihole_container_name }} pihole -b {{ item }}"
+  command: "docker exec {{ pihole_container_name }} pihole deny {{ item }}"
   with_items: "{{ blacklist_domains }}"
   register: blacklist_result
-  changed_when: "'Already blacklisted' not in blacklist_result.stdout"
+  changed_when: "'Added' in blacklist_result.stdout"
   failed_when: false
 
 - name: Display Docker Pi-hole configuration status

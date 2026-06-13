@@ -13,6 +13,7 @@
   vars:
     docker_users:
       - "{{ username }}"
+    docker_install_compose: false  # get.docker.com installs docker-compose-plugin (v2); pip3 not present on these hosts
     deploy_docker_services_for: "{{ inventory_hostname }}"
     pihole_container_name: "pihole-{{ inventory_hostname | lower }}"
 
@@ -21,6 +22,13 @@
     - role: deploy_docker_env
 
   tasks:
+    - name: Stop traditional pihole-FTL before starting container (frees :53 and :80)
+      systemd:
+        name: pihole-FTL
+        state: stopped
+        enabled: false
+      failed_when: false
+
     - name: Start Pi-hole container
       community.docker.docker_compose_v2:
         project_src: "/home/{{ ansible_user }}/docker"
