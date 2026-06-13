@@ -12,7 +12,7 @@
       - role: check_if_pi
       - role: provision_server
 
-  - name: pihole and DNS setup (defiant & ds9)
+  - name: OS setup (defiant & ds9)
     hosts: post_provision_servers
     gather_facts: true
     become: true
@@ -21,8 +21,41 @@
     roles:
       - role: check_if_pi
       - role: remove_default_user
-      # deploy_pihole (traditional) removed — Pi-hole now runs via Docker Compose.
-      # After this playbook completes, move host to dns_servers group and run:
-      #   ansible-playbook -i hosts playbooks/pihole_docker_deploy/pihole_docker_deploy.yml --limit <host>
       # - role: artis3n.tailscale  #not working currently
       # - role: IronicBadger.figurine
+
+  - name: Deploy Pi-hole via Docker Compose (defiant & ds9)
+    hosts: post_provision_servers
+    gather_facts: true
+    become: true
+    vars_files:
+      - ../../group_vars/all/vars.yml
+      - ../../group_vars/all/docker_vars.yml
+    vars:
+      docker_users:
+        - "{{ username }}"
+      docker_install_compose: false
+      deploy_docker_services_for: "{{ inventory_hostname }}"
+      pihole_container_name: "pihole-{{ inventory_hostname | lower }}"
+
+    roles:
+      - role: geerlingguy.docker_arm
+      - role: deploy_docker_env
+
+    tasks:
+      - name: Stop traditional pihole-FTL before starting container (frees :53 and :80)
+        systemd:
+          name: pihole-FTL
+          state: stopped
+          enabled: false
+        failed_when: false
+
+      - name: Start Pi-hole container
+        community.docker.docker_compose_v2:
+          project_src: "/home/{{ ansible_user }}/docker"
+          state: present
+
+      - name: Configure Pi-hole whitelist and blacklist
+        include_role:
+          name: deploy_pihole
+          tasks_from: configure_pihole_docker.yml
