@@ -38,6 +38,9 @@ pfsense_password: "{{ vault_pfsense_password }}"
 
 username: "{{ vault_username }}"
 
+provision_username: "{{ vault_provision_username }}"
+provision_password: "{{ vault_provision_password }}"
+
 ansible_project_path: "/home/{{ username }}/code_base/ansible_projects"
 
 dmz_username: "{{ vault_dmz_username }}"

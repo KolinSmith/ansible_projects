@@ -38,8 +38,6 @@
       vars:
         motd_force_install: true
     - role: remove_default_user
-      vars:
-        default_user: "pi"
 
     # - role: install_tor  # DISABLED: Using Docker-based Tor relay instead (see operator docker-compose)
     # - role: install_bat #doesnt seem to be working

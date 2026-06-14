@@ -1,2 +1,3 @@
 ---
 # defaults file for remove_default_user
+default_user: "{{ provision_username }}"
