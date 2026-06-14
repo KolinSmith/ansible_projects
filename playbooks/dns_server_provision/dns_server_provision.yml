@@ -56,6 +56,18 @@
           enabled: false
         failed_when: false
 
+      - name: Disable systemd-resolved DNS stub listener (frees :53 for Pi-hole)
+        lineinfile:
+          path: /etc/systemd/resolved.conf
+          regexp: '^#?DNSStubListener'
+          line: 'DNSStubListener=no'
+          insertafter: '^\[Resolve\]'
+
+      - name: Restart systemd-resolved to free port 53
+        systemd:
+          name: systemd-resolved
+          state: restarted
+
       - name: Start Pi-hole container
         community.docker.docker_compose_v2:
           project_src: "/home/{{ ansible_user }}/docker"

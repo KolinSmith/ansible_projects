@@ -117,19 +117,12 @@ defiant ansible_host=192.168.9.3
 
 [provision_servers:vars]
 ansible_connection=ssh
-ansible_user={{ provision_username }}
-ansible_ssh_user={{ provision_username }}
-ansible_password={{ provision_password }}
-ansible_become=yes
-ansible_become_method=sudo
-ansible_become_password={{ provision_password }}
 ansible_python_interpreter=/usr/bin/python3
-ansible_ssh_extra_args=-o PasswordAuthentication=yes -o PubkeyAuthentication=no
 default_user={{ provision_username }}
 
 #make sure to set as the same as the hostname from provision_servers
 [post_provision_servers]
-; defiant ansible_host=192.168.9.3  ; temporarily removed during provision (Play 1)
+defiant ansible_host=192.168.9.3
 forgejo-runner ansible_host=192.168.9.101
 
 [post_provision_servers:vars]

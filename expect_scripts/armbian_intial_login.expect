@@ -81,6 +81,6 @@ send "exit\r"
 # End the script
 expect eof
 
-system "ansible-playbook -i /home/dax/code_base/ansible_projects/hosts /home/dax/code_base/ansible_projects/playbooks/dns_server_provision/dns_server_provision.yml --limit defiant --tags initial_provision"
+system "ansible-playbook -i /home/dax/code_base/ansible_projects/hosts /home/dax/code_base/ansible_projects/playbooks/dns_server_provision/dns_server_provision.yml --limit defiant --tags initial_provision --extra-vars \"ansible_user=$username ansible_password=$user_password ansible_become_password=$user_password\""
 # system "sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/dns_load_balancer_provision/dns_load_balancer_provision.yml"
 # system "sudo ansible-playbook /home/dax/code_base/ansible_projects/playbooks/dev_server_provision/dev_server_provision.yml"
