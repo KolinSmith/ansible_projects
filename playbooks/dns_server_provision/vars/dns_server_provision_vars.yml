@@ -74,7 +74,7 @@ necessary_packages:
     - dnsutils
     - unzip
     - pigz
-    - exa
+    - eza
 tailscale_auth_key: '{{ tailscale_auth_key }}'
 
 # #ironicbadger.figurine
