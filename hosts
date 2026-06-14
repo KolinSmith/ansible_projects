@@ -59,7 +59,7 @@ ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 
 [dns_servers]
 ds9 ansible_host=192.168.9.4
-defiant ansible_host=192.168.9.3
+; defiant ansible_host=192.168.9.3  ; temporarily removed during provision
 
 [dns_servers:vars]
 ansible_user={{ username | lower }}
@@ -112,7 +112,7 @@ ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 ansible_python_interpreter=/usr/bin/python3
 
 [provision_servers]
-; defiant ansible_host=192.168.9.3
+defiant ansible_host=192.168.9.3
 ; forgejo-runner ansible_host=192.168.9.101
 
 [provision_servers:vars]
@@ -124,11 +124,12 @@ ansible_become=yes
 ansible_become_method=sudo
 ansible_become_password={{ provision_password }}
 ansible_python_interpreter=/usr/bin/python3
-default_user=pi
+ansible_ssh_extra_args=-o PasswordAuthentication=yes -o PubkeyAuthentication=no
+default_user={{ provision_username }}
 
 #make sure to set as the same as the hostname from provision_servers
 [post_provision_servers]
-defiant ansible_host=192.168.9.3
+; defiant ansible_host=192.168.9.3  ; temporarily removed during provision (Play 1)
 forgejo-runner ansible_host=192.168.9.101
 
 [post_provision_servers:vars]

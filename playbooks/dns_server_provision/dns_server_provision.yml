@@ -4,9 +4,10 @@
     hosts: provision_servers
     gather_facts: true
     become: true
+    tags: [initial_provision]
     vars_files:
       - vars/dns_server_provision_vars.yml
-    roles: 
+    roles:
       - role: bootstrap_python
       # - role: deploy_apt-cacher_client
       - role: check_if_pi
@@ -16,6 +17,7 @@
     hosts: post_provision_servers
     gather_facts: true
     become: true
+    tags: [post_provision]
     vars_files:
       - vars/dns_server_provision_vars.yml
     vars:
@@ -31,6 +33,7 @@
     hosts: post_provision_servers
     gather_facts: true
     become: true
+    tags: [post_provision]
     vars_files:
       - ../../group_vars/all/vars.yml
       - ../../group_vars/all/docker_vars.yml
