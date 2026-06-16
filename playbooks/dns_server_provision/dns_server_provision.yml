@@ -26,6 +26,7 @@
       - role: check_if_pi
       - role: remove_default_user
       - role: install_custom_motd
+      - role: import_dotfiles
       # - role: artis3n.tailscale  #not working currently
       # - role: IronicBadger.figurine
 
