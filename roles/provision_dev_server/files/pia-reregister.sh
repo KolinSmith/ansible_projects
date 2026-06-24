@@ -267,6 +267,7 @@ log "wg set completed"
 
 log "Updating live interface IP on pfSense (${PFSENSE_WG_IFACE} -> ${PEER_IP})"
 
+# shellcheck disable=SC2087  # intentional: client expands ${PEER_IP} etc, server expands \${CURR}
 ssh "${PFSENSE_HOST}" /bin/sh <<EOF || die "ifconfig update on pfSense failed"
 CURR=\$(ifconfig ${PFSENSE_WG_IFACE} | awk '/inet /{print \$2; exit}')
 if [ "\${CURR}" = "${PEER_IP}" ]; then
@@ -279,13 +280,13 @@ else
         sudo route -q add -host ${PFSENSE_GW_MONITOR_IP} ${PEER_IP} 2>/dev/null || true
     OLD_PID_FILE="/var/run/dpinger_PIA_OVER_WIREGUARD~\${CURR}~${PFSENSE_GW_MONITOR_IP}.pid"
     [ -f "\${OLD_PID_FILE}" ] && sudo kill "\$(cat \${OLD_PID_FILE})" 2>/dev/null || true
-    sudo /usr/local/bin/dpinger -S -r 0 -i PIA_OVER_WIREGUARD \
+    sudo nohup /usr/local/bin/dpinger -S -r 0 -i PIA_OVER_WIREGUARD \
         -B "${PEER_IP}" \
         -p "/var/run/dpinger_PIA_OVER_WIREGUARD~${PEER_IP}~${PFSENSE_GW_MONITOR_IP}.pid" \
         -u "/var/run/dpinger_PIA_OVER_WIREGUARD~${PEER_IP}~${PFSENSE_GW_MONITOR_IP}.sock" \
         -C /etc/rc.gateway_alarm \
         -d 1 -s 500 -l 2000 -t 60000 -A 1000 -D 500 -L 20 \
-        "${PFSENSE_GW_MONITOR_IP}"
+        "${PFSENSE_GW_MONITOR_IP}" </dev/null >/dev/null 2>&1 &
 fi
 EOF
 
