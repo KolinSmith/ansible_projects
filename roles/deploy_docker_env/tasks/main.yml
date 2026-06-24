@@ -79,7 +79,7 @@
 - name: Create status alias for Dockerized Tor relay monitoring (operator only)
   lineinfile:
     path: "/home/{{ ansible_user }}/.zshrc"
-    line: "alias status='docker exec -it tor-relay nyx'"
+    line: "alias status='docker exec -it -e TERM=$TERM tor-relay nyx'"
     regexp: "^alias status="
     state: present
     create: yes
