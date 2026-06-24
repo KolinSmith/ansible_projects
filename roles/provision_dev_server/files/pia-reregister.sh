@@ -267,6 +267,7 @@ log "wg set completed"
 
 log "Updating live interface IP on pfSense (${PFSENSE_WG_IFACE} -> ${PEER_IP})"
 
+# shellcheck disable=SC2087  # intentional: client expands ${PEER_IP} etc, server expands \${CURR}
 ssh "${PFSENSE_HOST}" /bin/sh <<EOF || die "ifconfig update on pfSense failed"
 CURR=\$(ifconfig ${PFSENSE_WG_IFACE} | awk '/inet /{print \$2; exit}')
 if [ "\${CURR}" = "${PEER_IP}" ]; then
