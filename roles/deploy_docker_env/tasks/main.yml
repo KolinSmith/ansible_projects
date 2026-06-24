@@ -94,7 +94,7 @@
     docker login {{ vault_forgejo_internal_url | regex_replace('^https?://', '') }}
     -u {{ vault_username }} --password-stdin
   no_log: true
-  when: deploy_docker_services_for in ['operator', 'forgejo-runner']
+  when: deploy_docker_services_for == 'forgejo-runner'
 
 - name: Fix docker config.json permissions so docker group can read it (forgejo-runner only)
   file:
