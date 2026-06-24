@@ -659,6 +659,15 @@
           job: "/home/{{ user }}/.scripts/pia-reregister.sh >> /var/log/pia-reregister.log 2>&1"
         become_user: "{{ user }}"
 
+      - name: create docker prune job (forgejo-runner only)
+        cron:
+          name: docker_prune
+          minute: "0"
+          hour: "3"
+          weekday: "0"
+          job: "docker system prune -af >> /var/log/docker-prune.log 2>&1"
+        when: inventory_hostname == 'forgejo-runner'
+
       # - name: create piHoleUpdate job
       #   cron:
       #     name: piHoleUpdate
