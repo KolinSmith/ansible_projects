@@ -87,3 +87,19 @@
     group: "{{ ansible_user }}"
     mode: '0644'
   when: deploy_docker_services_for == 'operator'
+
+- name: Login to Forgejo container registry as ansible_user
+  shell: >
+    echo "{{ vault_forgejo_api_token }}" |
+    docker login {{ vault_forgejo_internal_url | regex_replace('^https?://', '') }}
+    -u {{ vault_username }} --password-stdin
+  no_log: true
+  when: deploy_docker_services_for == 'forgejo-runner'
+
+- name: Fix docker config.json permissions so docker group can read it (forgejo-runner only)
+  file:
+    path: "/home/{{ ansible_user }}/.docker/config.json"
+    owner: "{{ ansible_user }}"
+    group: docker
+    mode: '0640'
+  when: deploy_docker_services_for == 'forgejo-runner'
