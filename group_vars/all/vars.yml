@@ -47,3 +47,7 @@ uptime_kuma_pfsense_push_url: "{{ vault_uptime_kuma_pfsense_push_url }}"
 uptime_kuma_forgejo_disk_push_url: "{{ vault_uptime_kuma_forgejo_disk_push_url }}"
 pfsense_backup_host: "{{ vault_pfsense_backup_host }}"
 pfsense_backup_forgejo_repo: "{{ vault_pfsense_backup_forgejo_repo }}"
+
+forgejo_api_token: "{{ vault_forgejo_api_token }}"
+uptime_kuma_forgejo_backup_push_url: "{{ vault_uptime_kuma_forgejo_backup_push_url }}"
+borg_tailscale_ip: "100.72.103.67"
