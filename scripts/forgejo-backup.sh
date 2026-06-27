@@ -19,9 +19,10 @@ fi
 source "$SECRETS_FILE"
 # Expects: FORGEJO_API_TOKEN, UPTIME_KUMA_PUSH_URL
 
-# Discover all repos accessible to dax via Forgejo API
-REPOS=$(curl -sf "${FORGEJO_API}/repos/search?limit=50&token=${FORGEJO_API_TOKEN}" \
-  | python3 -c "import sys,json; [print(r['full_name']) for r in json.load(sys.stdin)['data']]")
+# Discover all repos owned by dax (not mirrors or other users' repos)
+REPOS=$(curl -sf "${FORGEJO_API}/user/repos?limit=50" \
+  -H "Authorization: token ${FORGEJO_API_TOKEN}" \
+  | python3 -c "import sys,json; [print(r['full_name']) for r in json.load(sys.stdin) if r['owner']['login']=='dax']")
 
 if [ -z "$REPOS" ]; then
   echo "ERROR: no repos found via Forgejo API" >&2
