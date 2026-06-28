@@ -6,7 +6,7 @@ set -euo pipefail
 
 SECRETS_FILE="/home/ubuntu/.secrets/forgejo-backup.env"
 FORGEJO_SSH="ssh://git@127.0.0.1:222"
-FORGEJO_API="http://127.0.0.1:3001/api/v1"
+FORGEJO_API="http://100.86.4.29:3001/api/v1"
 STAGING="/tmp/forgejo-backup-staging"
 BORG_DEST="kolin@100.72.103.67:/mnt/disks/HUB/BACKUPS/forgejo_backup"
 export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new -i /home/ubuntu/.ssh/id_ecdsa"
