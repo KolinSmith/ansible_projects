@@ -49,3 +49,4 @@ necessary_packages:
   - tldr
   - bat
   - trash-cli
+  - rsync
