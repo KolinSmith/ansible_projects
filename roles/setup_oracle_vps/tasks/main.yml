@@ -234,5 +234,54 @@
       name: apt-daily-upgrade.service
       enabled: no
 
+  # Forgejo repo backup to Borg
+  - name: Create scripts directory
+    file:
+      path: /home/{{ user }}/.scripts
+      state: directory
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: '0755'
+
+  - name: Create secrets directory
+    file:
+      path: /home/{{ user }}/.secrets
+      state: directory
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: '0700'
+
+  - name: Deploy forgejo-backup script
+    copy:
+      src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/scripts/forgejo-backup.sh"
+      dest: /home/{{ user }}/.scripts/forgejo-backup.sh
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: '0755'
+
+  - name: Render forgejo-backup secrets file
+    template:
+      src: forgejo-backup.env.j2
+      dest: /home/{{ user }}/.secrets/forgejo-backup.env
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: '0600'
+    no_log: true
+
+  - name: Add Borg to known_hosts for forgejo-backup rsync
+    known_hosts:
+      name: "{{ borg_tailscale_ip }}"
+      state: present
+      key: "{{ lookup('pipe', 'ssh-keyscan -t ed25519 ' + borg_tailscale_ip + ' 2>/dev/null') }}"
+      path: /home/{{ user }}/.ssh/known_hosts
+
+  - name: Schedule forgejo-backup cron (5:30am UTC daily)
+    cron:
+      name: forgejo-backup
+      minute: "30"
+      hour: "5"
+      job: "/home/{{ user }}/.scripts/forgejo-backup.sh >> /var/log/forgejo-backup.log 2>&1"
+      user: "{{ user }}"
+
 
 
