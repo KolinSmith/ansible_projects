@@ -14,7 +14,6 @@ orangepi_aggressive_rotation: true
 # Log rotation settings
 orangepi_log_rotation_days: 3
 orangepi_atop_retention_days: 2
-orangepi_sysstat_retention_days: 2
 
 # Rsyslog optimization settings
 orangepi_disable_file_sync: true

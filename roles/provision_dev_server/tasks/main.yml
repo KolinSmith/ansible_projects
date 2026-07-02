@@ -675,8 +675,9 @@
           hour: "*"
           job: >-
             USED=$(df / --output=pcent | tail -1 | tr -d ' %');
-            [ "$USED" -lt 80 ] && STATUS=up || STATUS=down;
-            curl -fsS "{{ uptime_kuma_forgejo_disk_push_url }}?status=$STATUS&msg=disk%20${USED}pct" >/dev/null 2>&1
+            IUSED=$(df -i / --output=ipcent | tail -1 | tr -d ' %');
+            { [ "$USED" -lt 80 ] && [ "$IUSED" -lt 80 ]; } && STATUS=up || STATUS=down;
+            curl -fsS "{{ uptime_kuma_forgejo_disk_push_url }}?status=$STATUS&msg=disk%20${USED}pct%20inode%20${IUSED}pct" >/dev/null 2>&1
         become: true
         when: inventory_hostname == 'forgejo-runner'
 
