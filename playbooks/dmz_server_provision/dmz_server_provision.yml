@@ -5,6 +5,11 @@
   become: true
   vars_files:
     - vars/dmz_server_provision_vars.yml
+  pre_tasks:
+    - name: add packages I want
+      apt:
+        name: "{{ necessary_packages }}"
+        state: latest
   roles:
     - role: bootstrap_python
     - role: check_if_pi
