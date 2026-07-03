@@ -34,13 +34,11 @@
     delaycompress
 }
 
-# Reduce sysstat data retention  
-/var/log/sysstat/*
-{
-    daily
-    rotate {{ orangepi_sysstat_retention_days }}
-    missingok
-    notifempty
-    compress
-    delaycompress
-}
+# NOTE: sysstat is NOT logrotate'd here. sysstat manages its own rotation
+# natively via /etc/cron.d/sysstat (debian-sa1) using HISTORY= in
+# /etc/sysstat/sysstat. A previous version of this stanza logrotate'd
+# /var/log/sysstat/* on top of that, and the glob matched sysstat's own
+# already-rotated/compressed output, causing indefinite compounding
+# rename corruption (e.g. sa01.1.1.1.1.1.2.gz.2.gz.1...) that exhausted
+# the filesystem's inode table. Do not re-add a logrotate stanza for
+# this directory — adjust HISTORY in /etc/sysstat/sysstat instead.
