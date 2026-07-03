@@ -4,12 +4,12 @@
 # Deployed and scheduled by Ansible (setup_oracle_vps role).
 set -euo pipefail
 
-SECRETS_FILE="/home/ubuntu/.secrets/forgejo-backup.env"
+SECRETS_FILE="${HOME}/.secrets/forgejo-backup.env"
 FORGEJO_SSH="ssh://git@127.0.0.1:222"
 FORGEJO_API="http://100.86.4.29:3001/api/v1"
 STAGING="/tmp/forgejo-backup-staging"
 BORG_DEST="kolin@100.72.103.67:/mnt/disks/HUB/BACKUPS/forgejo_backup"
-export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new -i /home/ubuntu/.ssh/id_ecdsa"
+export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new -i ${HOME}/.ssh/id_ecdsa"
 
 if [ ! -f "$SECRETS_FILE" ]; then
   echo "ERROR: secrets file not found: $SECRETS_FILE" >&2
@@ -41,7 +41,7 @@ while IFS= read -r repo; do
   fi
 done <<< "$REPOS"
 
-rsync -a --delete -e "ssh -i /home/ubuntu/.ssh/id_ecdsa -o StrictHostKeyChecking=accept-new" \
+rsync -a --delete -e "ssh -i ${HOME}/.ssh/id_ecdsa -o StrictHostKeyChecking=accept-new" \
   "$STAGING/" "$BORG_DEST/"
 rm -rf "$STAGING"
 
