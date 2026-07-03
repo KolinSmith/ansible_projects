@@ -1,4 +1,4 @@
-user: "{{ default_username }}"
+user: "{{ dmz_username }}"
 my_custom_path_var: '/home/{{ user }}/.local/bin'
 public_keys:
   - name: Enterprise Public Key File
