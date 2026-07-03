@@ -8,6 +8,7 @@
       recursive: no
       key_file: "/home/{{ username }}/.ssh/id_ed25519"
     delegate_to: localhost
+    become: false
     run_once: true
 
   - name: copy dotfiles into ~/
