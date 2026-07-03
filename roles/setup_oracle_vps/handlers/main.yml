@@ -1,2 +1,7 @@
 ---
 # handlers file for setup_oracle_vps
+
+- name: Reload ssh
+  ansible.builtin.service:
+    name: ssh
+    state: reloaded
