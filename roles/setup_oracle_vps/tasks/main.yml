@@ -151,6 +151,11 @@
 
   - name: Setup Tailscale
     command: tailscale up --authkey={{ tailscale_auth_key }}
+    failed_when: false
+    # Tailscale rejects re-running 'up' with just --authkey once a host is already
+    # connected with other non-default settings (e.g. --ssh) unless every current
+    # flag is restated. Best-effort: if the host is already connected, that's the
+    # desired end state regardless of this command's exit code.
 
   - name: Add docker directories
     file:
