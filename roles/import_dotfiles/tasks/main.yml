@@ -23,9 +23,21 @@
       - .tmux.conf
       - .wgetrc
       - .vimrc
-      - .ansible_password
       - .gitconfig
       - .exports
+
+  # .ansible_password is the vault master decryption password - it must only ever
+  # live on the Ansible controller (voyager), never on managed hosts. Kept as its
+  # own task (not in the generic dotfiles list above) so it's never accidentally
+  # bundled back in.
+  - name: copy .ansible_password (voyager only - the Ansible controller)
+    copy:
+      src: /tmp/tmp-dotfiles/.ansible_password
+      dest: "/home/{{ ansible_user }}/.ansible_password"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: '0600'
+    when: "'dev_server' in group_names"
 
   - name: copy vim directory
     copy:
