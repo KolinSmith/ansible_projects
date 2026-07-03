@@ -175,10 +175,10 @@ jobs:
           GH_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
-          API_BASE: ${{ github.server_url }}/api/v1
+          API_BASE: ${{ secrets.FORGEJO_API_URL }}
         run: |
           python3 << 'PYEOF'
-          import json, os, urllib.request, urllib.error
+          import json, os, sys, urllib.request, urllib.error
 
           MARKER = "<!-- scc-stats -->"
 
@@ -200,17 +200,25 @@ jobs:
                   print(f"Warning: API call failed ({method} {url}): HTTP {e.code} {e.reason}")
                   return None
 
+          # This job is `continue-on-error: true` (informational, must never block a
+          # merge) — but that also meant a broken FORGEJO_TOKEN silently showed green.
+          # Exiting non-zero on failure keeps the step visibly red without blocking.
           comments = req("GET", f"{api}/repos/{repo}/issues/{pr}/comments")
           if comments is None:
-              print("Could not fetch comments — skipping post.")
+              print("Could not fetch comments — failing this step so the breakage is visible.")
+              sys.exit(1)
+
+          existing = next((c for c in comments if MARKER in c["body"]), None)
+          if existing:
+              result = req("PATCH", f"{api}/repos/{repo}/issues/comments/{existing['id']}",
+                            json.dumps({"body": body}).encode())
+              if result is None:
+                  sys.exit(1)
+              print(f"Updated stats comment #{existing['id']}")
           else:
-              existing = next((c for c in comments if MARKER in c["body"]), None)
-              if existing:
-                  req("PATCH", f"{api}/repos/{repo}/issues/comments/{existing['id']}",
-                      json.dumps({"body": body}).encode())
-                  print(f"Updated stats comment #{existing['id']}")
-              else:
-                  req("POST", f"{api}/repos/{repo}/issues/{pr}/comments",
-                      json.dumps({"body": body}).encode())
-                  print(f"Posted stats comment to PR #{pr}")
+              result = req("POST", f"{api}/repos/{repo}/issues/{pr}/comments",
+                           json.dumps({"body": body}).encode())
+              if result is None:
+                  sys.exit(1)
+              print(f"Posted stats comment to PR #{pr}")
           PYEOF
