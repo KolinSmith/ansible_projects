@@ -42,6 +42,10 @@ dmz_username: "{{ vault_dmz_username }}"
 
 tailscale_auth_key: "{{ vault_tailscale_auth_key }}"
 
+tailscale_oauth_client_id: "{{ vault_tailscale_oauth_client_id }}"
+tailscale_oauth_client_secret: "{{ vault_tailscale_oauth_client_secret }}"
+tailscale_tailnet: "{{ vault_tailscale_tailnet }}"
+
 pfsense_backup_ssh_user: "{{ vault_pfsense_backup_ssh_user }}"
 uptime_kuma_pfsense_push_url: "{{ vault_uptime_kuma_pfsense_push_url }}"
 uptime_kuma_forgejo_disk_push_url: "{{ vault_uptime_kuma_forgejo_disk_push_url }}"
