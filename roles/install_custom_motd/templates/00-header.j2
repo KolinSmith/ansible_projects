@@ -7,8 +7,9 @@ GREEN='{{ motd_color_good }}'
 CYAN='{{ motd_color_info }}'
 NC='{{ motd_color_reset }}'
 
-# Clear screen
-clear
+# Clear screen (TERM may not be set yet in PAM's session context on some
+# OpenSSH versions at this point in login — default it just for this call)
+TERM="${TERM:-xterm}" clear
 
 {% if motd_show_hostname %}
 # Display hostname with figlet
