@@ -1,7 +1,7 @@
 <?php
-// Usage: php pia-pfsense-update.php <server_key> <peer_ip>
-if ($argc < 3) {
-    fwrite(STDERR, "Usage: php pia-pfsense-update.php <server_key> <peer_ip>\n");
+// Usage: php pia-pfsense-update.php <server_key> <peer_ip> <endpoint_ip> <endpoint_port>
+if ($argc < 5) {
+    fwrite(STDERR, "Usage: php pia-pfsense-update.php <server_key> <peer_ip> <endpoint_ip> <endpoint_port>\n");
     exit(1);
 }
 
@@ -11,22 +11,32 @@ require_once('/etc/inc/util.inc');
 
 global $config;
 
-$new_server_key = $argv[1];
-$new_peer_ip    = $argv[2];
+$new_server_key    = $argv[1];
+$new_peer_ip        = $argv[2];
+$new_endpoint_ip    = $argv[3];
+$new_endpoint_port  = $argv[4];
 
-// Update WireGuard peer public key (find by endpoint IP)
+// Update the WireGuard peer (matched by description, not endpoint — the PIA
+// tunnel is the only peer with this description. Matching by endpoint IP
+// broke silently for months: it never updated the endpoint field, so
+// config.xml kept pointing at whatever server was configured the very first
+// time, even as `wg set` kept the live kernel state current. A pfSense
+// reboot would have reloaded config.xml and dialed that stale server.)
 $peers = &$config['installedpackages']['wireguard']['peers']['item'];
 $updated_peer = false;
 foreach ($peers as $i => &$peer) {
-    if (strpos($peer['endpoint'], '151.240.66.252') !== false) {
+    if (stripos($peer['descr'], 'PIA') !== false) {
         echo "peer[$i] key: {$peer['publickey']} -> $new_server_key\n";
+        echo "peer[$i] endpoint: {$peer['endpoint']}:{$peer['port']} -> {$new_endpoint_ip}:{$new_endpoint_port}\n";
         $peer['publickey'] = $new_server_key;
+        $peer['endpoint']  = $new_endpoint_ip;
+        $peer['port']      = $new_endpoint_port;
         $updated_peer = true;
         break;
     }
 }
 if (!$updated_peer) {
-    fwrite(STDERR, "ERROR: peer with endpoint 151.240.66.252 not found\n");
+    fwrite(STDERR, "ERROR: WireGuard peer with descr containing 'PIA' not found\n");
     exit(1);
 }
 
