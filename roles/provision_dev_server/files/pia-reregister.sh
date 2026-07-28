@@ -22,6 +22,26 @@
 #
 # This script re-registers daily at 2 AM so the tunnel never expires.
 #
+# SERVER SELECTION (rewritten 2026-07-27)
+# ----------------------------------------
+# Originally this script targeted one hardcoded PIA server. On 2026-07-27,
+# PIA silently decommissioned that server (Server-12244-2a) — it dropped off
+# PIA's public server list with no notice. The cron kept "succeeding" as long
+# as the dead server still accepted addKey calls; once PIA fully pulled it,
+# every attempt started timing out at the TCP level and the tunnel died with
+# no automatic recovery. A hand-picked replacement server was found to
+# already be absent from PIA's *current* published list within hours of being
+# chosen — proof a single hardcoded server is fundamentally fragile.
+#
+# Now the script pulls PIA's live server list for the Texas region
+# (closest to this deployment) at every run and tries candidates in order:
+#   1. The last server that worked (persisted in PIA_SERVER_STATE_FILE)
+#   2. Every other WireGuard server PIA currently publishes for the region
+# If a candidate's addKey call fails, or the handshake never comes up fresh,
+# the script automatically moves to the next candidate in the same run —
+# no more silent, invisible failures. The winning server is persisted for
+# next time so happy-path runs don't re-shop the whole region.
+#
 # HOW IT WORKS
 # ------------
 # pfSense's WireGuard UI has a bug: it silently ignores pasted private keys and
@@ -30,17 +50,21 @@
 #
 #   1. Read PIA credentials from Ansible vault (never stored in plaintext)
 #   2. Call PIA's get_token.sh to obtain a fresh one-time auth token
-#   3. Call PIA's /addKey API with pfSense's actual public key (read directly
-#      from /usr/local/etc/wireguard/tun_wg0.conf on pfSense)
-#   4. SCP a PHP script to pfSense and run it to update config.xml in-place
-#      (updating the peer's public key and the interface's tunnel IP)
-#   5. Run `wg set` on pfSense to sync the live WireGuard peer state
+#   3. Fetch PIA's live server list and build a candidate order (see above)
+#   4. For each candidate, call PIA's /addKey API with pfSense's actual public
+#      key (read directly from /usr/local/etc/wireguard/tun_wg0.conf on pfSense)
+#   5. SCP a PHP script to pfSense and run it to update config.xml in-place
+#      (peer public key, peer endpoint, interface tunnel IP)
+#   6. Run `wg set` on pfSense to sync the live WireGuard peer state
 #      WITHOUT restarting the interface (see CRITICAL NOTE below)
-#   6. Update the live interface inet address on pfSense to match peer_ip
+#   7. Update the live interface inet address on pfSense to match peer_ip
 #      (`wg set` updates the peer but not the interface IP — if peer_ip changed,
 #      PIA routes return traffic to the new IP, not the old one on the interface)
-#   7. Verify the tunnel by polling `wg show` for a fresh handshake
-#   8. Ping Uptime Kuma on success; absence of ping = Kuma alerts on failure
+#   8. Verify the tunnel by polling `wg show` for a fresh handshake; if this
+#      fails, move on to the next candidate server instead of giving up
+#   9. Once a candidate succeeds: persist it, remove stale WireGuard peers
+#      left over from past registrations, reload pf rules, flush pf states
+#  10. Ping Uptime Kuma on success; absence of ping = Kuma alerts on failure
 #
 # CRITICAL NOTE: rc.newwanip MUST NOT BE CALLED
 # ----------------------------------------------
@@ -59,6 +83,7 @@
 # Companion script:           /home/dax/.scripts/pia-pfsense-update.php
 # Cron (Voyager, user dax):   0 2 * * * /home/dax/.scripts/pia-reregister.sh
 # Log file:                   /var/log/pia-reregister.log
+# State file (last-good server, not committed): /opt/piavpn-manual/pia-current-server.env
 # Uptime Kuma monitor:        Push monitor; alerts if no heartbeat in 26h
 #
 # CREDENTIALS
@@ -68,15 +93,16 @@
 # Nothing sensitive is stored on disk or committed to git.
 # =============================================================================
 
-set -euo pipefail
+set -uo pipefail
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
-readonly PIA_SERVER_IP="151.240.66.252"
-readonly PIA_SERVER_HOST="Server-12244-2a"
+readonly PIA_REGION="us_south_west"   # PIA's region id for US Texas (closest to this deployment)
+readonly PIA_SERVERLIST_URL="https://serverlist.piaservers.net/vpninfo/servers/v6"
 readonly PIA_SERVER_PORT="1337"
+readonly PIA_SERVER_STATE_FILE="${HOME}/.cache/pia-current-server.env"
 readonly PIA_MANUAL_CONNECTIONS_DIR="${HOME}/code_base/manual-connections"
 readonly PIA_CA_CERT="${PIA_MANUAL_CONNECTIONS_DIR}/ca.rsa.4096.crt"
 readonly GET_TOKEN_SCRIPT="${PIA_MANUAL_CONNECTIONS_DIR}/get_token.sh"
@@ -86,7 +112,7 @@ readonly PFSENSE_WG_IFACE="tun_wg0"
 readonly PFSENSE_GW_MONITOR_IP="1.1.1.1"
 readonly TOKEN_FILE="/opt/piavpn-manual/token"
 
-# Handshake verification: poll every 5s, up to 12 tries (60s total)
+# Handshake verification: poll every 5s, up to 12 tries (60s total) per candidate
 readonly HANDSHAKE_POLL_INTERVAL=5
 readonly HANDSHAKE_MAX_TRIES=12
 # A handshake is "fresh" if it occurred within the last 120s
@@ -161,114 +187,120 @@ TOKEN_AGE=$(( $(date +%s) - TOKEN_MTIME ))
 log "Token obtained (length: ${#TOKEN})"
 
 # ---------------------------------------------------------------------------
-# Step 3: Call PIA /addKey API to register pfSense's WireGuard public key
+# Step 3: Build the candidate server list
 #
-# We use --connect-to to route the HTTPS request to the server's IP directly
-# while presenting the hostname in SNI (required for TLS cert validation against
-# PIA's CA). The server responds with a new server_key and peer_ip.
+# Fetch PIA's live, official server list and take every WireGuard server
+# currently published for our region. Try the last-known-good server first
+# (if we have one) so happy-path runs don't reshuffle candidates for no
+# reason; fall through to the rest of the region on failure.
 # ---------------------------------------------------------------------------
 
-log "Calling PIA /addKey API (server: ${PIA_SERVER_HOST} / ${PIA_SERVER_IP}:${PIA_SERVER_PORT})"
+log "Fetching current PIA server list for region ${PIA_REGION}"
 
-ADD_KEY_RESPONSE=$(curl -s -G \
-    --connect-to "${PIA_SERVER_HOST}::${PIA_SERVER_IP}:" \
-    --cacert "${PIA_CA_CERT}" \
-    --data-urlencode "pt=${TOKEN}" \
-    --data-urlencode "pubkey=${PFSENSE_WG_PUBKEY}" \
-    "https://${PIA_SERVER_HOST}:${PIA_SERVER_PORT}/addKey") \
-    || die "curl to /addKey failed"
+SERVER_LIST_JSON=$(curl -s --max-time 15 "${PIA_SERVERLIST_URL}" | head -1)
+[[ ${#SERVER_LIST_JSON} -gt 1000 ]] || die "PIA server list response looks truncated/invalid (got ${#SERVER_LIST_JSON} bytes)"
 
-log "Raw /addKey response: ${ADD_KEY_RESPONSE}"
+REGION_CANDIDATES=$(echo "${SERVER_LIST_JSON}" \
+    | jq -r --arg region "${PIA_REGION}" \
+      '.regions[] | select(.id==$region) | .servers.wg[] | .ip+" "+.cn')
+[[ -n "${REGION_CANDIDATES}" ]] || die "No WireGuard servers found for region ${PIA_REGION} — PIA may have renamed/dropped it"
 
-# ---------------------------------------------------------------------------
-# Step 4: Parse the /addKey response
-# ---------------------------------------------------------------------------
+LAST_GOOD=""
+if [[ -f "${PIA_SERVER_STATE_FILE}" ]]; then
+    LAST_GOOD=$(cat "${PIA_SERVER_STATE_FILE}" 2>/dev/null || true)
+fi
 
-API_STATUS=$(echo "${ADD_KEY_RESPONSE}" | jq -r '.status // empty') \
-    || die "Failed to parse /addKey response with jq"
+# last-known-good first, then the rest of the region, de-duplicated
+CANDIDATES=$(
+    { [[ -n "${LAST_GOOD}" ]] && echo "${LAST_GOOD}"; echo "${REGION_CANDIDATES}"; } \
+    | awk '!seen[$0]++'
+)
 
-[[ "${API_STATUS}" == "OK" ]] \
-    || die "/addKey returned non-OK status: '${API_STATUS}'. Full response: ${ADD_KEY_RESPONSE}"
-
-SERVER_KEY=$(echo "${ADD_KEY_RESPONSE}" | jq -r '.server_key // empty') \
-    || die "jq failed extracting server_key"
-PEER_IP=$(echo "${ADD_KEY_RESPONSE}" | jq -r '.peer_ip // empty') \
-    || die "jq failed extracting peer_ip"
-
-[[ -n "${SERVER_KEY}" ]] || die "server_key is empty in /addKey response"
-[[ -n "${PEER_IP}" ]]    || die "peer_ip is empty in /addKey response"
-
-log "server_key: ${SERVER_KEY}"
-log "peer_ip:    ${PEER_IP}"
+CANDIDATE_COUNT=$(echo "${CANDIDATES}" | wc -l)
+log "Candidate servers this run (${CANDIDATE_COUNT}): $(echo "${CANDIDATES}" | tr '\n' ',' | sed 's/,$//')"
 
 # ---------------------------------------------------------------------------
-# Step 5: Update pfSense config.xml via PHP script
+# Step 4: Try each candidate until one works
 #
-# pia-pfsense-update.php updates three values in pfSense's config.xml:
-#   - The WireGuard peer's public key (server_key)
-#   - The WireGuard interface's tunnel address (peer_ip)
-#   - The PIA_OVER_WIREGUARD gateway IP (peer_ip)
-# It calls pfSense's write_config() to persist the changes and trigger
-# config sync. The PHP script is SCP'd fresh each run so it stays in sync
-# with any updates deployed by Ansible.
+# try_candidate registers pfSense's public key against a single PIA server
+# and verifies the handshake comes up fresh. It returns 1 (instead of dying)
+# on any failure so the caller can move on to the next candidate.
+# Sets SERVER_KEY / PEER_IP / WINNING_IP / WINNING_CN on success.
 # ---------------------------------------------------------------------------
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+try_candidate() {
+    local candidate_ip="$1"
+    local candidate_cn="$2"
 
-log "Copying PHP updater to pfSense"
+    log "--- Trying candidate: ${candidate_cn} / ${candidate_ip}:${PIA_SERVER_PORT} ---"
 
-scp -q "${SCRIPT_DIR}/pia-pfsense-update.php" "${PFSENSE_HOST}:/tmp/pia-pfsense-update.php" \
-    || die "scp of pia-pfsense-update.php to pfSense failed"
+    local add_key_response
+    add_key_response=$(curl -s -G --max-time 15 \
+        --connect-to "${candidate_cn}::${candidate_ip}:" \
+        --cacert "${PIA_CA_CERT}" \
+        --data-urlencode "pt=${TOKEN}" \
+        --data-urlencode "pubkey=${PFSENSE_WG_PUBKEY}" \
+        "https://${candidate_cn}:${PIA_SERVER_PORT}/addKey")
+    if [[ $? -ne 0 || -z "${add_key_response}" ]]; then
+        log "WARN: curl to /addKey failed for ${candidate_cn}"
+        return 1
+    fi
 
-log "Running PHP updater on pfSense"
+    log "Raw /addKey response: ${add_key_response}"
 
-ssh "${PFSENSE_HOST}" "sudo php /tmp/pia-pfsense-update.php '${SERVER_KEY}' '${PEER_IP}'" \
-    || die "PHP updater on pfSense failed"
+    local api_status
+    api_status=$(echo "${add_key_response}" | jq -r '.status // empty')
+    if [[ "${api_status}" != "OK" ]]; then
+        log "WARN: /addKey returned non-OK status '${api_status}' for ${candidate_cn}"
+        return 1
+    fi
 
-log "pfSense config updated successfully"
+    SERVER_KEY=$(echo "${add_key_response}" | jq -r '.server_key // empty')
+    PEER_IP=$(echo "${add_key_response}" | jq -r '.peer_ip // empty')
 
-# ---------------------------------------------------------------------------
-# Step 6: Sync live WireGuard state with `wg set`
-#
-# config.xml is now updated but the live WireGuard kernel state still has the
-# old peer key and endpoint. `wg set` updates the kernel state atomically
-# without taking the interface down.
-#
-# IMPORTANT: Do NOT use rc.newwanip — it triggers a kernel panic on pfSense
-# 2.7.2 / FreeBSD 14.0-CURRENT (page fault in ifc_find_cloner via netlink
-# RTM_GETLINK racing against WireGuard interface DOWN). See header comment.
-# ---------------------------------------------------------------------------
+    if [[ -z "${SERVER_KEY}" || -z "${PEER_IP}" ]]; then
+        log "WARN: server_key or peer_ip missing in /addKey response for ${candidate_cn}"
+        return 1
+    fi
 
-log "Syncing live WireGuard state on pfSense (wg set, no rc.newwanip)"
+    log "server_key: ${SERVER_KEY}"
+    log "peer_ip:    ${PEER_IP}"
 
-ssh "${PFSENSE_HOST}" "sudo wg set ${PFSENSE_WG_IFACE} \
-    peer '${SERVER_KEY}' \
-    endpoint '${PIA_SERVER_IP}:${PIA_SERVER_PORT}' \
-    allowed-ips '0.0.0.0/0' \
-    persistent-keepalive 25" \
-    || die "wg set on pfSense failed"
+    # Update pfSense config.xml (peer key, peer endpoint, interface tunnel IP)
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-log "wg set completed"
+    log "Copying PHP updater to pfSense"
+    scp -q "${script_dir}/pia-pfsense-update.php" "${PFSENSE_HOST}:/tmp/pia-pfsense-update.php" || {
+        log "WARN: scp of pia-pfsense-update.php to pfSense failed"
+        return 1
+    }
 
-# ---------------------------------------------------------------------------
-# Step 6b: Update live interface IP on pfSense
-#
-# `wg set` updates the WireGuard peer (public key, endpoint, allowed IPs) but
-# does NOT update the inet address on tun_wg0. If peer_ip changed between
-# re-registrations, the interface keeps the old IP. PIA assigns return traffic
-# to the new peer_ip — packets leave pfSense fine but responses are dropped
-# because the old IP is no longer the registered address for this peer key.
-#
-# We also update the gateway monitor's host route for PFSENSE_GW_MONITOR_IP
-# to use the new interface IP as its gateway. Deleting the route is avoided
-# because dpinger (in "down" state) may not re-add it, causing a chicken-and-
-# egg situation where pings can't flow without the route to add the route.
-# ---------------------------------------------------------------------------
+    log "Running PHP updater on pfSense"
+    ssh "${PFSENSE_HOST}" "sudo php /tmp/pia-pfsense-update.php '${SERVER_KEY}' '${PEER_IP}' '${candidate_ip}' '${PIA_SERVER_PORT}'" || {
+        log "WARN: PHP updater on pfSense failed for ${candidate_cn}"
+        return 1
+    }
+    log "pfSense config updated successfully"
 
-log "Updating live interface IP on pfSense (${PFSENSE_WG_IFACE} -> ${PEER_IP})"
+    # Sync live WireGuard state with `wg set`. Do NOT use rc.newwanip — see
+    # header comment (kernel panic on this pfSense/FreeBSD combination).
+    log "Syncing live WireGuard state on pfSense (wg set, no rc.newwanip)"
+    ssh "${PFSENSE_HOST}" "sudo wg set ${PFSENSE_WG_IFACE} \
+        peer '${SERVER_KEY}' \
+        endpoint '${candidate_ip}:${PIA_SERVER_PORT}' \
+        allowed-ips '0.0.0.0/0' \
+        persistent-keepalive 25" || {
+        log "WARN: wg set on pfSense failed for ${candidate_cn}"
+        return 1
+    }
+    log "wg set completed"
 
-# shellcheck disable=SC2087  # intentional: client expands ${PEER_IP} etc, server expands \${CURR}
-ssh "${PFSENSE_HOST}" /bin/sh <<EOF || die "ifconfig update on pfSense failed"
+    # Update live interface IP if peer_ip changed. wg set updates the peer
+    # but not the interface's inet address.
+    log "Updating live interface IP on pfSense (${PFSENSE_WG_IFACE} -> ${PEER_IP})"
+    # shellcheck disable=SC2087  # intentional: client expands ${PEER_IP} etc, server expands \${CURR}
+    ssh "${PFSENSE_HOST}" /bin/sh <<EOF || { log "WARN: ifconfig update on pfSense failed for ${candidate_cn}"; return 1; }
 CURR=\$(ifconfig ${PFSENSE_WG_IFACE} | awk '/inet /{print \$2; exit}')
 if [ "\${CURR}" = "${PEER_IP}" ]; then
     echo "Interface IP already ${PEER_IP} -- no update needed"
@@ -289,54 +321,102 @@ else
         "${PFSENSE_GW_MONITOR_IP}" </dev/null >/dev/null 2>&1 &
 fi
 EOF
+    log "Interface IP update complete"
 
-log "Interface IP update complete"
+    # Verify handshake within 60s
+    log "Waiting for WireGuard handshake (up to $((HANDSHAKE_MAX_TRIES * HANDSHAKE_POLL_INTERVAL))s)"
+    local handshake_ok=false
+    local attempt
+    for (( attempt=1; attempt<=HANDSHAKE_MAX_TRIES; attempt++ )); do
+        log "Handshake check attempt ${attempt}/${HANDSHAKE_MAX_TRIES}"
 
-# ---------------------------------------------------------------------------
-# Step 7: Verify WireGuard handshake within 60s
-# ---------------------------------------------------------------------------
+        local handshake_output
+        handshake_output=$(ssh "${PFSENSE_HOST}" "sudo wg show ${PFSENSE_WG_IFACE} latest-handshakes" 2>/dev/null)
+        if [[ $? -ne 0 ]]; then
+            log "WARN: wg show failed on attempt ${attempt}, retrying"
+            sleep "${HANDSHAKE_POLL_INTERVAL}"
+            continue
+        fi
 
-log "Waiting for WireGuard handshake (up to $((HANDSHAKE_MAX_TRIES * HANDSHAKE_POLL_INTERVAL))s)"
+        local handshake_ts
+        handshake_ts=$(echo "${handshake_output}" | awk -v key="${SERVER_KEY}" '$1 == key {print $2}')
 
-HANDSHAKE_OK=false
-for (( attempt=1; attempt<=HANDSHAKE_MAX_TRIES; attempt++ )); do
-    log "Handshake check attempt ${attempt}/${HANDSHAKE_MAX_TRIES}"
+        if [[ -z "${handshake_ts}" || "${handshake_ts}" == "0" ]]; then
+            log "No handshake recorded yet for server_key"
+            sleep "${HANDSHAKE_POLL_INTERVAL}"
+            continue
+        fi
 
-    # `wg show <iface> latest-handshakes` prints: <pubkey>\t<unix-epoch>
-    # We match on the server key we just registered.
-    HANDSHAKE_OUTPUT=$(ssh "${PFSENSE_HOST}" "sudo wg show ${PFSENSE_WG_IFACE} latest-handshakes" 2>/dev/null) \
-        || { log "WARN: wg show failed on attempt ${attempt}, retrying"; sleep "${HANDSHAKE_POLL_INTERVAL}"; continue; }
+        local now age
+        now=$(date +%s)
+        age=$(( now - handshake_ts ))
+        log "Handshake timestamp: ${handshake_ts} (age: ${age}s)"
 
-    HANDSHAKE_TS=$(echo "${HANDSHAKE_OUTPUT}" \
-        | awk -v key="${SERVER_KEY}" '$1 == key {print $2}')
+        if (( age < HANDSHAKE_MAX_AGE )); then
+            log "Handshake is fresh (age ${age}s < ${HANDSHAKE_MAX_AGE}s) — tunnel is UP"
+            handshake_ok=true
+            break
+        else
+            log "Handshake is stale (age ${age}s >= ${HANDSHAKE_MAX_AGE}s), waiting"
+            sleep "${HANDSHAKE_POLL_INTERVAL}"
+        fi
+    done
 
-    if [[ -z "${HANDSHAKE_TS}" || "${HANDSHAKE_TS}" == "0" ]]; then
-        log "No handshake recorded yet for server_key"
-        sleep "${HANDSHAKE_POLL_INTERVAL}"
-        continue
+    if [[ "${handshake_ok}" != "true" ]]; then
+        log "WARN: no fresh handshake for ${candidate_cn} after $((HANDSHAKE_MAX_TRIES * HANDSHAKE_POLL_INTERVAL))s"
+        return 1
     fi
 
-    NOW=$(date +%s)
-    AGE=$(( NOW - HANDSHAKE_TS ))
+    WINNING_IP="${candidate_ip}"
+    WINNING_CN="${candidate_cn}"
+    return 0
+}
 
-    log "Handshake timestamp: ${HANDSHAKE_TS} (age: ${AGE}s)"
-
-    if (( AGE < HANDSHAKE_MAX_AGE )); then
-        log "Handshake is fresh (age ${AGE}s < ${HANDSHAKE_MAX_AGE}s) — tunnel is UP"
-        HANDSHAKE_OK=true
+WINNER_FOUND=false
+while IFS= read -r line; do
+    [[ -n "${line}" ]] || continue
+    candidate_ip="${line%% *}"
+    candidate_cn="${line#* }"
+    if try_candidate "${candidate_ip}" "${candidate_cn}"; then
+        WINNER_FOUND=true
         break
-    else
-        log "Handshake is stale (age ${AGE}s >= ${HANDSHAKE_MAX_AGE}s), waiting"
-        sleep "${HANDSHAKE_POLL_INTERVAL}"
     fi
-done
+done <<< "${CANDIDATES}"
 
-if [[ "${HANDSHAKE_OK}" != "true" ]]; then
-    die "No fresh WireGuard handshake after $((HANDSHAKE_MAX_TRIES * HANDSHAKE_POLL_INTERVAL))s — tunnel may be down"
+[[ "${WINNER_FOUND}" == "true" ]] || die "Every candidate server failed — tunnel is down. Candidates tried: $(echo "${CANDIDATES}" | tr '\n' ',' | sed 's/,$//')"
+
+if [[ -n "${LAST_GOOD}" && "${LAST_GOOD}" != "${WINNING_IP} ${WINNING_CN}" ]]; then
+    log "NOTE: rotated away from previous server (${LAST_GOOD}) to ${WINNING_CN} / ${WINNING_IP}"
 fi
 
+mkdir -p "$(dirname "${PIA_SERVER_STATE_FILE}")" 2>/dev/null
+echo "${WINNING_IP} ${WINNING_CN}" > "${PIA_SERVER_STATE_FILE}" \
+    || log "WARN: failed to persist winning server to ${PIA_SERVER_STATE_FILE} (next run will re-shop the region)"
+
+log "Registered successfully against ${WINNING_CN} / ${WINNING_IP}"
+
 # ---------------------------------------------------------------------------
-# Step 8: Reload pfSense pf rules
+# Step 5: Clean up stale WireGuard peers
+#
+# `wg set ... peer <key> ...` only adds/updates a peer — it never removes
+# old ones. Every past re-registration (including server rotations) left its
+# previous peer entry live in the kernel. Remove anything that isn't the
+# peer we just verified.
+# ---------------------------------------------------------------------------
+
+log "Cleaning up stale WireGuard peers"
+
+while IFS= read -r stale_key; do
+    [[ -n "${stale_key}" && "${stale_key}" != "${SERVER_KEY}" ]] || continue
+    log "  Removing stale peer ${stale_key}"
+    ssh -n "${PFSENSE_HOST}" "sudo wg set ${PFSENSE_WG_IFACE} peer '${stale_key}' remove" 2>/dev/null \
+        || log "  WARN: failed to remove stale peer ${stale_key} (non-fatal)"
+done < <(ssh -n "${PFSENSE_HOST}" "sudo wg show ${PFSENSE_WG_IFACE} peers" 2>/dev/null)
+
+log "Stale peer cleanup complete"
+
+# ---------------------------------------------------------------------------
+# Step 6: Reload pfSense pf rules
 #
 # `wg set` and `ifconfig` update live kernel state but do NOT cause pfSense
 # to regenerate its pf ruleset. Policy-based routing rules use `route-to
@@ -364,18 +444,18 @@ log "Flushing pf states for pia_redirect_group"
 while IFS= read -r host; do
     [[ -n "${host}" ]] || continue
     log "  Flushing states for ${host}"
-    ssh "${PFSENSE_HOST}" "sudo pfctl -k ${host}" 2>/dev/null \
+    ssh -n "${PFSENSE_HOST}" "sudo pfctl -k ${host}" 2>/dev/null \
         || log "  WARN: pfctl -k ${host} failed (non-fatal)"
-done < <(ssh "${PFSENSE_HOST}" "sudo pfctl -t pia_redirect_group -T show" 2>/dev/null)
+done < <(ssh -n "${PFSENSE_HOST}" "sudo pfctl -t pia_redirect_group -T show" 2>/dev/null)
 
 log "pf rules reloaded and states flushed"
 
 # ---------------------------------------------------------------------------
-# Step 9: Ping Uptime Kuma healthcheck
+# Step 7: Ping Uptime Kuma healthcheck
 #
 # The Uptime Kuma push monitor expects a heartbeat within its configured
 # window (set to 26h to give the 2 AM cron a 2h grace period). A missing
-# heartbeat means the script failed somewhere above and Kuma will alert.
+# heartbeat means every candidate server failed and Kuma will alert.
 # ---------------------------------------------------------------------------
 
 log "Pinging Uptime Kuma healthcheck"
