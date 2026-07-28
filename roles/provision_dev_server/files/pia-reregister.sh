@@ -74,8 +74,8 @@ set -euo pipefail
 # Constants
 # ---------------------------------------------------------------------------
 
-readonly PIA_SERVER_IP="151.240.66.252"
-readonly PIA_SERVER_HOST="Server-12244-2a"
+readonly PIA_SERVER_IP="209.87.162.27"
+readonly PIA_SERVER_HOST="Server-11383-2a"
 readonly PIA_SERVER_PORT="1337"
 readonly PIA_MANUAL_CONNECTIONS_DIR="${HOME}/code_base/manual-connections"
 readonly PIA_CA_CERT="${PIA_MANUAL_CONNECTIONS_DIR}/ca.rsa.4096.crt"
