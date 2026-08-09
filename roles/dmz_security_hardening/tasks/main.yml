@@ -1,0 +1,36 @@
+---
+# fail2ban: ban repeat-offender IPs hitting sshd, since this host is internet-facing
+- name: Install fail2ban
+  apt:
+    name: fail2ban
+    state: present
+    update_cache: true
+
+- name: Deploy fail2ban sshd jail config
+  template:
+    src: jail.local.j2
+    dest: /etc/fail2ban/jail.local
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart fail2ban
+
+- name: Ensure fail2ban is enabled and running
+  systemd:
+    name: fail2ban
+    enabled: true
+    state: started
+
+# rpcbind: pulled in by a manually-installed nfs-common with no NFS mounts anywhere
+# on this host — unused, public 111/tcp+udp listener with no functional purpose.
+- name: Disable and stop rpcbind.socket
+  systemd:
+    name: rpcbind.socket
+    enabled: false
+    state: stopped
+
+- name: Disable and stop rpcbind
+  systemd:
+    name: rpcbind
+    enabled: false
+    state: stopped

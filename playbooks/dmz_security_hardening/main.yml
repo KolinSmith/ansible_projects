@@ -1,0 +1,7 @@
+---
+- name: DMZ security hardening (fail2ban + disable unused rpcbind)
+  hosts: dmz_post_provision
+  gather_facts: true
+  become: true
+  roles:
+    - role: dmz_security_hardening
