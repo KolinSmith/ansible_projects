@@ -256,6 +256,14 @@
       group: "{{ user }}"
       mode: '0700'
 
+  - name: Create logs directory
+    file:
+      path: /home/{{ user }}/logs
+      state: directory
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: '0755'
+
   - name: Deploy forgejo-backup script
     copy:
       src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/scripts/forgejo-backup.sh"
@@ -285,7 +293,7 @@
       name: forgejo-backup
       minute: "30"
       hour: "5"
-      job: "/home/{{ user }}/.scripts/forgejo-backup.sh >> /var/log/forgejo-backup.log 2>&1"
+      job: "/home/{{ user }}/.scripts/forgejo-backup.sh >> /home/{{ user }}/logs/forgejo-backup.log 2>&1"
       user: "{{ user }}"
 
 
