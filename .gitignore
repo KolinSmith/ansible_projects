@@ -1,3 +1,5 @@
 ansible.log
-.claude/
+.claude/*
+!.claude/progress-logs/
+!.claude/plans/
 k3s-hosts.ini
