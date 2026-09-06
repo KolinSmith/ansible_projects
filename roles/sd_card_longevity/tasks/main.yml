@@ -1,0 +1,55 @@
+---
+# tasks file for sd_card_longevity
+
+  - name: Check for Raspbian's dphys-swapfile
+    ansible.builtin.stat:
+      path: /etc/init.d/dphys-swapfile
+    register: sd_longevity_dphys
+    when: sd_longevity_disable_dphys_swapfile | bool
+
+  - name: Turn off and disable dphys-swapfile
+    ansible.builtin.command: "{{ item }}"
+    loop:
+      - dphys-swapfile swapoff
+      - systemctl disable dphys-swapfile
+    changed_when: true
+    failed_when: false
+    when:
+      - sd_longevity_disable_dphys_swapfile | bool
+      - sd_longevity_dphys.stat is defined and sd_longevity_dphys.stat.exists
+
+  - name: Install zram-tools
+    ansible.builtin.apt:
+      name: zram-tools
+      state: present
+      update_cache: true
+      cache_valid_time: 3600
+    when: sd_longevity_zram_enabled | bool
+
+  - name: Configure zram swap
+    ansible.builtin.template:
+      src: zramswap.j2
+      dest: /etc/default/zramswap
+      owner: root
+      group: root
+      mode: "0644"
+    notify: Restart zramswap
+    when: sd_longevity_zram_enabled | bool
+
+  - name: Enable and start zramswap
+    ansible.builtin.systemd:
+      name: zramswap
+      enabled: true
+      state: started
+    when: sd_longevity_zram_enabled | bool
+
+  - name: Mount tmpfs on temp directories
+    ansible.posix.mount:
+      path: "{{ item.path }}"
+      src: tmpfs
+      fstype: tmpfs
+      opts: "defaults,nosuid,nodev,size={{ item.size }}"
+      state: mounted
+    loop: "{{ sd_longevity_tmpfs_paths }}"
+    loop_control:
+      label: "{{ item.path }}"

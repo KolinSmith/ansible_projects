@@ -87,3 +87,15 @@
       state: started
       enabled: true
     when: print_server_airprint_enabled | bool
+
+  # cups-browsed discovers *other* network printers and auto-creates local
+  # queues for them. This box is the print host, not a client — it only
+  # causes noise and the odd phantom queue. It ships as a cups dependency.
+  - name: Disable cups-browsed (this host is a print server, not a client)
+    ansible.builtin.systemd:
+      name: cups-browsed
+      state: stopped
+      enabled: false
+      masked: true
+    failed_when: false
+    when: print_server_disable_cups_browsed | bool

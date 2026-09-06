@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: Kolin Smith
+  description: >-
+    Reduce SD-card writes on an SBC: zram swap instead of swap-on-card,
+    tmpfs for temp dirs, disable Raspbian's dphys-swapfile.
+  license: MIT
+  min_ansible_version: "2.12"
+  galaxy_tags:
+    - raspberrypi
+    - sbc
+    - sdcard
+    - zram
+
+dependencies: []

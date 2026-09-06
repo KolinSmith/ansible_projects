@@ -34,6 +34,7 @@
       - role: import_dotfiles
       - role: install_custom_motd
       - role: artis3n.tailscale
+      - role: sd_card_longevity     # zram swap + tmpfs temp dirs, less SD wear
       - role: deploy_beszel_agent      # native (non-Docker) monitoring agent
       - role: deploy_print_server
       # CUPS-only by decision (2026-09-05). The old box's other services move

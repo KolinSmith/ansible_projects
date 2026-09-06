@@ -1,0 +1,7 @@
+---
+# handlers file for sd_card_longevity
+
+  - name: Restart zramswap
+    ansible.builtin.systemd:
+      name: zramswap
+      state: restarted

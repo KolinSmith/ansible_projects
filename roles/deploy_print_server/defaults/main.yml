@@ -24,6 +24,7 @@ print_server_usb_match: "Brother"
 
 print_server_set_default: true
 print_server_share_printers: true          # cupsctl --share-printers --remote-any
+print_server_disable_cups_browsed: true    # a print host doesn't need printer discovery
 
 # --- Samba print sharing (for Windows clients) ----------------------------
 print_server_samba_enabled: true
