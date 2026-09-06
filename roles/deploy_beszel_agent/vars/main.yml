@@ -1,7 +1,0 @@
----
-# ansible_architecture -> Beszel release asset arch
-beszel_agent_arch_map:
-  x86_64: amd64
-  aarch64: arm64
-  armv7l: armv7
-  armv6l: armv6

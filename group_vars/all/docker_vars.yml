@@ -30,3 +30,7 @@ docker_cf_api_email: "{{ docker_superuser_email }}"
 docker_projects_repo: "https://github.com/kolinsmith/docker_projects.git"
 docker_projects_base_path: "/home/{{ username }}/code_base/docker_projects"  # Path on Ansible controller
 docker_projects_branch: "master"
+
+# Print server (docker_projects/printer)
+docker_cups_admin_user: "print"
+docker_cups_admin_password: "{{ vault_cups_admin_password }}"

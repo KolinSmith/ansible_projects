@@ -10,17 +10,13 @@ necessary_packages:
   - rsync
   - unattended-upgrades
 
-# --- deploy_print_server overrides -------------------------------------
-# Leave the URI empty to auto-detect the USB printer. Pin it once known,
-# e.g.: usb://Brother/HL-L2320D%20series?serial=U63877J0N376391
-print_server_queue_uri: "usb://Brother/HL-L2320D%20series?serial=U63877J0N376391"
-print_server_queue_name: "Brother_Printer"
-print_server_queue_location: "Living Room"
-print_server_samba_enabled: true
-print_server_samba_workgroup: "WORKGROUP"
-print_server_airprint_enabled: true
+# --- deploy_docker_env -------------------------------------------------
+# Deploys docker_projects/printer/ (cups + beszel-agent + beszel-socket-proxy)
+# and renders .env from roles/deploy_docker_env/templates/printer.env.example
+# using the fleet-shared vault beszel vars.
+deploy_docker_services_for: printer
 
-# NOTE: the old box (192.168.3.8) was also the central rsyslog collector for
-# borg / defiant / ds9 / internetPi / i2pd + pfSense. Per the 2026-09-05
-# decision that role moves to voyager (run install_rsyslog_server there) — it
-# is deliberately NOT in this playbook.
+# --- What is NOT on this box (moved during the migration) -------------
+# rsyslog central collector  -> voyager (run install_rsyslog_server there)
+# WireGuard VPN server (wg0)  -> pfSense native WireGuard
+# cron: github_backup + reconnectUnifi -> voyager

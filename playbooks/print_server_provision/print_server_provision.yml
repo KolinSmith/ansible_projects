@@ -1,8 +1,11 @@
 ---
-# Provision the print-server Pi. Target: a fresh Bookworm image at
-# 192.168.9.11 (hostname "printserver"), replacing the crufty "printer" @
-# 192.168.3.8. This box is CUPS-only now — rsyslog collector, WireGuard, and
-# the cron jobs move to voyager / pfSense. See
+# Provision the print-server Pi. Target: a fresh Raspberry Pi OS Lite
+# (Bookworm) image at 192.168.9.11 (hostname "printserver"), replacing the
+# crufty "printer" @ 192.168.3.8.
+#
+# Docker-based, like operator: CUPS + Avahi and the beszel-agent all run as
+# containers from docker_projects/printer/. rsyslog collector, WireGuard,
+# and the cron jobs move off to voyager / pfSense (they are NOT here). See
 # dotfiles/.claude/plans/2026-09-05-print-server-migration-and-rebuild.md
 #
 # First boot (fresh image, still on default pi/raspberry creds):
@@ -10,7 +13,7 @@
 #   sudo ansible-playbook playbooks/print_server_provision/print_server_provision.yml
 #
 # Afterwards it authenticates as {{ username }} via SSH key and lives in
-# [printer].
+# [printer]. Start the stack: cd ~/docker && docker compose up -d
 
   - name: Print server - initial hardening + base packages
     hosts: provision_servers
@@ -23,7 +26,7 @@
       - role: check_if_pi
       - role: provision_server
 
-  - name: Print server - dotfiles, monitoring agents, services
+  - name: Print server - dotfiles, SD hardening, Docker + services
     hosts: printer
     gather_facts: true
     become: true
@@ -34,14 +37,12 @@
       - role: import_dotfiles
       - role: install_custom_motd
       - role: artis3n.tailscale
-      - role: sd_card_longevity     # zram swap + tmpfs temp dirs, less SD wear
-      - role: deploy_beszel_agent      # native (non-Docker) monitoring agent
-      - role: deploy_print_server
-      # CUPS-only by decision (2026-09-05). The old box's other services move
-      # off during the migration:
-      #   - rsyslog central collector -> voyager (install_rsyslog_server there)
-      #   - WireGuard VPN server (wg0, 6 peers) -> pfSense native WireGuard
-      #   - cron: github_backup + reconnectUnifi -> voyager
-      # The old box had NO monitoring agent at all; deploy_beszel_agent above
-      # closes that gap. Register printserver:45876 in the Beszel hub UI on
-      # voyager after the first run.
+      - role: sd_card_longevity        # zram swap + tmpfs temp dirs, less SD wear
+      - role: geerlingguy.docker
+      - role: deploy_docker_env
+        vars:
+          deploy_docker_services_for: printer
+      # The stack (docker_projects/printer/): cups (CUPS + Avahi, USB printer
+      # passthrough, ./cups config volume) + beszel-agent + beszel-socket-proxy.
+      # After the first run, register printserver:45876 in the Beszel hub UI
+      # on voyager, then `cd ~/docker && docker compose up -d`.
