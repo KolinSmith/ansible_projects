@@ -20,8 +20,7 @@ print_server_samba_enabled: true
 print_server_samba_workgroup: "WORKGROUP"
 print_server_airprint_enabled: true
 
-# --- install_rsyslog_server -------------------------------------------
-# This host is the central syslog collector for borg / defiant / ds9 /
-# internetPi / i2pd + pfSense. The role enables imudp/imtcp on 514; the
-# per-host log routing lives in /etc/rsyslog.d/ (carried over from the
-# old box during the migration).
+# NOTE: the old box (192.168.3.8) was also the central rsyslog collector for
+# borg / defiant / ds9 / internetPi / i2pd + pfSense. Per the 2026-09-05
+# decision that role moves to voyager (run install_rsyslog_server there) — it
+# is deliberately NOT in this playbook.

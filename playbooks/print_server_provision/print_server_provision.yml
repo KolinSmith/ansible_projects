@@ -1,7 +1,9 @@
 ---
-# Provision the print-server Pi (currently "printer" @ 192.168.3.8; migrating
-# to the 192.168.9.x server VLAN — see
-# dotfiles/.claude/plans/2026-09-05-print-server-migration-and-rebuild.md).
+# Provision the print-server Pi. Target: a fresh Bookworm image at
+# 192.168.9.11 (hostname "printserver"), replacing the crufty "printer" @
+# 192.168.3.8. This box is CUPS-only now — rsyslog collector, WireGuard, and
+# the cron jobs move to voyager / pfSense. See
+# dotfiles/.claude/plans/2026-09-05-print-server-migration-and-rebuild.md
 #
 # First boot (fresh image, still on default pi/raspberry creds):
 #   add the host to [provision_servers] in ./hosts, then:
@@ -32,9 +34,9 @@
       - role: import_dotfiles
       - role: install_custom_motd
       - role: artis3n.tailscale
-      - role: install_rsyslog_server
       - role: deploy_print_server
-      # WireGuard VPN server (wg0, ~6 personal peers) is still hand-managed on
-      # the current box. A deploy_wireguard_server role is a planned follow-up
-      # PR — see the migration plan. Until then, restore /etc/wireguard/ from
-      # backup and `systemctl enable --now wg-quick@wg0` by hand.
+      # CUPS-only by decision (2026-09-05). The old box's other services move
+      # off during the migration:
+      #   - rsyslog central collector -> voyager (install_rsyslog_server there)
+      #   - WireGuard VPN server (wg0, 6 peers) -> pfSense native WireGuard
+      #   - cron: github_backup + reconnectUnifi -> voyager
