@@ -1,0 +1,27 @@
+---
+# vars for print_server_provision
+
+# Packages provision_server installs on top of the base image.
+necessary_packages:
+  - vim
+  - git
+  - htop
+  - curl
+  - rsync
+  - unattended-upgrades
+
+# --- deploy_print_server overrides -------------------------------------
+# Leave the URI empty to auto-detect the USB printer. Pin it once known,
+# e.g.: usb://Brother/HL-L2320D%20series?serial=U63877J0N376391
+print_server_queue_uri: ""
+print_server_queue_name: "Brother_HL-L2320D"
+print_server_queue_location: "Office"
+print_server_samba_enabled: true
+print_server_samba_workgroup: "WORKGROUP"
+print_server_airprint_enabled: true
+
+# --- install_rsyslog_server -------------------------------------------
+# This host is the central syslog collector for borg / defiant / ds9 /
+# internetPi / i2pd + pfSense. The role enables imudp/imtcp on 514; the
+# per-host log routing lives in /etc/rsyslog.d/ (carried over from the
+# old box during the migration).

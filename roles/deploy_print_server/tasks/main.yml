@@ -1,0 +1,89 @@
+---
+# tasks file for deploy_print_server
+#
+# Sets up a CUPS print server for a USB-attached Brother HL-L2320D (brlaser
+# driver), optionally shares it over Samba for Windows clients, and enables
+# Avahi so Apple devices can discover it via AirPrint.
+
+  - name: Install CUPS and print driver packages
+    apt:
+      name: "{{ print_server_packages }}"
+      state: present
+      update_cache: true
+      cache_valid_time: 3600
+
+  - name: Ensure cupsd is running and enabled
+    ansible.builtin.service:
+      name: cups
+      state: started
+      enabled: true
+
+  - name: Add {{ ansible_user }} to the lpadmin group
+    ansible.builtin.user:
+      name: "{{ ansible_user }}"
+      groups: lpadmin
+      append: true
+
+  - name: Share printers on the local network
+    ansible.builtin.command: cupsctl --remote-any --share-printers
+    changed_when: false
+    when: print_server_share_printers | bool
+
+  - name: Auto-detect the USB printer device URI
+    ansible.builtin.shell: >
+      set -o pipefail;
+      lpinfo -v | awk '/usb:/ && /{{ print_server_usb_match }}/ {print $2; exit}'
+    args:
+      executable: /bin/bash
+    register: print_server_detected_uri
+    changed_when: false
+    failed_when: false
+    when: print_server_queue_uri | length == 0
+
+  - name: Resolve the effective device URI
+    ansible.builtin.set_fact:
+      print_server_effective_uri: >-
+        {{ print_server_queue_uri
+           if (print_server_queue_uri | length > 0)
+           else (print_server_detected_uri.stdout | default('') | trim) }}
+
+  - name: Fail when no printer URI is available
+    ansible.builtin.fail:
+      msg: >-
+        No device URI supplied and none auto-detected via `lpinfo -v`.
+        Plug the printer in, or set print_server_queue_uri.
+    when: print_server_effective_uri | length == 0
+
+  - name: Check whether the print queue already exists
+    ansible.builtin.command: "lpstat -p {{ print_server_queue_name }}"
+    register: print_server_queue_state
+    changed_when: false
+    failed_when: false
+
+  - name: Create / update the print queue
+    ansible.builtin.command: >
+      lpadmin -p {{ print_server_queue_name }} -E
+      -v '{{ print_server_effective_uri }}'
+      -m '{{ print_server_queue_ppd }}'
+      -D '{{ print_server_queue_info }}'
+      -L '{{ print_server_queue_location }}'
+      -o printer-is-shared={{ print_server_share_printers | bool | ternary('true', 'false') }}
+    register: print_server_lpadmin
+    changed_when: print_server_queue_state.rc != 0
+    notify: Restart cups
+
+  - name: Set the queue as the system default
+    ansible.builtin.command: "lpadmin -d {{ print_server_queue_name }}"
+    changed_when: false
+    when: print_server_set_default | bool
+
+  - name: Configure Samba print sharing
+    ansible.builtin.import_tasks: samba.yml
+    when: print_server_samba_enabled | bool
+
+  - name: Ensure Avahi is running for AirPrint discovery
+    ansible.builtin.service:
+      name: avahi-daemon
+      state: started
+      enabled: true
+    when: print_server_airprint_enabled | bool
