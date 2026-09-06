@@ -1,0 +1,58 @@
+---
+# tasks file for deploy_beszel_agent
+
+  - name: Create the beszel system user
+    ansible.builtin.user:
+      name: "{{ beszel_agent_user }}"
+      system: true
+      shell: /usr/sbin/nologin
+      home: "{{ beszel_agent_dir }}"
+      create_home: false
+
+  - name: Ensure the install directory exists
+    ansible.builtin.file:
+      path: "{{ beszel_agent_dir }}"
+      state: directory
+      owner: "{{ beszel_agent_user }}"
+      group: "{{ beszel_agent_user }}"
+      mode: "0755"
+
+  - name: Resolve the release asset architecture
+    ansible.builtin.set_fact:
+      beszel_agent_asset_arch: "{{ beszel_agent_arch_map[ansible_architecture] | default(ansible_architecture) }}"
+
+  - name: Resolve the download URL
+    ansible.builtin.set_fact:
+      beszel_agent_url: >-
+        {{ ('https://github.com/henrygd/beszel/releases/latest/download/beszel-agent_linux_' ~ beszel_agent_asset_arch ~ '.tar.gz')
+           if (beszel_agent_version == 'latest')
+           else ('https://github.com/henrygd/beszel/releases/download/' ~ beszel_agent_version ~ '/beszel-agent_linux_' ~ beszel_agent_asset_arch ~ '.tar.gz') }}
+
+  - name: Download and extract the beszel-agent binary
+    ansible.builtin.unarchive:
+      src: "{{ beszel_agent_url }}"
+      dest: "{{ beszel_agent_dir }}"
+      remote_src: true
+      owner: "{{ beszel_agent_user }}"
+      group: "{{ beszel_agent_user }}"
+      mode: "0755"
+      creates: "{{ beszel_agent_dir }}/beszel-agent"
+    notify: Restart beszel-agent
+
+  - name: Install the systemd unit
+    ansible.builtin.template:
+      src: beszel-agent.service.j2
+      dest: /etc/systemd/system/beszel-agent.service
+      owner: root
+      group: root
+      mode: "0644"
+    notify:
+      - Reload systemd
+      - Restart beszel-agent
+
+  - name: Enable and start beszel-agent
+    ansible.builtin.systemd:
+      name: beszel-agent
+      enabled: true
+      state: started
+      daemon_reload: true

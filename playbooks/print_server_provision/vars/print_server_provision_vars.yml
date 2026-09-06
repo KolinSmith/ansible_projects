@@ -13,8 +13,8 @@ necessary_packages:
 # --- deploy_print_server overrides -------------------------------------
 # Leave the URI empty to auto-detect the USB printer. Pin it once known,
 # e.g.: usb://Brother/HL-L2320D%20series?serial=U63877J0N376391
-print_server_queue_uri: ""
-print_server_queue_name: "Brother_HL-L2320D"
+print_server_queue_uri: "usb://Brother/HL-L2320D%20series?serial=U63877J0N376391"
+print_server_queue_name: "Brother_Printer"
 print_server_queue_location: "Living Room"
 print_server_samba_enabled: true
 print_server_samba_workgroup: "WORKGROUP"

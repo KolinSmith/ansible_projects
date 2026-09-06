@@ -1,0 +1,17 @@
+---
+# defaults file for deploy_beszel_agent
+#
+# Native (non-Docker) Beszel monitoring agent, as a systemd service. For
+# hosts that don't run Docker. Docker hosts use the beszel-agent container
+# in docker_projects instead.
+
+beszel_agent_version: "latest"          # or a pinned release tag, e.g. "v0.9.1"
+beszel_agent_listen_port: "45876"       # TCP port the Beszel hub connects to
+beszel_agent_user: "beszel"
+beszel_agent_dir: "/opt/beszel-agent"
+
+# From the Beszel hub on voyager. KEY = the hub's SSH public key; TOKEN =
+# the agent registration token. Fleet-shared in this deployment
+# (group_vars/all/docker_vars.yml -> vault).
+beszel_agent_key: "{{ docker_beszel_agent_key }}"
+beszel_agent_token: "{{ docker_beszel_agent_token }}"

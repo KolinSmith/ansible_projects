@@ -1,0 +1,20 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Beszel Agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ beszel_agent_user }}
+Environment="LISTEN={{ beszel_agent_listen_port }}"
+Environment="KEY={{ beszel_agent_key }}"
+Environment="TOKEN={{ beszel_agent_token }}"
+ExecStart={{ beszel_agent_dir }}/beszel-agent
+Restart=always
+RestartSec=5
+# Lets the non-root agent read full network stats
+AmbientCapabilities=CAP_NET_RAW
+
+[Install]
+WantedBy=multi-user.target

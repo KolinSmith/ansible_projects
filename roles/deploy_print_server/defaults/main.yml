@@ -9,7 +9,7 @@ print_server_packages:
   - printer-driver-brlaser
   - avahi-daemon
 
-print_server_queue_name: "Brother_HL-L2320D"
+print_server_queue_name: "Brother_Printer"
 print_server_queue_location: "Living Room"
 print_server_queue_info: "Brother HL-L2320D series"
 

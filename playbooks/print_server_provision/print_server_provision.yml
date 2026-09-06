@@ -34,9 +34,13 @@
       - role: import_dotfiles
       - role: install_custom_motd
       - role: artis3n.tailscale
+      - role: deploy_beszel_agent      # native (non-Docker) monitoring agent
       - role: deploy_print_server
       # CUPS-only by decision (2026-09-05). The old box's other services move
       # off during the migration:
       #   - rsyslog central collector -> voyager (install_rsyslog_server there)
       #   - WireGuard VPN server (wg0, 6 peers) -> pfSense native WireGuard
       #   - cron: github_backup + reconnectUnifi -> voyager
+      # The old box had NO monitoring agent at all; deploy_beszel_agent above
+      # closes that gap. Register printserver:45876 in the Beszel hub UI on
+      # voyager after the first run.

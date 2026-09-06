@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: Kolin Smith
+  description: >-
+    Install the Beszel monitoring agent as a native systemd service
+    (for hosts that do not run Docker).
+  license: MIT
+  min_ansible_version: "2.12"
+  galaxy_tags:
+    - monitoring
+    - beszel
+    - observability
+
+dependencies: []
