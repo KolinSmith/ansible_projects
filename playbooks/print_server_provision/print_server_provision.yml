@@ -1,16 +1,18 @@
 ---
-# Provision the print-server Pi. Target: a fresh Raspberry Pi OS Lite
-# (Bookworm) image at 192.168.9.11 (hostname "printserver"), replacing the
+# Provision the print-server Pi. Target: a fresh Armbian (Debian 13 / Trixie,
+# minimal, arm64) image at 192.168.9.11 (hostname "printserver"), replacing the
 # crufty "printer" @ 192.168.3.8.
 #
-# Docker-based, like operator: CUPS + Avahi and the beszel-agent all run as
-# containers from docker_projects/printer/. rsyslog collector, WireGuard,
-# and the cron jobs move off to voyager / pfSense (they are NOT here). See
+# Docker-based, like operator: CUPS + Avahi + Samba (custom cups-samba image)
+# and the beszel-agent all run as containers from docker_projects/printer/.
+# rsyslog collector, WireGuard, and the cron jobs move off to voyager / pfSense
+# (they are NOT here). See
 # dotfiles/.claude/plans/2026-09-05-print-server-migration-and-rebuild.md
 #
-# First boot (fresh image, still on default pi/raspberry creds):
-#   add the host to [provision_servers] in ./hosts, then:
-#   sudo ansible-playbook playbooks/print_server_provision/print_server_provision.yml
+# First boot: run expect_scripts/armbian_intial_login.expect (it walks the
+# armbian-firstlogin, creates a throwaway `pi` user, then calls this playbook).
+# Add the host to [provision_servers] (as pi) and [printer] (as {{ username }})
+# in ./hosts first.
 #
 # Afterwards it authenticates as {{ username }} via SSH key and lives in
 # [printer]. Start the stack: cd ~/docker && docker compose up -d
@@ -26,23 +28,37 @@
       - role: check_if_pi
       - role: provision_server
 
-  - name: Print server - dotfiles, SD hardening, Docker + services
+  - name: Print server - ramlog, dotfiles, Docker + services
     hosts: printer
     gather_facts: true
     become: true
     vars_files:
       - vars/print_server_provision_vars.yml
+      - ../../group_vars/all/docker_vars.yml
+    vars:
+      motd_force_install: true
     roles:
       - role: check_if_pi
+      - role: orangepi_disable_ramlog     # Armbian ramlog -> disk (Armbian-only)
       - role: import_dotfiles
-      - role: install_custom_motd
-      - role: artis3n.tailscale
-      - role: sd_card_longevity        # zram swap + tmpfs temp dirs, less SD wear
+      - role: artis3n.tailscale.machine
+        vars:
+          tailscale_authkey: "{{ tailscale_auth_key }}"
+      - role: geerlingguy.pip
       - role: geerlingguy.docker
+        vars:
+          docker_users: "{{ username }}"          # so `dax` can run docker without sudo
+          docker_daemon_options:
+            # trust the plain-HTTP Forgejo registry that hosts cups-samba
+            insecure-registries: ["{{ docker_forgejo_registry }}"]
       - role: deploy_docker_env
         vars:
           deploy_docker_services_for: printer
-      # The stack (docker_projects/printer/): cups (CUPS + Avahi, USB printer
-      # passthrough, ./cups config volume) + beszel-agent + beszel-socket-proxy.
-      # After the first run, register printserver:45876 in the Beszel hub UI
-      # on voyager, then `cd ~/docker && docker compose up -d`.
+      - role: install_custom_motd
+      - role: remove_default_user         # deletes the throwaway `pi`; reboots. LAST.
+        vars:
+          default_user: "pi"
+      # The stack (docker_projects/printer/): cups (CUPS + Avahi + Samba, USB
+      # printer passthrough, ./cups config volume) + beszel-agent +
+      # beszel-socket-proxy. After the first run, register printserver:45876 in
+      # the Beszel hub UI on voyager, then `cd ~/docker && docker compose up -d`.

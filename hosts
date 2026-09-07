@@ -123,6 +123,7 @@ ansible_python_interpreter=/usr/bin/python3
 
 [provision_servers]
 ; forgejo-runner ansible_host=192.168.9.101
+; printserver ansible_host=192.168.9.11   # <-- print-server first boot (as pi); pair with [printer] below
 
 [provision_servers:vars]
 ansible_connection=ssh
