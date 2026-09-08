@@ -1,8 +1,30 @@
 ---
 # vars for print_server_provision
 
+# --- provision_server (play 1) ---------------------------------------
+user: "{{ ansible_user }}"
+my_custom_path_var: "/home/{{ username }}/.local/bin"
+extra_path: "/usr/local/bin"
+# absolute — lookup('env','HOME') is /root under sudo
+ansible_project_path: "/home/{{ username }}/code_base/ansible_projects"
+
+# SSH keys installed for {{ username }} on the box
+public_keys:
+  - name: Voyager Public Key File
+    key: "{{ lookup('file', ansible_project_path ~ '/files/voyager_pub_key.pub') }}"
+  - name: Enterprise Public Key File
+    key: "{{ lookup('file', ansible_project_path ~ '/files/enterprise_pub_key.pub') }}"
+
+# import_dotfiles clones this on the controller (voyager) and pushes the
+# dotfiles to the box. .ansible_password is skipped (guarded: dev_server only).
+dotfiles_repo: "git@github.com:KolinSmith/dotfiles.git"
+
 # Packages provision_server installs on top of the base image.
+# Kept minimal — this box only runs the Docker print stack.
 necessary_packages:
+  - zsh          # dax's login shell (provision_server sets shell: /bin/zsh)
+  - acl          # become to an unprivileged user
+  - sudo
   - vim
   - git
   - htop
@@ -10,10 +32,11 @@ necessary_packages:
   - rsync
   - unattended-upgrades
 
-# --- deploy_docker_env -------------------------------------------------
-# Deploys docker_projects/printer/ (cups + beszel-agent + beszel-socket-proxy)
+# --- deploy_docker_env (play 2) -------------------------------------
+# Deploys docker_projects/printer/ (cups-samba + beszel-agent + beszel-socket-proxy)
 # and renders .env from roles/deploy_docker_env/templates/printer.env.example
-# using the fleet-shared vault beszel vars.
+# using the fleet-shared vault beszel vars + docker_cups_admin_password +
+# docker_printer_{name,uri,ppd}.
 deploy_docker_services_for: printer
 
 # --- What is NOT on this box (moved during the migration) -------------
