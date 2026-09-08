@@ -166,7 +166,7 @@
     file:
       path: /home/{{ username | lower }}/.zshrc
       state: absent
-    when: orange_pi == true
+    when: is_armbian | default(false)
 
   - name: create ~/.zshrc file for local user
     file:
@@ -188,14 +188,14 @@
     file:
       path: /home/{{ username | lower }}/.oh-my-zsh
       state: absent
-    when: orange_pi == true
+    when: is_armbian | default(false)
 
   - name: Install Oh My ZSH
     git:
       repo: 'https://github.com/ohmyzsh/ohmyzsh.git'
       dest: /home/{{ username | lower }}/.oh-my-zsh
     # become_user: "{{ username | lower}}"
-    when: omz_installed.stat.exists == False or orange_pi == true
+    when: omz_installed.stat.exists == False or (is_armbian | default(false))
 
   - name: Checkout powerlevel10k repo and use refspec to fetch all pull requests
     git:
@@ -269,12 +269,12 @@
 
 
   #https://web.archive.org/web/20240205053108/https://forum.yunohost.org/t/armbian-zram-var-log-full-and-email-notifications-every-15-minutes/26295
-  - name: Disable armbian-ramlog on Orange Pis
+  - name: Disable armbian-ramlog (Armbian)
     lineinfile:
       path: /etc/default/armbian-ramlog
       regexp: '^ENABLED='
       line: 'ENABLED=false'
-    when: orange_pi == true
+    when: is_armbian | default(false)
     notify: restart armbian-ramlog
 
   # - name: Set raspberry_pi fact
