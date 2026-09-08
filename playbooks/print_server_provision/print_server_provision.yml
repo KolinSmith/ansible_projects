@@ -37,6 +37,42 @@
       - ../../group_vars/all/docker_vars.yml
     vars:
       motd_force_install: true
+    pre_tasks:
+      # --- USB printing reliability on the Pi 3B -------------------------------
+      # Both fixes were applied by hand during the 2026-09 bring-up; baking them
+      # in so a reprovision reproduces a working print path. See
+      # dotfiles/.claude/plans/2026-09-05-print-server-migration-and-rebuild.md
+      - name: Blacklist the usblp kernel module
+        copy:
+          dest: /etc/modprobe.d/blacklist-usblp.conf
+          content: "# usblp and the CUPS libusb `usb` backend both claim the printer,\n# so the device flaps (usblp0 removed/re-added) and jobs stall.\nblacklist usblp\n"
+          owner: root
+          group: root
+          mode: '0644'
+
+      - name: Unload usblp now if it happens to be loaded
+        community.general.modprobe:
+          name: usblp
+          state: absent
+        failed_when: false
+
+      - name: Check for the RPi bootloader cmdline
+        stat:
+          path: /boot/firmware/cmdline.txt
+        register: rpi_cmdline
+
+      - name: Force USB Full Speed on the dwc_otg controller (cmdline.txt)
+        # The Pi 3B dwc_otg controller is unreliable for sustained USB bulk
+        # transfer at High Speed; Full Speed (12 Mbit) is slower but stable.
+        # The RPi bootloader reads /boot/firmware/cmdline.txt (NOT armbianEnv.txt
+        # extraargs) even under Armbian. Takes effect on the next reboot, which
+        # remove_default_user performs at the end of this play.
+        replace:
+          path: /boot/firmware/cmdline.txt
+          regexp: '^(?!.*dwc_otg\.speed=1)(.+)$'
+          replace: '\1 dwc_otg.speed=1'
+        when: rpi_cmdline.stat.exists
+
     roles:
       - role: check_if_pi
       - role: orangepi_disable_ramlog     # Armbian ramlog -> disk (Armbian-only)
