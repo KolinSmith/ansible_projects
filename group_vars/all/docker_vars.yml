@@ -30,3 +30,14 @@ docker_cf_api_email: "{{ docker_superuser_email }}"
 docker_projects_repo: "https://github.com/kolinsmith/docker_projects.git"
 docker_projects_base_path: "/home/{{ username }}/code_base/docker_projects"  # Path on Ansible controller
 docker_projects_branch: "master"
+
+# Print server (docker_projects/printer)
+docker_cups_admin_user: "print"
+docker_cups_admin_password: "{{ vault_cups_admin_password }}"
+docker_printer_name: "Brother_Printer"
+docker_printer_uri: "usb://Brother/HL-L2320D%20series?serial=U63877J0N376391"
+docker_printer_ppd: "drv:///brlaser.drv/brl2320d.ppd"
+
+# Self-hosted Forgejo container registry (Tailscale IP:port, plain HTTP).
+# Same value hardcoded in docker_projects/.forgejo/workflows/build-*.yml.
+docker_forgejo_registry: "100.86.4.29:3001"
