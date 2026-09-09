@@ -166,9 +166,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Count lines of code
-        run: scc --no-complexity . | tee /tmp/scc_output.txt
+      - name: Count lines of code (files changed in this PR)
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only --diff-filter=d \
+            origin/${{ github.base_ref }}...HEAD \
+            | grep -vE '^(\.ansible/|\.forgejo/|_deprecated/)' \
+            || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No non-excluded files changed in this PR." | tee /tmp/scc_output.txt
+            exit 0
+          fi
+          {
+            echo "Files changed in this PR:"
+            echo "$CHANGED" | sed 's/^/  /'
+            echo
+            printf '%s\n' "$CHANGED" | xargs scc --no-complexity
+            echo
+            git diff --shortstat origin/${{ github.base_ref }}...HEAD
+          } | tee /tmp/scc_output.txt
 
       - name: Post stats comment
         env:
@@ -185,7 +204,7 @@ jobs:
           with open("/tmp/scc_output.txt") as f:
               stats = f.read().strip()
 
-          body = f"{MARKER}\n## Code stats\n\n```\n{stats}\n```"
+          body = f"{MARKER}\n## Code stats (this PR)\n\n```\n{stats}\n```"
           token = os.environ["GH_TOKEN"]
           api   = os.environ["API_BASE"]
           repo  = os.environ["REPO"]
