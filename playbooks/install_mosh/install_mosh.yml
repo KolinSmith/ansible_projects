@@ -23,3 +23,19 @@
     ansible_ssh_private_key_file: "/home/dax/.ssh/id_ed25519"
   roles:
     - role: install_mosh
+
+- name: Install mosh on forgejo-runner
+  hosts: post_provision_servers
+  gather_facts: true
+  roles:
+    - role: install_mosh
+
+- name: Install mosh on dmz
+  hosts: dmz_post_provision
+  gather_facts: true
+  roles:
+    - role: install_mosh
+
+# borg (Unraid) is not apt-based and needs a different approach (a Docker
+# container running mosh-server) — deliberately not attempted here, tracked
+# as a separate docker_projects follow-up.
