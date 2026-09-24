@@ -59,3 +59,9 @@
           state: latest
         when:
           - raspberry_pi|default(false)
+
+############################################################################################
+
+      - name: install mosh (voyager hops in via mosh, not plain ssh)
+        include_role:
+          name: install_mosh
