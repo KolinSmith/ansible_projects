@@ -1,0 +1,25 @@
+---
+# Installs mosh on the hosts that get a second SSH hop from voyager
+# (voyager -> borg/defiant/ds9/operator, via each host's tmuxinator window).
+# Fixes freezes/broken-pipe disconnects on that second hop by giving it the
+# same UDP-based, reconnect-tolerant transport the first hop (Enterprise/Mac
+# -> voyager) already gets from mosh.
+#
+# operator isn't in any current inventory group (see
+# project_operator_inventory_drift), so it's targeted directly by IP here
+# rather than waiting on that separate, already-tracked gap to be fixed.
+
+- name: Install mosh on dns_servers (ds9, defiant)
+  hosts: dns_servers
+  gather_facts: true
+  roles:
+    - role: install_mosh
+
+- name: Install mosh on operator (not in static inventory)
+  hosts: 192.168.9.10
+  gather_facts: true
+  vars:
+    ansible_user: dax
+    ansible_ssh_private_key_file: "/home/dax/.ssh/id_ed25519"
+  roles:
+    - role: install_mosh
