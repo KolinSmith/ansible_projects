@@ -287,6 +287,7 @@
       state: present
       key: "{{ lookup('pipe', 'ssh-keyscan -t ed25519 ' + borg_tailscale_ip + ' 2>/dev/null') }}"
       path: /home/{{ user }}/.ssh/known_hosts
+    become_user: "{{ user }}"
 
   - name: Schedule forgejo-backup cron (5:30am UTC daily)
     cron:

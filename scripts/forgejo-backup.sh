@@ -41,8 +41,20 @@ while IFS= read -r repo; do
   fi
 done <<< "$REPOS"
 
-rsync -a --delete -e "ssh -i ${HOME}/.ssh/id_ecdsa -o StrictHostKeyChecking=accept-new" \
-  "$STAGING/" "$BORG_DEST/"
+# Retry the rsync to Borg: it crosses Tailscale, which occasionally relays
+# through DERP instead of a direct connection and can hit a transient timeout.
+for attempt in 1 2 3; do
+  if rsync -a --delete -e "ssh -i ${HOME}/.ssh/id_ecdsa -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15" \
+    "$STAGING/" "$BORG_DEST/"; then
+    break
+  fi
+  if [ "$attempt" -eq 3 ]; then
+    echo "ERROR: rsync to Borg failed after 3 attempts" >&2
+    exit 1
+  fi
+  echo "rsync attempt $attempt failed, retrying in 15s..." >&2
+  sleep 15
+done
 rm -rf "$STAGING"
 
 curl -fsS "${UPTIME_KUMA_PUSH_URL}?status=up&msg=OK&ping=" > /dev/null
