@@ -20,7 +20,31 @@
 #   - Traffic stops routing through the VPN silently
 #   - pfSense shows the interface as up but no data flows
 #
-# This script re-registers daily at 2 AM so the tunnel never expires.
+# This script runs every 15 minutes, checks whether the tunnel is healthy, and
+# only re-registers when it isn't (see HEALTH CHECK FIRST below).
+#
+# HEALTH CHECK FIRST (added 2026-09-30)
+# -------------------------------------
+# On 2026-09-21 the cron went from daily 2 AM to every 15 minutes so a dead
+# tunnel gets caught fast. But every run still did the full repair: re-register,
+# reload pf rules, and `pfctl -k <host>` for every pia_redirect_group member.
+# That last step killed *every* connection those hosts had, including LAN
+# traffic to the Servers VLAN and the pfSense dashboard, 96 times a day. It was
+# the root cause of Enterprise's SSH sessions to voyager dying at
+# :00/:15/:30/:45 and the pfSense dashboard freezing.
+#
+# Now each run first does a read-only health check:
+#   - the newest WireGuard handshake on tun_wg0 is < HEALTH_MAX_HANDSHAKE_AGE
+#   - the "IPs to be routed over PIA" rule has route-to (tun_wg0 <iface ip>)
+# Healthy            -> ping Uptime Kuma and exit. pfSense is not touched.
+# Handshake stale    -> full re-registration (below), then reload + flush.
+# Route-to wrong only -> reload pf rules + flush, no re-registration.
+#
+# The flush now kills only states created by the PIA routing rule
+# (`pfctl -k label -k id:<tracker>`) instead of `pfctl -k <host>`, so LAN and
+# inter-VLAN connections survive even when a repair does run.
+#
+# `--force` skips the health check and always re-registers (manual use).
 #
 # SERVER SELECTION (rewritten 2026-07-27)
 # ----------------------------------------
@@ -63,7 +87,8 @@
 #   8. Verify the tunnel by polling `wg show` for a fresh handshake; if this
 #      fails, move on to the next candidate server instead of giving up
 #   9. Once a candidate succeeds: persist it, remove stale WireGuard peers
-#      left over from past registrations, reload pf rules, flush pf states
+#      left over from past registrations, reload pf rules, flush the PIA
+#      routing rule's pf states
 #  10. Ping Uptime Kuma on success; absence of ping = Kuma alerts on failure
 #
 # CRITICAL NOTE: rc.newwanip MUST NOT BE CALLED
@@ -81,7 +106,7 @@
 # Managed by Ansible role: provision_dev_server
 # Script location on Voyager: /home/dax/.scripts/pia-reregister.sh
 # Companion script:           /home/dax/.scripts/pia-pfsense-update.php
-# Cron (Voyager, user dax):   0 2 * * * /home/dax/.scripts/pia-reregister.sh
+# Cron (Voyager, user dax):   */15 * * * * /home/dax/.scripts/pia-reregister.sh
 # Log file:                   /var/log/pia-reregister.log
 # State file (last-good server, not committed): /opt/piavpn-manual/pia-current-server.env
 # Uptime Kuma monitor:        Push monitor; alerts if no heartbeat in 26h
@@ -118,6 +143,16 @@ readonly HANDSHAKE_MAX_TRIES=12
 # A handshake is "fresh" if it occurred within the last 120s
 readonly HANDSHAKE_MAX_AGE=120
 
+# Health check: with persistent-keepalive 25, WireGuard re-handshakes about
+# every 2 minutes on a live tunnel, so a newest handshake older than 5 minutes
+# means the tunnel is dead.
+readonly HEALTH_MAX_HANDSHAKE_AGE=300
+
+# Tracker id of the pfSense rule "IPs to be routed over PIA" (LAN, route-to
+# PIA_OVER_WIREGUARD). pfSense labels the rule "id:<tracker>". Used to verify
+# route-to and to flush only that rule's states.
+readonly PIA_ROUTE_RULE_ID="1724169413"
+
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
@@ -133,10 +168,89 @@ die() {
 }
 
 # ---------------------------------------------------------------------------
+# pfSense helpers (health check + repairs)
+#
+# kolin's login shell on pfSense is tcsh, so remote commands stay simple and
+# all parsing/redirection happens locally.
+# ---------------------------------------------------------------------------
+
+# Read-only. Returns 0 = healthy, 1 = tunnel up but the PIA rule's route-to is
+# missing/stale (needs a pf reload), 2 = tunnel down or pfSense unreachable
+# (needs re-registration), 3 = PIA routing rule not found (config drift, needs
+# a human). Sets HEALTH_DETAIL for logging.
+check_health() {
+    local handshakes newest now age iface_ip rule
+    HEALTH_DETAIL=""
+
+    handshakes=$(ssh -n "${PFSENSE_HOST}" "sudo wg show ${PFSENSE_WG_IFACE} latest-handshakes" 2>/dev/null) \
+        || { HEALTH_DETAIL="wg show failed"; return 2; }
+    newest=$(echo "${handshakes}" | awk '$2 > max {max = $2} END {print max + 0}')
+    now=$(date +%s)
+    age=$(( now - newest ))
+    if (( newest == 0 || age >= HEALTH_MAX_HANDSHAKE_AGE )); then
+        HEALTH_DETAIL="newest handshake age ${age}s >= ${HEALTH_MAX_HANDSHAKE_AGE}s"
+        return 2
+    fi
+
+    iface_ip=$(ssh -n "${PFSENSE_HOST}" "ifconfig ${PFSENSE_WG_IFACE}" 2>/dev/null | awk '/inet /{print $2; exit}')
+    rule=$(ssh -n "${PFSENSE_HOST}" "sudo pfctl -sr" 2>/dev/null | grep -F "ridentifier ${PIA_ROUTE_RULE_ID}" | head -1)
+    if [[ -z "${rule}" ]]; then
+        HEALTH_DETAIL="no pf rule with ridentifier ${PIA_ROUTE_RULE_ID}"
+        return 3
+    fi
+    if [[ -z "${iface_ip}" || "${rule}" != *"route-to (${PFSENSE_WG_IFACE} ${iface_ip})"* ]]; then
+        HEALTH_DETAIL="handshake age ${age}s, but PIA rule route-to is '$(echo "${rule}" | grep -o 'route-to ([^)]*)' || echo none)', expected '(${PFSENSE_WG_IFACE} ${iface_ip})'"
+        return 1
+    fi
+
+    HEALTH_DETAIL="handshake age ${age}s, route-to (${PFSENSE_WG_IFACE} ${iface_ip})"
+    return 0
+}
+
+# `wg set` and `ifconfig` update live kernel state but do NOT cause pfSense
+# to regenerate its pf ruleset. Policy-based routing rules use `route-to
+# (tun_wg0 <peer_ip>)` — if peer_ip changed, or if the rules were generated
+# while the gateway was down (omitting route-to entirely), hosts in
+# pia_redirect_group silently fall back to WAN despite the tunnel being up.
+#
+# filter_configure_sync reloads pf rules from config.xml without touching
+# the WireGuard interface (no rc.newwanip, no kernel panic).
+#
+# Then flush only the states created by the PIA routing rule, so connections
+# pinned to WAN or to an old peer_ip re-route through the tunnel on reconnect.
+# This used to be `pfctl -k <host>` for every pia_redirect_group member, which
+# also killed their LAN/inter-VLAN connections (SSH to voyager, the pfSense
+# dashboard). A label kill leaves those alone.
+reload_and_flush() {
+    local out
+
+    log "Reloading pfSense pf rules (filter_configure_sync)"
+    ssh -n "${PFSENSE_HOST}" "sudo /etc/rc.filter_configure_sync" \
+        || log "WARN: filter_configure_sync failed — policy routing may be stale until next pfSense rule save"
+
+    log "Flushing pf states created by the PIA routing rule (label id:${PIA_ROUTE_RULE_ID})"
+    out=$(ssh -n "${PFSENSE_HOST}" "sudo pfctl -k label -k id:${PIA_ROUTE_RULE_ID}" 2>&1) \
+        || log "WARN: pfctl label flush failed (non-fatal)"
+    log "  ${out}"
+}
+
+# The Uptime Kuma push monitor alerts when heartbeats stop. It's only pinged
+# when the tunnel is verified healthy (or repaired), so a missing heartbeat
+# means the tunnel is down and the script couldn't fix it.
+ping_kuma() {
+    log "Pinging Uptime Kuma healthcheck"
+    curl -fsS --max-time 10 "${UPTIME_KUMA_URL}" > /dev/null \
+        || log "WARN: Uptime Kuma ping failed — tunnel is up but healthcheck not confirmed"
+}
+
+FORCE=false
+[[ "${1:-}" == "--force" ]] && FORCE=true
+
+# ---------------------------------------------------------------------------
 # Step 1: Read credentials from Ansible vault
 # ---------------------------------------------------------------------------
 
-log "Starting PIA WireGuard re-registration"
+log "Starting PIA WireGuard check"
 log "Reading credentials from Ansible vault"
 
 VAULT_FILE="${HOME}/code_base/ansible_projects/group_vars/all/vault.yml"
@@ -161,6 +275,37 @@ UPTIME_KUMA_URL=$("${_VAULT[@]}" | awk '/^vault_uptime_kuma_pia_push_url:/{gsub(
 [[ -n "${UPTIME_KUMA_URL}" ]]  || die "vault_uptime_kuma_pia_push_url is empty"
 
 log "Credentials loaded for user: ${PIA_USER}"
+
+# ---------------------------------------------------------------------------
+# Step 1b: Health check — only repair what's actually broken
+# ---------------------------------------------------------------------------
+
+if [[ "${FORCE}" == "true" ]]; then
+    log "--force given: skipping health check, re-registering"
+else
+    check_health
+    case $? in
+        0)
+            log "Tunnel healthy (${HEALTH_DETAIL}) — nothing to do"
+            ping_kuma
+            exit 0
+            ;;
+        1)
+            log "Tunnel up but pf rules are stale (${HEALTH_DETAIL}) — reloading rules, no re-registration"
+            reload_and_flush
+            check_health || die "Still unhealthy after pf reload: ${HEALTH_DETAIL}"
+            log "Repaired (${HEALTH_DETAIL})"
+            ping_kuma
+            exit 0
+            ;;
+        3)
+            die "Health check can't find the PIA routing rule (${HEALTH_DETAIL}) — was it recreated? Update PIA_ROUTE_RULE_ID"
+            ;;
+        *)
+            log "Tunnel unhealthy (${HEALTH_DETAIL}) — re-registering"
+            ;;
+    esac
+fi
 
 # ---------------------------------------------------------------------------
 # Step 2: Get a fresh PIA token
@@ -416,51 +561,18 @@ done < <(ssh -n "${PFSENSE_HOST}" "sudo wg show ${PFSENSE_WG_IFACE} peers" 2>/de
 log "Stale peer cleanup complete"
 
 # ---------------------------------------------------------------------------
-# Step 6: Reload pfSense pf rules
-#
-# `wg set` and `ifconfig` update live kernel state but do NOT cause pfSense
-# to regenerate its pf ruleset. Policy-based routing rules use `route-to
-# (tun_wg0 <peer_ip>)` — if peer_ip changed, or if the rules were generated
-# while the gateway was down (omitting route-to entirely), hosts in
-# pia_redirect_group silently fall back to WAN despite the tunnel being up.
-#
-# filter_configure_sync reloads pf rules from config.xml without touching
-# the WireGuard interface (no rc.newwanip, no kernel panic).
-#
-# We also flush states for pia_redirect_group so existing WAN-pinned
-# connections immediately re-route through the tunnel on reconnect.
+# Step 6: Reload pf rules and flush the PIA rule's states (see reload_and_flush)
 # ---------------------------------------------------------------------------
 
-log "Reloading pfSense pf rules (filter_configure_sync)"
+reload_and_flush
 
-ssh "${PFSENSE_HOST}" "sudo /etc/rc.filter_configure_sync" \
-    || log "WARN: filter_configure_sync failed — policy routing may be stale until next pfSense rule save"
-
-log "Flushing pf states for pia_redirect_group"
-
-# Flush states for each host in the alias so they re-route through PIA immediately.
-# pfctl -k <addr> kills all states where addr is the source — brief TCP disruption
-# is acceptable since connections will re-establish over the tunnel.
-while IFS= read -r host; do
-    [[ -n "${host}" ]] || continue
-    log "  Flushing states for ${host}"
-    ssh -n "${PFSENSE_HOST}" "sudo pfctl -k ${host}" 2>/dev/null \
-        || log "  WARN: pfctl -k ${host} failed (non-fatal)"
-done < <(ssh -n "${PFSENSE_HOST}" "sudo pfctl -t pia_redirect_group -T show" 2>/dev/null)
-
-log "pf rules reloaded and states flushed"
+check_health || die "Re-registered, but still unhealthy after pf reload: ${HEALTH_DETAIL}"
+log "Post-repair health: ${HEALTH_DETAIL}"
 
 # ---------------------------------------------------------------------------
 # Step 7: Ping Uptime Kuma healthcheck
-#
-# The Uptime Kuma push monitor expects a heartbeat within its configured
-# window (set to 26h to give the 2 AM cron a 2h grace period). A missing
-# heartbeat means every candidate server failed and Kuma will alert.
 # ---------------------------------------------------------------------------
 
-log "Pinging Uptime Kuma healthcheck"
-
-curl -fsS --max-time 10 "${UPTIME_KUMA_URL}" > /dev/null \
-    || log "WARN: Uptime Kuma ping failed — tunnel is up but healthcheck not confirmed"
+ping_kuma
 
 log "PIA WireGuard re-registration completed successfully"
