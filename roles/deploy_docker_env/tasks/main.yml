@@ -96,6 +96,18 @@
   no_log: true
   when: deploy_docker_services_for == 'forgejo-runner'
 
+- name: Login to the plain-HTTP Forgejo registry (printer -> cups-samba image)
+  # Belt-and-suspenders: the cups-samba package is meant to be Public (then this
+  # is a no-op that still succeeds). Keeps the box reproducible if it isn't.
+  shell: >
+    echo "{{ vault_forgejo_api_token }}" |
+    docker login {{ docker_forgejo_registry }}
+    -u {{ vault_username }} --password-stdin
+  register: _printer_registry_login
+  changed_when: "'Login Succeeded' in (_printer_registry_login.stdout | default(''))"
+  no_log: true
+  when: deploy_docker_services_for == 'printer'
+
 - name: Fix docker config.json permissions so docker group can read it (forgejo-runner only)
   file:
     path: "/home/{{ ansible_user }}/.docker/config.json"

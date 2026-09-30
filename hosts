@@ -47,8 +47,19 @@ dmz_post_provision ansible_host=100.86.4.29
 ansible_user={{ dmz_username | lower }}
 ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 
+# Print server: CUPS + Avahi + Samba (the custom cups-samba container) + a
+# USB Brother HL-L2320D. Provisioned by playbooks/print_server_provision/ onto a
+# fresh Armbian (Debian 13 / Trixie, minimal, arm64) image at 192.168.9.11
+# (hostname "printserver"), Docker-based like operator. The old box's rsyslog
+# collector -> voyager, WireGuard -> pfSense, cron -> voyager. See
+# dotfiles/.claude/plans/2026-09-05-print-server-migration-and-rebuild.md
 [printer]
-printer ansible_host=192.168.3.8
+# printer ansible_host=192.168.3.8    # OLD box, powered off (card moved to the new Pi)
+printserver ansible_host=192.168.9.11
+
+[printer:vars]
+ansible_user={{ username | lower }}
+ansible_ssh_private_key_file=/home/{{ username | lower }}/.ssh/id_ed25519
 
 [dev_server]
 voyager ansible_host=192.168.9.2
@@ -113,6 +124,7 @@ ansible_python_interpreter=/usr/bin/python3
 
 [provision_servers]
 ; forgejo-runner ansible_host=192.168.9.101
+; printserver ansible_host=192.168.9.11   # <-- was here for play 1; commented after bootstrap (as pi); pair with [printer] below
 
 [provision_servers:vars]
 ansible_connection=ssh
