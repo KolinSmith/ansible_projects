@@ -12,6 +12,14 @@ docker_superuser_email: "{{ vault_docker_superuser_email }}"
 docker_beszel_agent_token: "{{ vault_beszel_agent_token }}"
 docker_beszel_agent_key: "{{ vault_beszel_agent_key }}"
 
+# Hermes Agent + Mem0 (Voyager AI interface migration)
+docker_hermes_anthropic_api_key: "{{ vault_hermes_anthropic_api_key }}"
+docker_hermes_telegram_bot_token: "{{ vault_hermes_telegram_bot_token }}"
+docker_mem0_postgres_password: "{{ vault_mem0_postgres_password }}"
+docker_mem0_admin_api_key: "{{ vault_mem0_admin_api_key }}"
+docker_mem0_jwt_secret: "{{ vault_mem0_jwt_secret }}"
+docker_mem0_openai_api_key: "{{ vault_mem0_openai_api_key }}"
+
 # Tor relay configuration (operator server)
 docker_tor_nickname: "{{ vault_docker_tor_nickname }}"
 docker_tor_contact_info: "{{ vault_docker_tor_contact_info }}"
