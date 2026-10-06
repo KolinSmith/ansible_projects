@@ -86,6 +86,20 @@
     force: true
   when: deploy_docker_services_for == 'voyager'
 
+# Dedicated deploy key (write access, scoped to the dotfiles repo only) so the
+# Hermes container can commit/push its own skill-driven edits (e.g. the `up`
+# skill writing to .claude/progress-logs). Lands under ~/.hermes, which is
+# already bind-mounted read-write into the hermes container at /opt/data.
+- name: Install Hermes dotfiles deploy key (voyager only)
+  copy:
+    content: "{{ docker_hermes_dotfiles_deploy_key }}"
+    dest: "/home/{{ ansible_user }}/.hermes/dotfiles_deploy_key"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+  no_log: true
+  when: deploy_docker_services_for == 'voyager'
+
 # Service-specific configuration
 - name: Create status alias for Dockerized Tor relay monitoring (operator only)
   lineinfile:

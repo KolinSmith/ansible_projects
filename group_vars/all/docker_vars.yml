@@ -19,6 +19,10 @@ docker_mem0_postgres_password: "{{ vault_mem0_postgres_password }}"
 docker_mem0_admin_api_key: "{{ vault_mem0_admin_api_key }}"
 docker_mem0_jwt_secret: "{{ vault_mem0_jwt_secret }}"
 docker_mem0_openai_api_key: "{{ vault_mem0_openai_api_key }}"
+# Dedicated deploy key (write access) so Hermes can commit/push its own
+# skill-driven edits (e.g. the `up` skill) to dotfiles -- scoped to this one
+# repo, not Kolin's personal key. Added 2026-10-06 (Task 11 smoke test fix).
+docker_hermes_dotfiles_deploy_key: "{{ vault_hermes_dotfiles_deploy_key }}"
 
 # Tor relay configuration (operator server)
 docker_tor_nickname: "{{ vault_docker_tor_nickname }}"
