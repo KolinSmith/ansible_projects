@@ -75,6 +75,31 @@
   loop_control:
     label: "{{ item.path | basename }}"
 
+# SearXNG's settings.yml lives nested at dmz/docker-data/searxng/, which the
+# generic find/copy above never reaches (it only looks at the top level of
+# each service's folder -- not recursive, deliberately, since other hosts'
+# nested dirs hold things like Beszel's live DB/SSH key and Traefik's acme.json
+# that must never be auto-synced from a possibly-stale git copy). This is a
+# single, explicitly-scoped exception for just this one file, not a general
+# recursion change.
+- name: Create docker-data/searxng directory (dmz only)
+  file:
+    path: "/home/{{ ansible_user }}/docker-data/searxng"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+  when: deploy_docker_services_for == 'dmz'
+
+- name: Copy SearXNG settings.yml to docker-data (dmz only)
+  copy:
+    src: "{{ docker_projects_base_path }}/dmz/docker-data/searxng/settings.yml"
+    dest: "/home/{{ ansible_user }}/docker-data/searxng/settings.yml"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  when: deploy_docker_services_for == 'dmz'
+
 # Mem0's only published image is arm64-only; Voyager is x86_64, so its
 # server component is built locally from a pinned source checkout instead
 # of a pulled image (see docs/superpowers/plans/2026-10-04-hermes-agent-migration.md).
@@ -112,6 +137,37 @@
     group: "{{ ansible_user }}"
     mode: '0644'
   when: deploy_docker_services_for == 'operator'
+
+- name: Inject real Jina API key into deployed SearXNG settings.yml (dmz only)
+  # The tracked repo keeps a REDACTED_JINA_API_KEY placeholder (never a real
+  # secret in git); the real value only ever existed as a one-off manual sed
+  # on the live host until now. Scoped narrowly via before/after so this
+  # can never touch any other engine's block in a 2800+ line file.
+  ansible.builtin.replace:
+    path: "/home/{{ ansible_user }}/docker-data/searxng/settings.yml"
+    after: "engine: jina"
+    before: "jina_engine: reader"
+    regexp: 'api_key: "REDACTED_JINA_API_KEY"'
+    replace: 'api_key: "{{ docker_searxng_jina_api_key }}"'
+  no_log: true
+  when: deploy_docker_services_for == 'dmz'
+
+- name: Inject real Marginalia API key into deployed SearXNG settings.yml (dmz only)
+  ansible.builtin.replace:
+    path: "/home/{{ ansible_user }}/docker-data/searxng/settings.yml"
+    after: "engine: marginalia"
+    before: "- name: mastodon users"
+    regexp: 'api_key: "REDACTED_MARGINALIA_API_KEY"'
+    replace: 'api_key: "{{ docker_searxng_marginalia_api_key }}"'
+  no_log: true
+  when: deploy_docker_services_for == 'dmz'
+
+- name: Restart searxng to pick up the real API keys (dmz only)
+  community.docker.docker_container:
+    name: searxng
+    state: started
+    restart: true
+  when: deploy_docker_services_for == 'dmz'
 
 - name: Login to Forgejo container registry as ansible_user
   shell: >

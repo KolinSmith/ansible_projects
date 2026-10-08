@@ -28,6 +28,14 @@ docker_hermes_dotfiles_deploy_key: "{{ vault_hermes_dotfiles_deploy_key }}"
 docker_tor_nickname: "{{ vault_docker_tor_nickname }}"
 docker_tor_contact_info: "{{ vault_docker_tor_contact_info }}"
 
+# SearXNG (DMZ) -- real values live only on the deployed settings.yml via a
+# targeted post-copy replace (deploy_docker_env), never in the git-tracked
+# file itself, which keeps REDACTED_*_API_KEY placeholders. Jina's key had
+# previously only ever been sed-substituted in by hand, never vaulted or
+# automated -- fixed here along with adding Marginalia's.
+docker_searxng_jina_api_key: "{{ vault_searxng_jina_api_key }}"
+docker_searxng_marginalia_api_key: "{{ vault_searxng_marginalia_api_key }}"
+
 # Forgejo Runner configuration (Orange Pi R1 Plus)
 docker_forgejo_instance_url: "{{ vault_forgejo_instance_url }}"
 docker_forgejo_runner_token: "{{ vault_forgejo_runner_token }}"
