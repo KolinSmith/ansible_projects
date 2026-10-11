@@ -237,3 +237,18 @@ MIT
 ## Author
 
 Created for homelab infrastructure management.
+
+## Armbian hosts (operator, ds9, defiant)
+
+Armbian ships its own MOTD scripts in `/etc/update-motd.d/` and re-marks them
+executable on every `armbian-bsp-*` package upgrade, which brings back duplicated
+sections next to this role's scripts. With `motd_force_install: true` the role:
+
+1. sets Armbian's scripts to mode 0644 (covers `98-armbian-autoreboot-warn` and
+   `99-blank`, which have no on/off switch), and
+2. sets `MOTD_DISABLE` in `/etc/default/armbian-motd` to `motd_armbian_disable`.
+   Each Armbian script exits silently if its name is listed there, and that file is
+   not owned by the package, so it survives upgrades.
+
+Apply with `playbooks/install_motd_armbian/install_motd_armbian.yml`
+(`-i <ip>,<ip>,` since these hosts are not all in the static inventory).

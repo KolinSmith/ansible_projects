@@ -40,3 +40,19 @@ motd_helpful_commands:
   - { name: "Monitoring", command: "htop" }
   - { name: "System logs", command: "journalctl -f" }
   - { name: "Disk usage", command: "ncdu /" }
+
+# Armbian's own on/off switch for its MOTD sections. Written to
+# /etc/default/armbian-motd, which the armbian-bsp package does NOT own, so it
+# survives package upgrades (an upgrade re-marks Armbian's scripts executable,
+# which is how operator ended up with duplicated sections on 2026-09-08).
+# Names are each script's THIS_SCRIPT value; matching is exact, per word.
+# 98-armbian-autoreboot-warn and 99-blank have no switch (the chmod step covers them).
+motd_armbian_disable:
+  - clear
+  - header
+  - ap-info
+  - ip-info
+  - containers-info
+  - sysinfo
+  - tips
+  - commands

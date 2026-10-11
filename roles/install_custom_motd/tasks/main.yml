@@ -95,6 +95,18 @@
   when:
     - item.path is not search('00-header|10-sysinfo|40-commands')
 
+- name: Check for Armbian MOTD config
+  stat:
+    path: /etc/default/armbian-motd
+  register: armbian_motd_conf
+
+- name: Disable Armbian MOTD sections via its own config (survives package upgrades)
+  lineinfile:
+    path: /etc/default/armbian-motd
+    regexp: '^MOTD_DISABLE='
+    line: 'MOTD_DISABLE="{{ motd_armbian_disable | join(" ") }}"'
+  when: armbian_motd_conf.stat.exists
+
 - name: Deploy custom MOTD header script
   template:
     src: 00-header.j2
