@@ -1,5 +1,8 @@
 ansible.log
-.claude/*
-!.claude/progress-logs/
-!.claude/plans/
+# Claude files (plans, specs, progress logs, memory, CLAUDE.md) live ONLY in the
+# dotfiles repo under .claude/. Never commit them here.
+.claude/
+CLAUDE.md
+.superpowers/
+docs/superpowers/
 k3s-hosts.ini

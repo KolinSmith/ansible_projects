@@ -102,7 +102,7 @@
 
 # Mem0's only published image is arm64-only; Voyager is x86_64, so its
 # server component is built locally from a pinned source checkout instead
-# of a pulled image (see docs/superpowers/plans/2026-10-04-hermes-agent-migration.md).
+# of a pulled image (see .claude/plans/2026-10-04-hermes-agent-migration.md in the dotfiles repo).
 - name: Clone pinned Mem0 source for local build (voyager only)
   git:
     repo: "https://github.com/mem0ai/mem0.git"
