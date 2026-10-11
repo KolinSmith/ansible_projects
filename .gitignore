@@ -1,6 +1,7 @@
 ansible.log
 # Claude files (plans, specs, progress logs, memory, CLAUDE.md) live ONLY in the
 # dotfiles repo under .claude/. Never commit them here.
+# (Applies to plans, specs, progress logs, memory, CLAUDE.md and superpowers scratch.)
 .claude/
 CLAUDE.md
 .superpowers/
