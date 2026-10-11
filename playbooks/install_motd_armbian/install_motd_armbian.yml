@@ -17,4 +17,4 @@
         # Banner text per real hostname; hosts not listed show their own hostname.
         motd_header_text: "{{ {'DS9': 'ds9', 'operator': 'operaTor'}[ansible_facts['hostname']] | default('') }}"
         # Extra Helpful Commands lines per real hostname.
-        motd_extra_commands: "{{ {'operator': [{'name': 'Tor relay (Nyx)', 'command': 'status   (opens Nyx, the live Tor relay monitor)'}]}[ansible_facts['hostname']] | default([]) }}"
+        motd_extra_commands: "{{ {'operator': [{'name': 'Tor relay stats', 'command': 'status   (opens Nyx, the live Tor relay monitor)'}]}[ansible_facts['hostname']] | default([]) }}"
