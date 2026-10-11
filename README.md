@@ -26,7 +26,7 @@ Ansible roles and playbooks for the homelab. Targets Voyager (dev server, Ubuntu
 
 - **Voyager** (`192.168.9.2`) — Ubuntu 24.04 LTS, HP EliteDesk 800 G4 DM, dev machine, always-on
 - **Borg** (`192.168.9.7`) — Unraid server, primary homelab Docker host
-- **Operator** (`192.168.9.10`) — Tor relay host
+- **Operator** (`172.16.9.10`, DMZ VLAN 300) — Tor relay host, network-isolated from the server VLAN
 - **pfSense** (`192.168.3.1`) — Router/firewall
 
 ## Running the Dev Server Playbook

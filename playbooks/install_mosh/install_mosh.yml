@@ -16,7 +16,7 @@
     - role: install_mosh
 
 - name: Install mosh on operator (not in static inventory)
-  hosts: 192.168.9.10
+  hosts: 172.16.9.10
   gather_facts: true
   vars:
     ansible_user: dax
