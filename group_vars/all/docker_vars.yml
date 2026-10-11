@@ -12,9 +12,29 @@ docker_superuser_email: "{{ vault_docker_superuser_email }}"
 docker_beszel_agent_token: "{{ vault_beszel_agent_token }}"
 docker_beszel_agent_key: "{{ vault_beszel_agent_key }}"
 
+# Hermes Agent + Mem0 (Voyager AI interface migration)
+docker_hermes_anthropic_api_key: "{{ vault_hermes_anthropic_api_key }}"
+docker_hermes_telegram_bot_token: "{{ vault_hermes_telegram_bot_token }}"
+docker_mem0_postgres_password: "{{ vault_mem0_postgres_password }}"
+docker_mem0_admin_api_key: "{{ vault_mem0_admin_api_key }}"
+docker_mem0_jwt_secret: "{{ vault_mem0_jwt_secret }}"
+docker_mem0_openai_api_key: "{{ vault_mem0_openai_api_key }}"
+# Dedicated deploy key (write access) so Hermes can commit/push its own
+# skill-driven edits (e.g. the `up` skill) to dotfiles -- scoped to this one
+# repo, not Kolin's personal key. Added 2026-10-06 (Task 11 smoke test fix).
+docker_hermes_dotfiles_deploy_key: "{{ vault_hermes_dotfiles_deploy_key }}"
+
 # Tor relay configuration (operator server)
 docker_tor_nickname: "{{ vault_docker_tor_nickname }}"
 docker_tor_contact_info: "{{ vault_docker_tor_contact_info }}"
+
+# SearXNG (DMZ) -- real values live only on the deployed settings.yml via a
+# targeted post-copy replace (deploy_docker_env), never in the git-tracked
+# file itself, which keeps REDACTED_*_API_KEY placeholders. Jina's key had
+# previously only ever been sed-substituted in by hand, never vaulted or
+# automated -- fixed here along with adding Marginalia's.
+docker_searxng_jina_api_key: "{{ vault_searxng_jina_api_key }}"
+docker_searxng_marginalia_api_key: "{{ vault_searxng_marginalia_api_key }}"
 
 # Forgejo Runner configuration (Orange Pi R1 Plus)
 docker_forgejo_instance_url: "{{ vault_forgejo_instance_url }}"
