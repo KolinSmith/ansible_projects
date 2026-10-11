@@ -10,7 +10,7 @@ NC='{{ motd_color_reset }}'
 echo -e "${CYAN}Helpful Commands:${NC}"
 echo ""
 
-{% for cmd in motd_helpful_commands %}
+{% for cmd in motd_helpful_commands + motd_extra_commands %}
 printf " ${YELLOW}%-15s${NC} : %s\n" "{{ cmd.name }}" "{{ cmd.command }}"
 {% endfor %}
 

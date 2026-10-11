@@ -15,10 +15,10 @@ TERM="${TERM:-xterm}" clear
 # Display hostname with figlet
 if command -v figlet &> /dev/null; then
     echo -e "${GREEN}"
-    figlet -f {{ motd_header_font }} "$(hostname)"
+    figlet -f {{ motd_header_font }} "{{ motd_header_text if motd_header_text else '$(hostname)' }}"
     echo -e "${NC}"
 else
-    echo -e "${GREEN}=== $(hostname) ===${NC}"
+    echo -e "${GREEN}=== {{ motd_header_text if motd_header_text else '$(hostname)' }} ===${NC}"
     echo ""
 fi
 {% endif %}
