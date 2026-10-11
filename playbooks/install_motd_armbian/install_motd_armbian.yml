@@ -14,3 +14,5 @@
     - role: install_custom_motd
       vars:
         motd_force_install: true
+        # Banner text per real hostname; hosts not listed show their own hostname.
+        motd_header_text: "{{ {'DS9': 'ds9', 'operator': 'operaTor'}[ansible_facts['hostname']] | default('') }}"
