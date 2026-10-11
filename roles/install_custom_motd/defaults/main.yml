@@ -43,6 +43,9 @@ motd_helpful_commands:
   - { name: "Monitoring", command: "htop" }
   - { name: "System logs", command: "journalctl -f" }
   - { name: "Disk usage", command: "ncdu /" }
+# Extra per-host lines appended to Helpful Commands (same name/command shape). Keep the
+# name to 15 characters or fewer so the columns line up.
+motd_extra_commands: []
 
 # Armbian's own on/off switch for its MOTD sections. Written to
 # /etc/default/armbian-motd, which the armbian-bsp package does NOT own, so it
