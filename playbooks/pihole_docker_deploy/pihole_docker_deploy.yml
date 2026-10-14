@@ -1,0 +1,138 @@
+---
+# Deploy Pi-hole via Docker Compose on the DNS servers (ds9, defiant).
+#
+# Also performs the in-place native -> Docker migration: if a native
+# pihole-FTL / beszel-agent systemd unit is present, it is stopped and
+# disabled only after the container image has been pre-pulled, so the DNS
+# outage is limited to the few seconds between the stop and the container
+# answering.
+#
+# Run one host at a time (the other DNS server keeps answering):
+#   ansible-playbook playbooks/pihole_docker_deploy/pihole_docker_deploy.yml --limit ds9
+#
+# Optional: restore a Teleporter backup after the container is up:
+#   -e pihole_teleporter_import_file=/path/on/controller/pi-hole_backup.zip
+#
+# Prerequisites (the playbook asserts the vault ones):
+#   - ansible_projects: vault_pihole_* keys + <host>.env.example templates
+#   - docker_projects checkout on the controller is up to date (the compose
+#     and config files are copied from docker_projects_base_path)
+
+- name: Deploy Pi-hole Docker stack on DNS servers
+  hosts: dns_servers
+  gather_facts: true
+  become: true
+  serial: 1
+  any_errors_fatal: true
+  vars_files:
+    - ../../group_vars/all/vars.yml
+    - ../../group_vars/all/docker_vars.yml
+  vars:
+    docker_users:
+      - "{{ username }}"
+    # get.docker.com installs docker-compose-plugin (v2); pip3 is not needed
+    docker_install_compose: false
+    deploy_docker_services_for: "{{ inventory_hostname }}"
+    pihole_container_name: "pihole-{{ inventory_hostname | lower }}"
+    pihole_compose_dir: "/home/{{ ansible_user }}/docker"
+
+  pre_tasks:
+    - name: Assert the Pi-hole vault variables are defined
+      ansible.builtin.assert:
+        that:
+          - vault_pihole_webpassword is defined
+          - vault_pihole_upstream_dns is defined
+          - vault_pihole_rev_server_cidr is defined
+          - vault_pihole_rev_server_target is defined
+          - vault_pihole_rev_server_domain is defined
+          - vault_beszel_agent_key is defined
+          - vault_pihole_virtual_host_defiant is defined
+          - vault_pihole_virtual_host_ds9 is defined
+        quiet: true
+        fail_msg: "Missing Pi-hole vault variables (ansible_projects PR #64)"
+
+    - name: Gather service facts to detect a native install
+      ansible.builtin.service_facts:
+
+  roles:
+    - role: geerlingguy.docker_arm
+    - role: deploy_docker_env
+
+  tasks:
+    - name: Pre-pull container images while the native services still run
+      community.docker.docker_compose_v2_pull:
+        project_src: "{{ pihole_compose_dir }}"
+        policy: missing
+
+    - name: Stop and disable native pihole-FTL (frees :53 and :80)
+      ansible.builtin.systemd:
+        name: pihole-FTL
+        state: stopped
+        enabled: false
+      when: "'pihole-FTL.service' in ansible_facts.services"
+
+    - name: Stop and disable native beszel-agent (the container takes :45876)
+      ansible.builtin.systemd:
+        name: beszel-agent
+        state: stopped
+        enabled: false
+      when: "'beszel-agent.service' in ansible_facts.services"
+
+    - name: Start the Pi-hole and Beszel containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ pihole_compose_dir }}"
+        state: present
+
+    - name: Wait for the Pi-hole container to report healthy
+      ansible.builtin.command:
+        cmd: "docker inspect --format '{{ '{{' }}.State.Health.Status{{ '}}' }}' {{ pihole_container_name }}"
+      register: pihole_health
+      until: pihole_health.stdout | trim == 'healthy'
+      retries: 24
+      delay: 5
+      changed_when: false
+      check_mode: false
+
+    - name: Import Teleporter backup (optional)
+      when: pihole_teleporter_import_file is defined
+      block:
+        - name: Copy the Teleporter archive into the Pi-hole data dir
+          ansible.builtin.copy:
+            src: "{{ pihole_teleporter_import_file }}"
+            dest: "{{ pihole_compose_dir }}/etc-pihole/teleporter-import.zip"
+            mode: '0600'
+
+        - name: Import the archive
+          ansible.builtin.command:
+            cmd: >-
+              docker exec {{ pihole_container_name }}
+              pihole-FTL --teleporter /etc/pihole/teleporter-import.zip
+          changed_when: true
+
+        - name: Restart the Pi-hole container to apply the import
+          ansible.builtin.command:
+            cmd: "docker restart {{ pihole_container_name }}"
+          changed_when: true
+
+      always:
+        - name: Remove the Teleporter archive (it holds the settings and hash)
+          ansible.builtin.file:
+            path: "{{ pihole_compose_dir }}/etc-pihole/teleporter-import.zip"
+            state: absent
+
+    - name: Configure Pi-hole whitelist and blacklist
+      ansible.builtin.include_role:
+        name: deploy_pihole
+        tasks_from: configure_pihole_docker.yml
+
+    - name: Verify the server answers DNS queries from the controller
+      ansible.builtin.command:
+        cmd: "dig +short +time=3 +tries=1 @{{ ansible_host }} example.com"
+      delegate_to: localhost
+      become: false
+      register: pihole_dig
+      until: pihole_dig.stdout | trim != ''
+      retries: 10
+      delay: 3
+      changed_when: false
+      check_mode: false

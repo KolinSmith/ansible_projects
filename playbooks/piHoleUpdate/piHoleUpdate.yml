@@ -1,16 +1,59 @@
 ---
-  - name: piHoleUpdate
-    hosts: dns_servers
-    gather_facts: yes
-    #become_user: {{ ansible_user }}
-    become: yes
-    tasks:
-      - name: Update and upgrade apt packages
-        apt:
-          upgrade: yes
-          update_cache: yes
-          cache_valid_time: 86400 #One day
-          
-      - name: update pihole
-        #I had to use this instead of the normal "pihole -up" because of the way I have DNS setup
-        shell: "PIHOLE_SKIP_OS_CHECK=true sudo -E pihole -up"
+# Update the DNS servers one at a time (the other keeps answering).
+# Works for both install types: a Docker-managed Pi-hole is updated by
+# pulling the new image and recreating the container; a native install uses
+# `pihole -up`.
+- name: piHoleUpdate
+  hosts: dns_servers
+  gather_facts: true
+  become: true
+  serial: 1
+  any_errors_fatal: true
+  tasks:
+    - name: Update and upgrade apt packages
+      ansible.builtin.apt:
+        upgrade: true
+        update_cache: true
+        cache_valid_time: 86400  # One day
+
+    - name: Detect Pi-hole deployment type (Docker vs Traditional)
+      ansible.builtin.include_role:
+        name: deploy_pihole
+        tasks_from: detect_pihole_type.yml
+
+    - name: Update native Pi-hole
+      # PIHOLE_SKIP_OS_CHECK is needed instead of the plain "pihole -up"
+      # because of the way DNS is set up on these hosts
+      ansible.builtin.shell: "PIHOLE_SKIP_OS_CHECK=true sudo -E pihole -up"
+      changed_when: true
+      when: not pihole_is_docker
+
+    - name: Pull new images and recreate changed containers
+      community.docker.docker_compose_v2:
+        project_src: "/home/{{ ansible_user }}/docker"
+        state: present
+        pull: always
+      when: pihole_is_docker
+
+    - name: Wait for the Pi-hole container to report healthy
+      ansible.builtin.command:
+        cmd: "docker inspect --format '{{ '{{' }}.State.Health.Status{{ '}}' }}' {{ pihole_container_name }}"
+      register: pihole_health
+      until: pihole_health.stdout | trim == 'healthy'
+      retries: 24
+      delay: 5
+      changed_when: false
+      check_mode: false
+      when: pihole_is_docker
+
+    - name: Verify the server answers DNS queries before moving on
+      ansible.builtin.command:
+        cmd: "dig +short +time=3 +tries=1 @{{ ansible_host }} example.com"
+      delegate_to: localhost
+      become: false
+      register: pihole_dig
+      until: pihole_dig.stdout | trim != ''
+      retries: 10
+      delay: 3
+      changed_when: false
+      check_mode: false
