@@ -1,30 +1,54 @@
 ---
+# Ship this host's syslog to the central collector. See dotfiles plan
+# 2026-10-20-central-logging-voyager.md.
 
-#
-#https://www.makeuseof.com/set-up-linux-remote-logging-using-rsyslog/
-#
+- name: Install rsyslog
+  ansible.builtin.apt:
+    name: rsyslog
+    state: present
 
-  - name: Install rsyslog
-    apt:
-      name: rsyslog
-      state: present
+- name: Ensure the queue spool directory exists on persistent disk
+  ansible.builtin.file:
+    path: /var/spool/rsyslog
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
 
-  - name: Start service rsyslog, if not started
-    ansible.builtin.service:
-      name: rsyslog
-      state: started
+- name: Drop the old append-a-line forwarding rule from rsyslog.conf, if present
+  ansible.builtin.lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '^\*\.\* @{1,2}[^ ]+:514\s*$'
+    state: absent
+  notify: restart rsyslog
 
-  - name: Enable service rsyslog to start on boot
-    ansible.builtin.service:
-      name: rsyslog
-      enabled: yes
+- name: Deploy config and validate the full rsyslog configuration (roll back on error)
+  block:
+    - name: Deploy 90-forward.conf.j2
+      ansible.builtin.template:
+        src: 90-forward.conf.j2
+        dest: /etc/rsyslog.d/90-forward.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: restart rsyslog
 
-  - name: Edit rsyslog.conf to send logs to rsyslog server
-    lineinfile:
-      path: /etc/rsyslog.conf
-      line: "*.* @{{ hostvars[groups['dev_server'][0]]['ansible_host'] }}:514"
+    - name: Validate the full rsyslog config
+      ansible.builtin.command: rsyslogd -N1
+      changed_when: false
+      check_mode: false
+  rescue:
+    - name: Remove the config that failed validation
+      ansible.builtin.file:
+        path: /etc/rsyslog.d/90-forward.conf
+        state: absent
 
-  - name: Restart rsyslog to take new line in conf
-    ansible.builtin.service:
-      name: rsyslog
-      state: restarted
+    - name: Stop here so rsyslog is not restarted on a bad config
+      ansible.builtin.fail:
+        msg: "rsyslog config failed validation; /etc/rsyslog.d/90-forward.conf removed"
+
+- name: Enable and start rsyslog
+  ansible.builtin.service:
+    name: rsyslog
+    state: started
+    enabled: true

@@ -1,2 +1,5 @@
 ---
-# defaults file for install_ryslog
+# Forward all local syslog to the central collector (Voyager) over TCP with a
+# disk-assisted queue, so a collector reboot or network blip loses nothing.
+rsyslog_server_host: "{{ hostvars[groups['dev_server'][0]]['ansible_host'] }}"
+rsyslog_server_port: 514

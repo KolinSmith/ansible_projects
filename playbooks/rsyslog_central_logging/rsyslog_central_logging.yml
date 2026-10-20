@@ -1,0 +1,17 @@
+---
+# Usage (from ansible_projects root):
+#   ansible-playbook -i playbooks/rsyslog_central_logging/inventory.yml \
+#     playbooks/rsyslog_central_logging/rsyslog_central_logging.yml --check --diff
+# Roll out one at a time with --limit; DNS servers (ds9, defiant) last:
+#   --limit voyager | printserver | forgejo-runner | dmz | operator | ds9 | defiant
+
+- name: Central log collector on Voyager
+  hosts: rsyslog_server
+  roles:
+    - install_rsyslog_server
+
+- name: Log forwarders
+  hosts: rsyslog_clients
+  serial: 1
+  roles:
+    - install_rsyslog_client

@@ -1,0 +1,8 @@
+# Managed by Ansible (install_rsyslog_client). Forward everything to the central collector.
+# Queue spools to /var/spool/rsyslog (persistent disk), NOT /var/log (RAM disk on log2ram hosts).
+*.* action(type="omfwd"
+           target="{{ rsyslog_server_host }}" port="{{ rsyslog_server_port }}" protocol="tcp"
+           template="RSYSLOG_SyslogProtocol23Format"
+           action.resumeRetryCount="-1" action.resumeInterval="30"
+           queue.type="LinkedList" queue.filename="fwd_central"
+           queue.maxDiskSpace="100m" queue.saveOnShutdown="on")

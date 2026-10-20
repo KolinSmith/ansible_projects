@@ -1,0 +1,19 @@
+---
+# Let operator (DMZ, 172.16.9.10) reach Voyager's syslog port ONLY.
+# DMZ rules are on opt8; confirm the rule order in the pfSense UI after applying
+# (this pass rule sits directly above "Block DMZ to all private ranges").
+- name: Allow operator to ship syslog to Voyager
+  hosts: pfsense_router
+  gather_facts: false
+  tasks:
+    - name: Allow operaTor syslog (TCP 514) to Voyager
+      pfsensible.core.pfsense_rule:
+        name: 'Allow operaTor syslog to Voyager'
+        interface: opt8
+        action: pass
+        protocol: tcp
+        source: 172.16.9.10
+        destination: 192.168.9.2
+        destination_port: 514
+        before: 'Block DMZ to all private ranges'
+        state: present

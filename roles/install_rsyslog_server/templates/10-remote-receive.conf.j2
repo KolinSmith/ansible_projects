@@ -1,0 +1,26 @@
+# Managed by Ansible (install_rsyslog_server). Central log receiver.
+# TCP only (UDP listener removed from rsyslog.conf): remote logs get a queue-capable transport.
+{% for sender in rsyslog_allowed_senders %}
+$AllowedSender TCP, {{ sender }}
+{% endfor %}
+
+module(load="imtcp")
+
+template(name="RemoteHostFile" type="list") {
+  constant(value="{{ rsyslog_remote_dir }}/")
+  property(name="hostname" securepath="replace" caseconversion="lower")
+  constant(value="/")
+  property(name="programname" securepath="replace" caseconversion="lower")
+  constant(value=".log")
+}
+
+# No fileOwner/dirOwner: rsyslog's unit cannot chown on this host (first message per file was dropped). Files are root:root, read with sudo.
+# Own ruleset so remote messages are NOT also mixed into Voyager's local /var/log/syslog.
+ruleset(name="remote") {
+  action(type="omfile" dynaFile="RemoteHostFile"
+         dirCreateMode="0750" fileCreateMode="0640"
+         template="RSYSLOG_FileFormat")
+  stop
+}
+
+input(type="imtcp" port="{{ rsyslog_remote_port }}" ruleset="remote")

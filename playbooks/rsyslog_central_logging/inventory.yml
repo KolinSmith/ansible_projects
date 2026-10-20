@@ -1,0 +1,29 @@
+---
+# Standalone inventory for the central logging rollout (not the shared `hosts` file).
+all:
+  vars:
+    ansible_user: dax
+    ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+    ansible_become: true
+  children:
+    rsyslog_server:
+      hosts:
+        voyager:
+          ansible_host: 192.168.9.2
+    rsyslog_clients:
+      vars:
+        rsyslog_server_host: 192.168.9.2
+      hosts:
+        ds9:
+          ansible_host: 192.168.9.4
+        defiant:
+          ansible_host: 192.168.9.3
+        printserver:
+          ansible_host: 192.168.9.11
+        forgejo-runner:
+          ansible_host: 192.168.9.101
+        operator:
+          ansible_host: 172.16.9.10   # DMZ VLAN; needs the pfSense rule in pfsense_operator_syslog.yml
+        dmz:
+          ansible_host: 100.86.4.29
+          rsyslog_server_host: 100.118.193.29   # Voyager's Tailscale address

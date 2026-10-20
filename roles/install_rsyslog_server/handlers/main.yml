@@ -1,2 +1,5 @@
 ---
-# handlers file for install_ryslog_server
+- name: restart rsyslog
+  ansible.builtin.service:
+    name: rsyslog
+    state: restarted
