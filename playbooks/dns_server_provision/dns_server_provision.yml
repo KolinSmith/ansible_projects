@@ -2,6 +2,7 @@
   #sudo ansible-playbook ~/code_base/ansible_projects/playbooks/dns_server_provision/dns_server_provision.yml
   - name: initial setup (defiant & ds9)
     hosts: provision_servers
+    tags: [initial_provision]
     gather_facts: true
     become: true
     vars_files:
@@ -14,6 +15,7 @@
 
   - name: pihole and DNS setup (defiant & ds9)
     hosts: post_provision_servers
+    tags: [post_provision]
     gather_facts: true
     become: true
     vars_files:

@@ -150,6 +150,12 @@
   #       state: present
   #       manage_dir: yes
 
+  - name: ensure sshd privilege separation dir exists (Ubuntu starts sshd via socket activation, so validate fails without it)
+    file:
+      path: /run/sshd
+      state: directory
+      mode: '0755'
+
 #might end up using the one from the dotfiles
   - name: add sshd config file
     template:
@@ -303,7 +309,7 @@
   - name: Flush handlers before reboot
     meta: flush_handlers
 
-  - name: Reboot the machine (Wait for up to 5 minutes for ARM hardware)
+  - name: Reboot the machine (Wait for up to 15 minutes for ARM hardware)
     reboot:
-      reboot_timeout: 300  # Orange Pi and other ARM boards can take 3-4 minutes to reboot
+      reboot_timeout: 900  # Orange Pi Zero 3 timed out at 300s on a fresh Ubuntu image
     ignore_errors: true
