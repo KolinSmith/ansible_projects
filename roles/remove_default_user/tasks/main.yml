@@ -25,6 +25,11 @@
 #     remove: yes
 #   when: raspberry_pi == false
 
+- name: Refuse to remove the user Ansible is connected as
+  assert:
+    that: default_user | lower != ansible_user | lower
+    fail_msg: "default_user ({{ default_user }}) is the account Ansible logs in with; set default_user for this host to the stock account (e.g. pi) in the inventory"
+
 - name: Check if default user exists
   getent:
     database: passwd
