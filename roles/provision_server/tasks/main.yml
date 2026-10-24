@@ -306,6 +306,14 @@
   # Flush all pending handlers BEFORE rebooting
   # This ensures handlers (like restart armbian-ramlog) run before the reboot
   # Otherwise they'll fail trying to connect after reboot when SSH host key has changed
+  - name: Reboot automatically 10s after a kernel panic (a hung SD card left ds9 down 19h on 2026-10-22)
+    copy:
+      dest: /etc/sysctl.d/90-panic-reboot.conf
+      content: "kernel.panic = 10\n"
+      owner: root
+      group: root
+      mode: '0644'
+
   - name: Flush handlers before reboot
     meta: flush_handlers
 
