@@ -1,0 +1,13 @@
+# Managed by Ansible (install_rsyslog_server)
+{{ rsyslog_remote_dir }}/*/*.log {
+    weekly
+    rotate {{ rsyslog_remote_rotate_weeks }}
+    compress
+    delaycompress
+    missingok
+    notifempty
+    sharedscripts
+    postrotate
+        /usr/bin/systemctl kill -s HUP rsyslog.service >/dev/null 2>&1 || true
+    endscript
+}

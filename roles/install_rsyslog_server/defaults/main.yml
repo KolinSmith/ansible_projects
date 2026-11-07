@@ -1,2 +1,13 @@
 ---
-# defaults file for install_ryslog_server
+# Central log collector. Receives syslog over TCP and writes one directory per
+# sending host: /var/log/remote/<hostname>/<program>.log
+rsyslog_remote_port: 514
+rsyslog_remote_dir: /var/log/remote
+rsyslog_remote_rotate_weeks: 8
+
+# Only these sources may send (TCP). Addresses are what the server sees.
+rsyslog_allowed_senders:
+  - 127.0.0.1
+  - 192.168.9.0/24   # server VLAN (ds9, defiant, printserver, forgejo-runner)
+  - 172.16.9.10      # operator, DMZ VLAN (pfSense allows it to port 514 only)
+  - 100.86.4.29      # dmz, over Tailscale

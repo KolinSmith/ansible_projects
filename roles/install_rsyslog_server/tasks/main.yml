@@ -1,40 +1,62 @@
 ---
+# Central syslog collector on Voyager. See dotfiles plan
+# 2026-10-20-central-logging-voyager.md.
 
-#
-#https://stackoverflow.com/questions/69830208/configure-a-syslog-server-through-ansible-playbook
-#
-  - name: Install rsyslog
-    apt:
-      name: rsyslog
-      state: present
+- name: Install rsyslog and logrotate
+  ansible.builtin.apt:
+    name: [rsyslog, logrotate]
+    state: present
 
-  - name: Start service rsyslog, if not started
-    ansible.builtin.service:
-      name: rsyslog
-      state: started
+- name: Remove the old catch-all UDP/TCP listeners from rsyslog.conf (replaced by the drop-in)
+  ansible.builtin.lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '^(module\(load="im(udp|tcp)"\)|input\(type="im(udp|tcp)"\s+port="514"\))\s*$'
+    state: absent
+  notify: restart rsyslog
 
-  - name: Enable service rsyslog to start on boot
-    ansible.builtin.service:
-      name: rsyslog
-      enabled: yes
+- name: Create the remote log directory
+  ansible.builtin.file:
+    path: "{{ rsyslog_remote_dir }}"
+    state: directory
+    owner: root
+    group: adm
+    mode: "0750"
 
-  - name: Swap/ edit lines in config (UDP) to enable listening
-    lineinfile:
-      dest: /etc/rsyslog.conf
-      line: 'module(load="imudp")' #new text
-      regexp: '#module(load="imudp")' #old text
-      state: present
-      create: true
+- name: Deploy config and validate the full rsyslog configuration (roll back on error)
+  block:
+    - name: Deploy 10-remote-receive.conf.j2
+      ansible.builtin.template:
+        src: 10-remote-receive.conf.j2
+        dest: /etc/rsyslog.d/10-remote-receive.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: restart rsyslog
 
-  - name: Swap/ edit lines in config (TCP) to enable listening
-    lineinfile:
-      dest: /etc/rsyslog.conf
-      line: 'module(load="imtcp")' #new text
-      regexp: '#module(load="imtcp")' #old text
-      state: present
-      create: true
+    - name: Validate the full rsyslog config
+      ansible.builtin.command: rsyslogd -N1
+      changed_when: false
+      check_mode: false
+  rescue:
+    - name: Remove the config that failed validation
+      ansible.builtin.file:
+        path: /etc/rsyslog.d/10-remote-receive.conf
+        state: absent
 
-  - name: Restart rsyslog to take new line in conf
-    ansible.builtin.service:
-      name: rsyslog
-      state: restarted
+    - name: Stop here so rsyslog is not restarted on a bad config
+      ansible.builtin.fail:
+        msg: "rsyslog config failed validation; /etc/rsyslog.d/10-remote-receive.conf removed"
+
+- name: Deploy logrotate policy for remote logs
+  ansible.builtin.template:
+    src: logrotate-remote.j2
+    dest: /etc/logrotate.d/rsyslog-remote
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable and start rsyslog
+  ansible.builtin.service:
+    name: rsyslog
+    state: started
+    enabled: true

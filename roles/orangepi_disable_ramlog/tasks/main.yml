@@ -99,7 +99,7 @@
       {% endif %}
       
       # Log rotation friendly settings
-      $FileOwner syslog
+      # $FileOwner syslog  (disabled: no 'syslog' user on Debian trixie/Armbian, rsyslog fails to start)
       $FileGroup adm
       $FileCreateMode 0640
       $DirCreateMode 0755
