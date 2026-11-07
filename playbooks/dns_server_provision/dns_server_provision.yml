@@ -23,6 +23,7 @@
     roles:
       - role: check_if_pi
       - role: remove_default_user
+      - role: install_rsyslog_client
       - role: deploy_pihole
       - role: install_mosh
       # - role: artis3n.tailscale  #not working currently
