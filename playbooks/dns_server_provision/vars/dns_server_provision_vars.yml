@@ -59,7 +59,13 @@ public_keys:
     key: "{{ lookup('file', 'dns_server_pub_key.pub') }}"
   - name: Borg Public Key File
     key: "{{ lookup('file', 'borg_pub_key.pub') }}"
+  # current ed25519 keys kept in files/ at the repo root (the role copies above are older ecdsa keys)
+  - name: Enterprise ed25519 Public Key File
+    key: "{{ lookup('file', ansible_project_path ~ '/files/enterprise_pub_key.pub') }}"
+  - name: Borg ed25519 Public Key File
+    key: "{{ lookup('file', ansible_project_path ~ '/files/borg_pub_key.pub') }}"
 extra_path: '/usr/local/bin'
+ansible_project_path: "{{ playbook_dir }}/../.."
 dotfiles_repo: 'git@github.com:KolinSmith/dotfiles.git'
 necessary_packages:
     - keepalived
@@ -74,7 +80,7 @@ necessary_packages:
     - dnsutils
     - unzip
     - pigz
-    - exa
+    - eza
 tailscale_auth_key: '{{ tailscale_auth_key }}'
 
 # #ironicbadger.figurine

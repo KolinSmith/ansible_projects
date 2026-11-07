@@ -94,6 +94,7 @@
     with_items: "{{ blacklist_domains }}"
 
   - name: make sure dns server ssh private key is installed
+    when: dns_server_private_ssh_key is defined  # gravity-sync is legacy (Pi-hole v6 uses Teleporter); skipped when no key is provided
     copy:
       content: '{{ dns_server_private_ssh_key }}'
       dest: '/home/{{ username }}/.ssh/id_ecdsa'
@@ -104,6 +105,7 @@
 
 #https://github.com/vmstan/gravity-sync/wiki/Installing
   - name: create gravity-sync folder
+    when: dns_server_private_ssh_key is defined  # gravity-sync is legacy (Pi-hole v6 uses Teleporter); skipped when no key is provided
     file:
       path: /etc/gravity-sync
       state: directory
@@ -112,12 +114,14 @@
       group: "{{ username }}"
 
   - name: Set REMOTE_HOST based on current server
+    when: dns_server_private_ssh_key is defined  # gravity-sync is legacy (Pi-hole v6 uses Teleporter); skipped when no key is provided
     set_fact:
      # remote_host: "{{ '192.168.9.4' if inventory_hostname == 'Ds9' else '192.168.9.3' }}"
      remote_host: "{{ '192.168.9.4' if '192.168.9.3' in ansible_default_ipv4.address else '192.168.9.3' }}"
     # when: "'Ds9' in inventory_hostname or 'Defiant' in inventory_hostname"
 
   - name: add gravity-sync.conf file to /etc/gravity-sync/
+    when: dns_server_private_ssh_key is defined  # gravity-sync is legacy (Pi-hole v6 uses Teleporter); skipped when no key is provided
     template:
       src: "{{ lookup('env', 'HOME') }}/code_base/ansible_projects/templates/gravity_sync_dot_conf.j2"
       dest: /etc/gravity-sync/gravity-sync.conf
@@ -126,6 +130,7 @@
       mode: 0775
 
   - name: install gravity-sync
+    when: dns_server_private_ssh_key is defined  # gravity-sync is legacy (Pi-hole v6 uses Teleporter); skipped when no key is provided
     shell: curl -sSL https://raw.githubusercontent.com/vmstan/gs-install/main/gs-install.sh | bash
     become: true
       
