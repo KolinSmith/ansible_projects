@@ -654,7 +654,7 @@
       - name: create pia-wireguard-reregister job
         cron:
           name: pia_wireguard_reregister
-          minute: "*/15"
+          minute: "*/5"
           hour: "*"
           job: "/home/{{ user }}/.scripts/pia-reregister.sh >> /var/log/pia-reregister.log 2>&1"
         become_user: "{{ user }}"

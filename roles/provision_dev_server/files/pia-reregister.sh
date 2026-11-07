@@ -20,7 +20,7 @@
 #   - Traffic stops routing through the VPN silently
 #   - pfSense shows the interface as up but no data flows
 #
-# This script runs every 15 minutes, checks whether the tunnel is healthy, and
+# This script runs every 5 minutes (was 15 until 2026-10-19), checks whether the tunnel is healthy, and
 # only re-registers when it isn't (see HEALTH CHECK FIRST below).
 #
 # HEALTH CHECK FIRST (added 2026-09-30)
@@ -106,7 +106,7 @@
 # Managed by Ansible role: provision_dev_server
 # Script location on Voyager: /home/dax/.scripts/pia-reregister.sh
 # Companion script:           /home/dax/.scripts/pia-pfsense-update.php
-# Cron (Voyager, user dax):   */15 * * * * /home/dax/.scripts/pia-reregister.sh
+# Cron (Voyager, user dax):   */5 * * * * /home/dax/.scripts/pia-reregister.sh
 # Log file:                   /var/log/pia-reregister.log
 # State file (last-good server, not committed): /opt/piavpn-manual/pia-current-server.env
 # Uptime Kuma monitor:        Push monitor; alerts if no heartbeat in 26h
